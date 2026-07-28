@@ -1,0 +1,33 @@
+# Dependências
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Build compilado
+backend/dist/
+frontend/build/
+
+# Variáveis de ambiente
+.env
+backend/.env
+frontend/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Uploads
+backend/public/
+backend/src/public/
+
+# Temporários
+*.tmp
+*.bak

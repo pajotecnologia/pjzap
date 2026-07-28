@@ -1,0 +1,172 @@
+import Flow from "../../models/Flow";
+import Ticket from "../../models/Ticket";
+import Message from "../../models/Message";
+import CreateMessageService from "../MessageServices/CreateMessageService";
+import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
+import SendInstagramMessageService from "../InstagramServices/SendInstagramMessageService";
+
+interface Request {
+  ticket: Ticket;
+  messageBody: string;
+  companyId: number;
+}
+
+interface FlowNode {
+  id: string;
+  type: "trigger" | "message" | "menu" | "transfer_queue" | "close_ticket";
+  title?: string;
+  content?: string;
+  keyword?: string;
+  queueId?: number;
+  options?: Array<{ id: string; optionNumber: string; text: string; targetNodeId: string }>;
+  targetNodeId?: string;
+}
+
+interface FlowConnection {
+  sourceNodeId: string;
+  targetNodeId: string;
+  optionId?: string;
+}
+
+const ExecuteFlowService = async ({
+  ticket,
+  messageBody,
+  companyId
+}: Request): Promise<boolean> => {
+  try {
+    const flows = await Flow.findAll({
+      where: { companyId, active: true }
+    });
+
+    if (!flows || flows.length === 0) {
+      return false;
+    }
+
+    const trimmedMsg = messageBody.trim().toLowerCase();
+
+    for (const flow of flows) {
+      let nodes: FlowNode[] = [];
+      let connections: FlowConnection[] = [];
+
+      try {
+        nodes = typeof flow.nodes === "string" ? JSON.parse(flow.nodes) : flow.nodes;
+        connections = typeof flow.connections === "string" ? JSON.parse(flow.connections) : flow.connections;
+      } catch (e) {
+        continue;
+      }
+
+      if (!Array.isArray(nodes) || nodes.length === 0) continue;
+
+      // 1. Procurar por nó Trigger que dê match com a mensagem de entrada
+      const triggerNode = nodes.find(
+        (n) => n.type === "trigger" && n.keyword && trimmedMsg.includes(n.keyword.toLowerCase())
+      ) || nodes.find((n) => n.type === "trigger" && (!n.keyword || n.keyword === "*"));
+
+      if (!triggerNode) continue;
+
+      // Encontra próximo nó conectado ao Trigger
+      let nextNodeId = triggerNode.targetNodeId;
+      if (!nextNodeId) {
+        const conn = connections.find((c) => c.sourceNodeId === triggerNode.id);
+        if (conn) nextNodeId = conn.targetNodeId;
+      }
+
+      if (!nextNodeId) continue;
+
+      let currentNode = nodes.find((n) => n.id === nextNodeId);
+
+      while (currentNode) {
+        if (currentNode.type === "message") {
+          let textToSend = currentNode.content || "";
+          textToSend = textToSend.replace(/{nome}/gi, ticket.contact.name || "Cliente");
+
+          if (ticket.channel === "instagram") {
+            await SendInstagramMessageService({
+              body: textToSend,
+              recipientId: ticket.contact.instagramId || ticket.contact.number,
+              whatsapp: ticket.whatsapp
+            });
+          } else {
+            await SendWhatsAppMessage({
+              body: textToSend,
+              ticket
+            });
+          }
+
+          const messageData = {
+            id: `flow_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            ticketId: ticket.id,
+            contactId: ticket.contactId,
+            body: textToSend,
+            fromMe: true,
+            read: true,
+            mediaType: "chat"
+          };
+          await CreateMessageService({ messageData, companyId });
+
+          // Avança para o próximo nó conectado
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "menu") {
+          let menuText = currentNode.content ? `${currentNode.content}\n\n` : "Escolha uma opção:\n\n";
+          if (currentNode.options && Array.isArray(currentNode.options)) {
+            currentNode.options.forEach((opt, idx) => {
+              menuText += `${opt.optionNumber || idx + 1}. ${opt.text}\n`;
+            });
+          }
+
+          if (ticket.channel === "instagram") {
+            await SendInstagramMessageService({
+              body: menuText,
+              recipientId: ticket.contact.instagramId || ticket.contact.number,
+              whatsapp: ticket.whatsapp
+            });
+          } else {
+            await SendWhatsAppMessage({
+              body: menuText,
+              ticket
+            });
+          }
+
+          const messageData = {
+            id: `flow_menu_${Date.now()}`,
+            ticketId: ticket.id,
+            contactId: ticket.contactId,
+            body: menuText,
+            fromMe: true,
+            read: true,
+            mediaType: "chat"
+          };
+          await CreateMessageService({ messageData, companyId });
+          return true; // Aguarda a resposta do cliente na próxima mensagem
+
+        } else if (currentNode.type === "transfer_queue") {
+          if (currentNode.queueId) {
+            await ticket.update({ queueId: currentNode.queueId, status: "pending" });
+          }
+          return true;
+
+        } else if (currentNode.type === "close_ticket") {
+          await ticket.update({ status: "closed" });
+          return true;
+        } else {
+          break;
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    console.error("Error executing flow:", err);
+    return false;
+  }
+};
+
+export default ExecuteFlowService;
