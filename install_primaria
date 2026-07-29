@@ -1,0 +1,119 @@
+#!/bin/bash
+# ==============================================================================
+# MENU PRINCIPAL DE INSTALAÇÃO E GERENCIAMENTO - PJZAP / WHATICKET
+# ==============================================================================
+
+set -e
+
+# Cores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+NC='\033[0m' # Sem Cor
+
+clear
+echo -e "${CYAN}"
+echo "======================================================================"
+echo "          🚀 PAINEL DE INSTALAÇÃO & GERENCIAMENTO PJZAP               "
+echo "======================================================================"
+echo -e "${NC}"
+
+if [ "$EUID" -ne 0 ]; then
+  echo -e "${RED}Erro: Por favor, execute este menu como root: sudo ./install_primaria${NC}"
+  exit 1
+fi
+
+show_menu() {
+    echo -e "${YELLOW}Escolha uma opção no menu abaixo:${NC}\n"
+    echo -e "  ${GREEN}[1]${NC} Instalar Instância Primária (Completa)"
+    echo -e "  ${GREEN}[2]${NC} Atualizar Sistema (Git Pull + Rebuild)"
+    echo -e "  ${GREEN}[3]${NC} Reiniciar Serviços (PM2, Nginx, Redis)"
+    echo -e "  ${GREEN}[4]${NC} Ver Logs em Tempo Real (PM2)"
+    echo -e "  ${RED}[0]${NC} Sair\n"
+    read -p "Digite a opção desejada [0-4]: " OPTION
+}
+
+install_primary() {
+    clear
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+    if [ -f "$SCRIPT_DIR/deploy_vps.sh" ]; then
+        chmod +x "$SCRIPT_DIR/deploy_vps.sh"
+        bash "$SCRIPT_DIR/deploy_vps.sh"
+    else
+        echo -e "${RED}Erro: O arquivo deploy_vps.sh não foi encontrado em $SCRIPT_DIR.${NC}"
+        exit 1
+    fi
+}
+
+update_system() {
+    clear
+    echo -e "${CYAN}=== Atualizando o Sistema PJZap ===${NC}\n"
+    INSTALL_DIR="/home/deploy/whaticket"
+    if [ -d "$INSTALL_DIR" ]; then
+        cd "$INSTALL_DIR"
+        echo -e "${YELLOW}1. Atualizando código via Git...${NC}"
+        sudo -u deploy git pull origin main || true
+
+        echo -e "${YELLOW}2. Atualizando Backend...${NC}"
+        cd "$INSTALL_DIR/backend"
+        sudo -u deploy npm install --legacy-peer-deps
+        sudo -u deploy npm run build
+        sudo -u deploy npx sequelize db:migrate
+
+        echo -e "${YELLOW}3. Atualizando Frontend...${NC}"
+        cd "$INSTALL_DIR/frontend"
+        sudo -u deploy npm install --legacy-peer-deps
+        sudo -u deploy GENERATE_SOURCEMAP=false NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
+        echo -e "${YELLOW}4. Reiniciando Serviços...${NC}"
+        sudo -u deploy pm2 restart whaticket-backend
+        sudo systemctl reload nginx
+
+        echo -e "\n${GREEN}✅ Sistema atualizado com sucesso!${NC}\n"
+    else
+        echo -e "${RED}Erro: Instalação não encontrada em $INSTALL_DIR.${NC}"
+    fi
+}
+
+restart_services() {
+    clear
+    echo -e "${CYAN}=== Reiniciando Serviços ===${NC}\n"
+    sudo -u deploy pm2 restart whaticket-backend || true
+    sudo systemctl restart redis-server
+    sudo systemctl restart postgresql
+    sudo systemctl reload nginx
+    echo -e "\n${GREEN}✅ Todos os serviços foram reiniciados!${NC}\n"
+}
+
+view_logs() {
+    clear
+    echo -e "${CYAN}=== Exibindo Logs do Backend (Pressione Ctrl+C para sair) ===${NC}\n"
+    sudo -u deploy pm2 logs whaticket-backend
+}
+
+show_menu
+
+case $OPTION in
+    1)
+        install_primary
+        ;;
+    2)
+        update_system
+        ;;
+    3)
+        restart_services
+        ;;
+    4)
+        view_logs
+        ;;
+    0)
+        echo -e "${CYAN}Saindo...${NC}"
+        exit 0
+        ;;
+    *)
+        echo -e "${RED}Opção inválida!${NC}"
+        exit 1
+        ;;
+esac

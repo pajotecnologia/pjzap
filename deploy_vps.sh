@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # Script de Instalação Automatizada do PJZap / Whaticket para VPS Ubuntu
-# Com suporte a usuário dedicado ('deploy') e clonagem via Git
+# Com suporte a usuário dedicado ('deploy'), bibliotecas do Chromium/FFmpeg e Nginx otimizado
 # ==============================================================================
 
 set -e
@@ -52,15 +52,18 @@ if ! id -u deploy &>/dev/null; then
     echo -e "${GREEN}Usuário 'deploy' criado com sucesso.${NC}"
 fi
 
-# 4. Atualizar pacotes do sistema
-echo -e "${CYAN}[2/9] Atualizando pacotes do sistema...${NC}"
+# 4. Atualizar pacotes do sistema e instalar dependências do Chromium & FFmpeg
+echo -e "${CYAN}[2/9] Atualizando sistema e instalando dependências nativas (FFmpeg/Chromium)...${NC}"
 apt update && apt upgrade -y
-apt install -y curl git wget unzip build-essential software-properties-common openssl
+apt install -y curl git wget unzip build-essential software-properties-common openssl \
+  ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
+  libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libpango-1.0-0 \
+  libcairo2 fonts-liberation libappindicator3-1 xdg-utils
 
-# 5. Criar Swap se não existir
+# 5. Criar Swap se não existir (4GB)
 if [ $(free -m | awk '/^Swap:/{print $2}') -eq 0 ]; then
-    echo -e "${CYAN}Criando arquivo de Swap (2GB)...${NC}"
-    fallocate -l 2G /swapfile
+    echo -e "${CYAN}Criando arquivo de Swap (4GB)...${NC}"
+    fallocate -l 4G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
@@ -170,7 +173,7 @@ EOF
 chown deploy:deploy .env
 
 sudo -u deploy npm install --legacy-peer-deps
-sudo -u deploy GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false npm run build
+sudo -u deploy GENERATE_SOURCEMAP=false NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
 # 11. Configurar Nginx Vhosts
 echo -e "${CYAN}[8/9] Configurando Nginx...${NC}"
@@ -192,11 +195,13 @@ server {
 }
 EOF
 
-# Vhost Backend (API + WebSockets)
+# Vhost Backend (API + WebSockets + Uploads até 100MB)
 cat <<EOF > /etc/nginx/sites-available/whaticket-backend
 server {
   listen 80;
   server_name $BACKEND_DOMAIN;
+
+  client_max_body_size 100M;
 
   location / {
     proxy_pass http://127.0.0.1:8080;
@@ -207,6 +212,9 @@ server {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto \$scheme;
+
+    proxy_read_timeout 86400s;
+    proxy_send_timeout 86400s;
   }
 }
 EOF
