@@ -93,23 +93,41 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   
     useEffect(() => {
     const fetchSession = async () => {
-      if (!whatsAppId) return;
+      if (!whatsAppId || !open) return;
 
       try {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
-        setWhatsApp(data);
+        setWhatsApp({
+          ...initialState,
+          ...data,
+          name: data.name || "",
+          greetingMessage: data.greetingMessage || "",
+          complationMessage: data.complationMessage || "",
+          outOfHoursMessage: data.outOfHoursMessage || "",
+          ratingMessage: data.ratingMessage || "",
+          token: data.token || "",
+          channel: data.channel || "whatsapp",
+          facebookPageUserId: data.facebookPageUserId || "",
+          facebookUserToken: data.facebookUserToken || "",
+          expiresInactiveMessage: data.expiresInactiveMessage || "",
+          expiresTicket: data.expiresTicket || 0,
+          timeUseBotQueues: data.timeUseBotQueues || 0,
+          maxUseBotQueues: data.maxUseBotQueues || 3,
+        });
 
         const whatsQueueIds = data.queues?.map((queue) => queue.id);
-        setSelectedQueueIds(whatsQueueIds);
-		setSelectedQueueId(data.transferQueueId);
+        setSelectedQueueIds(whatsQueueIds || []);
+        setSelectedQueueId(data.transferQueueId || null);
+        setSelectedPrompt(data.promptId || null);
       } catch (err) {
         toastError(err);
       }
     };
     fetchSession();
-  }, [whatsAppId]);
+  }, [whatsAppId, open]);
 
   useEffect(() => {
+    if (!open) return;
     (async () => {
       try {
         const { data } = await api.get("/prompt");
@@ -118,7 +136,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
         toastError(err);
       }
     })();
-  }, [whatsAppId]);
+  }, [whatsAppId, open]);
 
   useEffect(() => {
     (async () => {
