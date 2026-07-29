@@ -97,10 +97,9 @@ apt install -y nginx certbot python3-certbot-nginx
 
 # 7. Configurar Banco de Dados PostgreSQL
 echo -e "${CYAN}[4/9] Configurando banco de dados PostgreSQL...${NC}"
-sudo -u postgres psql -c "DROP DATABASE IF EXISTS whaticket_afcode;" || true
-sudo -u postgres psql -c "DROP USER IF EXISTS postgres;" || true
-sudo -u postgres psql -c "CREATE USER postgres WITH PASSWORD '$DB_PASS' SUPERUSER;"
-sudo -u postgres psql -c "CREATE DATABASE whaticket_afcode OWNER postgres;"
+(cd /tmp && sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$DB_PASS';")
+(cd /tmp && sudo -u postgres psql -c "DROP DATABASE IF EXISTS whaticket_afcode;") || true
+(cd /tmp && sudo -u postgres psql -c "CREATE DATABASE whaticket_afcode OWNER postgres;")
 
 # 8. Clonar ou Copiar o Repositório Git para o usuário 'deploy'
 echo -e "${CYAN}[5/9] Preparando o diretório de instalação (/home/deploy/whaticket)...${NC}"
