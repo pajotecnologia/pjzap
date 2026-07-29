@@ -70,14 +70,12 @@ if [ $(free -m | awk '/^Swap:/{print $2}') -eq 0 ]; then
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
 
-# 6. Instalar Node.js 18, PM2, PostgreSQL, Redis, Nginx e Certbot
-echo -e "${CYAN}[3/9] Instalando Node.js, PostgreSQL, Redis, PM2, Nginx e Certbot...${NC}"
+# 6. Instalar Node.js 20 LTS, PM2, PostgreSQL, Redis, Nginx e Certbot
+echo -e "${CYAN}[3/9] Instalando Node.js 20 LTS, PostgreSQL, Redis, PM2, Nginx e Certbot...${NC}"
 
-# Node.js 18 LTS
-if ! command -v node &> /dev/null; then
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt install -y nodejs
-fi
+# Node.js 20 LTS (Requerido pelo Baileys 7.x)
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
 
 # PM2
 npm install -g pm2
