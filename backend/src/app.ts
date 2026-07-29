@@ -56,12 +56,12 @@ app.use(helmet({
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 500,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Muitas requisições deste IP, tente novamente após 15 minutos',
   skip: (req) => {
-    return req.ip === '127.0.0.1' || req.ip === '::1';
+    return req.method === 'OPTIONS' || req.ip === '127.0.0.1' || req.ip === '::1';
   }
 });
 

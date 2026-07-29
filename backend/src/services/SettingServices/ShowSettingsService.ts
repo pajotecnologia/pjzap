@@ -7,14 +7,17 @@ interface Request {
 }
 
 const ShowSettingsService = async ({
-  settingKey, // Update parameter name to settingKey
+  settingKey,
   companyId
-}: Request): Promise<Setting | undefined> => {
+}: Request): Promise<Setting | any> => {
   const setting = await Setting.findOne({
-    where: { key: settingKey, companyId } // Update key to settingKey
+    where: { key: settingKey, companyId }
   });
 
   if (!setting) {
+    if (settingKey === "viewregister") {
+      return { key: "viewregister", value: "disabled" };
+    }
     throw new AppError("ERR_NO_SETTING_FOUND", 404);
   }
 
