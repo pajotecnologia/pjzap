@@ -179,11 +179,18 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
     const whatsappData = {
       ...values,
       queueIds: selectedQueueIds || [],
-      transferQueueId: selectedQueueId,
-      promptId: selectedPrompt ? selectedPrompt : null
+      transferQueueId: selectedQueueId ? Number(selectedQueueId) : null,
+      promptId: selectedPrompt ? Number(selectedPrompt) : null,
+      expiresTicket: values.expiresTicket ? Number(values.expiresTicket) : 0,
+      maxUseBotQueues: values.maxUseBotQueues ? Number(values.maxUseBotQueues) : 3,
+      timeUseBotQueues: values.timeUseBotQueues ? Number(values.timeUseBotQueues) : 0,
     };
     delete whatsappData["queues"];
     delete whatsappData["session"];
+    delete whatsappData["createdAt"];
+    delete whatsappData["updatedAt"];
+    delete whatsappData["companyId"];
+    delete whatsappData["prompt"];
 
     try {
       if (whatsAppId) {

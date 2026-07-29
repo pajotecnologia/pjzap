@@ -100,7 +100,19 @@ const UpdateWhatsAppService = async ({
     }
   }
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+  const cleanNumber = (val: any): number | null => {
+    if (val === "" || val === null || val === undefined || isNaN(Number(val))) {
+      return null;
+    }
+    return Number(val);
+  };
+
+  const parsedTransferQueueId = cleanNumber(transferQueueId);
+  const parsedTimeToTransfer = cleanNumber(timeToTransfer);
+  const parsedPromptId = cleanNumber(promptId);
+  const parsedMaxUseBotQueues = cleanNumber(maxUseBotQueues) ?? 3;
+  const parsedTimeUseBotQueues = cleanNumber(timeUseBotQueues) ?? 0;
+  const parsedExpiresTicket = cleanNumber(expiresTicket) ?? 0;
 
   await whatsapp.update({
     name,
@@ -113,14 +125,12 @@ const UpdateWhatsAppService = async ({
     isDefault,
     companyId,
     token,
-    //timeSendQueue,
-    //sendIdQueue,
-    transferQueueId,	
-	timeToTransfer,	
-    promptId,
-    maxUseBotQueues,
-    timeUseBotQueues,
-    expiresTicket,
+    transferQueueId: parsedTransferQueueId,	
+    timeToTransfer: parsedTimeToTransfer,	
+    promptId: parsedPromptId,
+    maxUseBotQueues: parsedMaxUseBotQueues,
+    timeUseBotQueues: parsedTimeUseBotQueues,
+    expiresTicket: parsedExpiresTicket,
     expiresInactiveMessage
   });
 
