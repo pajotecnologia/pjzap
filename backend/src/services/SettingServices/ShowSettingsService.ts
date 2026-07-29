@@ -10,18 +10,19 @@ const ShowSettingsService = async ({
   settingKey,
   companyId
 }: Request): Promise<Setting | any> => {
-  const setting = await Setting.findOne({
-    where: { key: settingKey, companyId }
-  });
+  try {
+    const setting = await Setting.findOne({
+      where: { key: settingKey, companyId }
+    });
 
-  if (!setting) {
-    if (settingKey === "viewregister") {
-      return { key: "viewregister", value: "disabled" };
+    if (!setting) {
+      return { key: settingKey, value: "disabled" };
     }
-    throw new AppError("ERR_NO_SETTING_FOUND", 404);
-  }
 
-  return setting;
+    return setting;
+  } catch (error) {
+    return { key: settingKey, value: "disabled" };
+  }
 };
 
 export default ShowSettingsService;
