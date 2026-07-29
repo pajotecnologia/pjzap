@@ -21,7 +21,16 @@ Sentry.init({ dsn: process.env.SENTRY_DSN });
 
 const app = express();
 
-app.set("trust proxy", "loopback");
+app.use(
+  cors({
+    credentials: true,
+    origin: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
+  })
+);
+
+app.set("trust proxy", true);
 
 app.use((req, res, next) => {
   req.id = uuidv4();
@@ -42,20 +51,12 @@ app.use(bodyParser.json({
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      connectSrc: ["'self'", process.env.FRONTEND_URL || "*"]
-    }
-  }
+  contentSecurityPolicy: false
 }));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Muitas requisições deste IP, tente novamente após 15 minutos',
@@ -65,27 +66,6 @@ const apiLimiter = rateLimit({
 });
 
 app.use('/auth', apiLimiter);
-
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_URL?.replace("http://", "https://"),
-  process.env.FRONTEND_URL?.replace("https://", "http://")
-].filter(Boolean);
-
-app.use(
-  cors({
-    credentials: true,
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-        callback(null, true);
-      } else {
-        callback(null, true);
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
-  })
-);
 
 app.use(cookieParser());
 app.use(express.json());
