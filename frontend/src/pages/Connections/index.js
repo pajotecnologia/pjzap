@@ -512,6 +512,7 @@ const Connections = () => {
         open={whatsAppModalOpen}
         onClose={handleCloseWhatsAppModal}
         whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
+        whatsAppData={selectedWhatsApp}
       />
       <MainHeader>
         <Title>{i18n.t("connections.title")}</Title>

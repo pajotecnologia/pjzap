@@ -62,7 +62,7 @@ const SessionSchema = Yup.object().shape({
     .required("Required"),
 });
 
-const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
+const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
   const classes = useStyles();
   const initialState = {
     name: "",
@@ -77,8 +77,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     facebookPageUserId: "",
     facebookUserToken: "",
     instagramId: "",
-    //timeSendQueue: 0,
-    //sendIdQueue: 0,
     expiresInactiveMessage: "",
     expiresTicket: 0,
     timeUseBotQueues: 0,
@@ -91,40 +89,68 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [prompts, setPrompts] = useState([]);
   
-    useEffect(() => {
+  useEffect(() => {
+    if (!open) {
+      setWhatsApp(initialState);
+      setSelectedQueueIds([]);
+      setSelectedQueueId(null);
+      setSelectedPrompt(null);
+      return;
+    }
+
+    if (whatsAppData) {
+      setWhatsApp({
+        ...initialState,
+        ...whatsAppData,
+        name: whatsAppData.name || "",
+        greetingMessage: whatsAppData.greetingMessage || "",
+        complationMessage: whatsAppData.complationMessage || "",
+        outOfHoursMessage: whatsAppData.outOfHoursMessage || "",
+        ratingMessage: whatsAppData.ratingMessage || "",
+        token: whatsAppData.token || "",
+        channel: whatsAppData.channel || "whatsapp",
+        facebookPageUserId: whatsAppData.facebookPageUserId || "",
+        facebookUserToken: whatsAppData.facebookUserToken || "",
+      });
+
+      if (whatsAppData.queues) {
+        setSelectedQueueIds(whatsAppData.queues.map((q) => q.id));
+      }
+      if (whatsAppData.transferQueueId) {
+        setSelectedQueueId(whatsAppData.transferQueueId);
+      }
+      if (whatsAppData.promptId) {
+        setSelectedPrompt(whatsAppData.promptId);
+      }
+    }
+
     const fetchSession = async () => {
-      if (!whatsAppId || !open) return;
+      if (!whatsAppId) return;
 
       try {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
-        setWhatsApp({
-          ...initialState,
+        setWhatsApp((prev) => ({
+          ...prev,
           ...data,
-          name: data.name || "",
-          greetingMessage: data.greetingMessage || "",
-          complationMessage: data.complationMessage || "",
-          outOfHoursMessage: data.outOfHoursMessage || "",
-          ratingMessage: data.ratingMessage || "",
-          token: data.token || "",
-          channel: data.channel || "whatsapp",
-          facebookPageUserId: data.facebookPageUserId || "",
-          facebookUserToken: data.facebookUserToken || "",
-          expiresInactiveMessage: data.expiresInactiveMessage || "",
-          expiresTicket: data.expiresTicket || 0,
-          timeUseBotQueues: data.timeUseBotQueues || 0,
-          maxUseBotQueues: data.maxUseBotQueues || 3,
-        });
+          name: data.name || prev.name || "",
+          greetingMessage: data.greetingMessage || prev.greetingMessage || "",
+          complationMessage: data.complationMessage || prev.complationMessage || "",
+          outOfHoursMessage: data.outOfHoursMessage || prev.outOfHoursMessage || "",
+          ratingMessage: data.ratingMessage || prev.ratingMessage || "",
+          token: data.token || prev.token || "",
+          channel: data.channel || prev.channel || "whatsapp",
+        }));
 
         const whatsQueueIds = data.queues?.map((queue) => queue.id);
-        setSelectedQueueIds(whatsQueueIds || []);
-        setSelectedQueueId(data.transferQueueId || null);
-        setSelectedPrompt(data.promptId || null);
+        if (whatsQueueIds) setSelectedQueueIds(whatsQueueIds);
+        if (data.transferQueueId) setSelectedQueueId(data.transferQueueId);
+        if (data.promptId) setSelectedPrompt(data.promptId);
       } catch (err) {
         toastError(err);
       }
     };
     fetchSession();
-  }, [whatsAppId, open]);
+  }, [whatsAppId, open, whatsAppData]);
 
   useEffect(() => {
     if (!open) return;
