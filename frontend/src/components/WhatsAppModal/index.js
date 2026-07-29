@@ -176,8 +176,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
   }, []);
 
   const handleSaveWhatsApp = async (values) => {
-const whatsappData = {
-      ...values, queueIds: selectedQueueIds, transferQueueId: selectedQueueId,
+    const whatsappData = {
+      ...values,
+      queueIds: selectedQueueIds || [],
+      transferQueueId: selectedQueueId,
       promptId: selectedPrompt ? selectedPrompt : null
     };
     delete whatsappData["queues"];
