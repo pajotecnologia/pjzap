@@ -40,7 +40,7 @@ const formatCurrency = (value) => {
 
 const LaneTitle = ({ squareColor, firstLane, children, quantity, totalValue }) => {
   const classes = useStyles();
-  const formattedTotal = formatCurrency(totalValue);
+  const formattedTotal = formatCurrency(totalValue || 0);
 
   return (
     <div className={classes.container}>
@@ -52,9 +52,7 @@ const LaneTitle = ({ squareColor, firstLane, children, quantity, totalValue }) =
         {children}
         <div className={classes.quantity}>{quantity}</div>
       </div>
-      {formattedTotal > 0 && (
-        <div className={classes.totalValue}>💰 {formattedTotal}</div>
-      )}
+      <div className={classes.totalValue}>💰 {formattedTotal}</div>
     </div>
   );
 };

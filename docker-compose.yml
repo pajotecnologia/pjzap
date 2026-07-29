@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME:-whaticket_afcode}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal_net
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    command: >
+      sh -c "npx sequelize db:migrate &&
+             npx sequelize db:seed:all &&
+             node dist/server.js"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      BACKEND_URL: https://${BACKEND_DOMAIN}
+      FRONTEND_URL: https://${FRONTEND_DOMAIN}
+      PROXY_PORT: 443
+      DB_DIALECT: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-whaticket_afcode}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      REDIS_URI: redis://redis:6379
+      REDIS_OPT_LIMITER_MAX: 1
+      REDIS_OPT_LIMITER_DURATION: 3000
+      USER_LIMIT: 10000
+      CONNECTIONS_LIMIT: 100000
+      CLOSED_SEND_BY_ME: "true"
+      COMPANY_NAME: ${COMPANY_NAME:-PJZap}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - internal_net
+      - traefik_global
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whaticket-backend.rule=Host(`${BACKEND_DOMAIN}`)"
+      - "traefik.http.routers.whaticket-backend.entrypoints=websecure"
+      - "traefik.http.routers.whaticket-backend.tls.certresolver=myresolver"
+      - "traefik.http.services.whaticket-backend.loadbalancer.server.port=8080"
+      - "traefik.http.routers.whaticket-backend.middlewares=cors-header@file"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: https://${BACKEND_DOMAIN}
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - traefik_global
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whaticket-frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.whaticket-frontend.entrypoints=websecure"
+      - "traefik.http.routers.whaticket-frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.whaticket-frontend.loadbalancer.server.port=80"
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  internal_net:
+    driver: bridge
+  traefik_global:
+    external: true

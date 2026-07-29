@@ -10,6 +10,7 @@ import sequelize from "./database";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
 import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
 import formatBody from "./helpers/Mustache";
+import { parseSpintax } from "./helpers/Spintax";
 import { MessageData, SendMessage } from "./helpers/SendMessage";
 import { getIO } from "./libs/socket";
 import { getWbot } from "./libs/wbot";
@@ -638,7 +639,7 @@ function getProcessedMessage(msg: string, variables: any[], contact: any) {
     }
   });
 
-  return finalMessage;
+  return parseSpintax(finalMessage);
 }
 
 export function randomValue(min, max) {
@@ -671,10 +672,11 @@ async function verifyAndFinalizeCampaign(campaign) {
 
 function calculateDelay(index, baseDelay, longerIntervalAfter, greaterInterval, messageInterval) {
   const diffSeconds = differenceInSeconds(baseDelay, new Date());
+  const randomJitter = Math.floor(Math.random() * 5000) + 1000;
   if (index > longerIntervalAfter) {
-    return diffSeconds * 1000 + greaterInterval
+    return diffSeconds * 1000 + greaterInterval + randomJitter;
   } else {
-    return diffSeconds * 1000 + messageInterval
+    return diffSeconds * 1000 + messageInterval + randomJitter;
   }
 }
 
@@ -813,20 +815,26 @@ async function handleDispatchCampaign(job) {
     const { data } = job;
     const { campaignShippingId, campaignId }: DispatchCampaignData = data;
     const campaign = await getCampaign(campaignId);
-    const wbot = await GetWhatsappWbot(campaign.whatsapp);
+    let whatsappToUse = campaign.whatsapp;
 
-    if (!wbot) {
-      logger.error(`campaignQueue -> DispatchCampaign -> error: wbot not found`);
+    const activeWhatsapps = await Whatsapp.findAll({
+      where: { companyId: campaign.companyId, status: "CONNECTED" }
+    });
+
+    if (activeWhatsapps.length > 0) {
+      const randomIndex = Math.floor(Math.random() * activeWhatsapps.length);
+      whatsappToUse = activeWhatsapps[randomIndex];
+    }
+
+    if (!whatsappToUse) {
+      logger.error(`campaignQueue -> DispatchCampaign -> error: whatsapp not found or connected`);
       return;
     }
 
-    if (!campaign.whatsapp) {
-      logger.error(`campaignQueue -> DispatchCampaign -> error: whatsapp not found`);
-      return;
-    }
+    const wbot = await GetWhatsappWbot(whatsappToUse);
 
-    if (!wbot?.user?.id) {
-      logger.error(`campaignQueue -> DispatchCampaign -> error: wbot user not found`);
+    if (!wbot || !wbot?.user?.id) {
+      logger.error(`campaignQueue -> DispatchCampaign -> error: wbot session not ready`);
       return;
     }
 
@@ -873,7 +881,7 @@ async function handleDispatchCampaign(job) {
         //const filePath = path.resolve("public", campaign.mediaPath);
         const filePath = path.resolve(`public/company${campaign.companyId}`, campaign.mediaPath);
         //const options = await getMessageOptions(campaign.mediaName, filePath);
-        const options = await getMessageOptions(campaign.mediaName, filePath);
+        const options = await getMessageOptions(campaign.mediaName, filePath, String(campaign.companyId));
         if (Object.keys(options).length) {
           await wbot.sendMessage(chatId, { ...options });
         }

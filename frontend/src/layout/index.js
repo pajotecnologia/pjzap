@@ -38,7 +38,7 @@ import ColorModeContext from "../layout/themeContext";
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 
-const drawerWidth = 310;
+const drawerWidth = 280;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,11 +49,14 @@ const useStyles = makeStyles((theme) => ({
     },
     backgroundColor: theme.palette.fancyBackground,
     '& .MuiButton-outlinedPrimary': {
-      color: theme.mode === 'light' ? '#FFF' : '#FFF',
-      backgroundColor: theme.mode === 'light' ? '#2DDD7F' : '#1c1c1c',
+      color: '#FFF',
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: '8px',
+      boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
     },
     '& .MuiTab-textColorPrimary.Mui-selected': {
-      color: theme.mode === 'light' ? '#2DDD7F' : '#FFF',
+      color: theme.palette.primary.main,
+      fontWeight: 600,
     }
   },
   avatar: {
@@ -61,21 +64,26 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbar: {
     paddingRight: 24,
-    color: theme.palette.dark.main,
+    paddingLeft: 16,
+    minHeight: "56px",
+    color: "#FFFFFF",
     background: theme.palette.barraSuperior,
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
   },
   toolbarIcon: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0 8px",
-    minHeight: "48px",
+    padding: "12px 16px",
+    minHeight: "64px",
     [theme.breakpoints.down("sm")]: {
-      height: "48px"
+      height: "56px"
     }
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
+    backdropFilter: "blur(12px)",
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -93,20 +101,32 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   menuButton: {
-    marginRight: 36,
+    marginRight: 20,
+    borderRadius: "10px",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    "&:hover": {
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+    }
   },
   menuButtonHidden: {
     display: "none",
   },
   title: {
     flexGrow: 1,
-    fontSize: 14,
-    color: "white",
+    fontSize: "0.95rem",
+    fontWeight: 500,
+    color: "#FFFFFF",
+    letterSpacing: "-0.01em",
   },
   drawerPaper: {
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
+    height: "100vh",
+    overflowX: "hidden",
+    backgroundColor: theme.palette.type === 'light' ? '#FFFFFF' : '#1E293B',
+    borderRight: theme.palette.type === 'light' ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.06)',
+    boxShadow: theme.palette.type === 'light' ? '4px 0 24px rgba(0,0,0,0.03)' : 'none',
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -131,26 +151,30 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   appBarSpacer: {
-    minHeight: "48px",
+    minHeight: "56px",
   },
   content: {
     flex: 1,
     overflow: "auto",
+    backgroundColor: theme.palette.fancyBackground,
   },
   container: {
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
   },
   paper: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(2.5),
     display: "flex",
     overflow: "auto",
-    flexDirection: "column"
+    flexDirection: "column",
+    borderRadius: "16px",
+    boxShadow: theme.palette.type === 'light' ? "0 4px 20px rgba(0, 0, 0, 0.03)" : "0 4px 20px rgba(0, 0, 0, 0.2)",
   },
   containerWithScroll: {
     flex: 1,
     padding: theme.spacing(1),
-    overflowY: "scroll",
+    overflowY: "auto",
+    overflowX: "hidden",
     ...theme.scrollbarStyles,
   },
   flagIcon: {

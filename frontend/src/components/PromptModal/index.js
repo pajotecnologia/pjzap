@@ -85,6 +85,7 @@ const PromptModal = ({ open, onClose, promptId }) => {
         maxTokens: 100,
         temperature: 1,
         apiKey: "",
+        provider: "openai",
         queueId: null,
         maxMessages: 10
     };
@@ -178,6 +179,19 @@ const PromptModal = ({ open, onClose, promptId }) => {
                                     fullWidth
                                 />
                                 <FormControl fullWidth margin="dense" variant="outlined">
+                                    <InputLabel>Provedor de IA / Modelo</InputLabel>
+                                    <Field
+                                        as={Select}
+                                        label="Provedor de IA / Modelo"
+                                        name="provider"
+                                    >
+                                        <MenuItem value="openai">OpenAI (GPT-4o / GPT-3.5)</MenuItem>
+                                        <MenuItem value="gemini">Google Gemini 1.5 Pro / Flash</MenuItem>
+                                        <MenuItem value="claude">Anthropic Claude 3.5 Sonnet</MenuItem>
+                                        <MenuItem value="groq">Groq / DeepSeek-V3</MenuItem>
+                                    </Field>
+                                </FormControl>
+                                <FormControl fullWidth margin="dense" variant="outlined">
                                     <Field
                                         as={TextField}
                                         label={i18n.t("promptModal.form.apikey")}
@@ -201,10 +215,10 @@ const PromptModal = ({ open, onClose, promptId }) => {
                                 </FormControl>
                                 <Field
                                     as={TextField}
-                                    label={i18n.t("promptModal.form.prompt")}
+                                    label="Instruções da IA & Base de Conhecimento / RAG (Treinamento)"
                                     name="prompt"
                                     error={touched.prompt && Boolean(errors.prompt)}
-                                    helperText={touched.prompt && errors.prompt}
+                                    helperText="Insira aqui as instruções do agente, regras de negócio e a Base de Conhecimento RAG (catálogo de produtos, PDFs, preços e perguntas frequentes)."
                                     variant="outlined"
                                     margin="dense"
                                     fullWidth

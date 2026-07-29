@@ -27,117 +27,114 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     background: theme.palette.type === 'dark' 
-      ? 'linear-gradient(135deg, #121212 0%, #1e1e1e 100%)' 
-      : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      ? 'radial-gradient(circle at 15% 15%, #1E293B 0%, #0F172A 70%, #020617 100%)' 
+      : 'radial-gradient(circle at 15% 15%, #ECFDF5 0%, #F1F5F9 50%, #E2E8F0 100%)',
     position: 'relative',
     overflow: 'hidden',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '50vh',
-      background: theme.palette.primary.dark, // Usando primary.dark
-      borderBottomLeftRadius: '50% 20%',
-      borderBottomRightRadius: '50% 20%',
-      zIndex: 0,
-    }
+    padding: theme.spacing(2),
   },
   loginContainer: {
     position: 'relative',
     width: '100%',
-    maxWidth: 400,
-    margin: theme.spacing(2),
+    maxWidth: 420,
     zIndex: 1,
   },
   loginCard: {
-    padding: theme.spacing(4, 3),
-    borderRadius: 16,
-    boxShadow: theme.shadows[4],
-    background: theme.palette.background.paper,
+    padding: theme.spacing(5, 4, 4),
+    borderRadius: 24,
+    backdropFilter: 'blur(16px)',
+    background: theme.palette.type === 'dark'
+      ? 'rgba(30, 41, 59, 0.85)'
+      : 'rgba(255, 255, 255, 0.95)',
+    boxShadow: theme.palette.type === 'dark'
+      ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+      : '0 25px 50px -12px rgba(16, 185, 129, 0.12)',
+    border: theme.palette.type === 'dark'
+      ? '1px solid rgba(255, 255, 255, 0.08)'
+      : '1px solid rgba(226, 232, 240, 0.8)',
     textAlign: 'center',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    '&:hover': {
-      transform: 'translateY(-5px)',
-      boxShadow: theme.shadows[6],
-    }
   },
   logoContainer: {
-    width: 100,
-    height: 100,
-    margin: '0 auto -50px',
-    borderRadius: '50%',
-    background: theme.palette.primary.dark, // Usando primary.dark
+    width: 90,
+    height: 90,
+    margin: '0 auto -45px',
+    borderRadius: '22px',
+    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: theme.shadows[4],
-    border: '4px solid ' + (theme.palette.type === 'dark' ? theme.palette.grey[900] : 'white'),
+    boxShadow: '0 12px 24px rgba(16, 185, 129, 0.3)',
+    border: '4px solid ' + (theme.palette.type === 'dark' ? '#0F172A' : '#FFFFFF'),
     position: 'relative',
     zIndex: 2,
     '& img': {
-      width: '70%',
+      width: '65%',
       height: 'auto',
-      filter: 'brightness(0) invert(1)',
+      objectFit: 'contain',
     }
   },
   formTitle: {
-    margin: theme.spacing(5, 0, 3),
+    margin: theme.spacing(4, 0, 1),
     color: theme.palette.text.primary,
     fontWeight: 700,
+    fontSize: '1.5rem',
+    letterSpacing: '-0.02em',
+  },
+  formSubtitle: {
+    color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
+    marginBottom: theme.spacing(3),
+    fontSize: '0.875rem',
   },
   form: {
     width: '100%',
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(2),
   },
   inputField: {
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2.5),
     '& .MuiOutlinedInput-root': {
-      borderRadius: 8,
-      backgroundColor: theme.palette.background.default,
+      borderRadius: 12,
+      backgroundColor: theme.palette.type === 'dark' ? 'rgba(15, 23, 42, 0.6)' : '#F8FAFC',
       '& fieldset': {
-        borderColor: theme.palette.divider,
+        borderColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#E2E8F0',
       },
       '&:hover fieldset': {
-        borderColor: theme.palette.primary.light,
+        borderColor: theme.palette.primary.main,
       },
       '&.Mui-focused fieldset': {
         borderColor: theme.palette.primary.main,
-        boxShadow: `0 0 0 2px ${theme.palette.primary.light}`,
+        borderWidth: 2,
       },
     },
     '& .MuiInputLabel-root': {
-      color: theme.palette.text.secondary,
+      color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
       '&.Mui-focused': {
         color: theme.palette.primary.main,
       },
     },
   },
   submitButton: {
-    margin: theme.spacing(3, 0, 2),
+    margin: theme.spacing(2, 0, 2),
     padding: theme.spacing(1.5),
-    borderRadius: 8,
+    borderRadius: 12,
     fontWeight: 600,
     fontSize: '1rem',
-    letterSpacing: 0.5,
     textTransform: 'none',
-    boxShadow: 'none',
+    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+    color: '#FFFFFF',
     transition: 'all 0.2s ease',
     '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: theme.shadows[4],
-    },
-    '&:active': {
-      transform: 'translateY(0)',
+      background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+      boxShadow: '0 6px 20px rgba(16, 185, 129, 0.45)',
+      transform: 'translateY(-1px)',
     },
   },
   linkText: {
-    color: theme.palette.text.secondary,
+    color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
     fontWeight: 500,
+    fontSize: '0.875rem',
     textDecoration: 'none',
-    display: 'inline-block',
-    margin: theme.spacing(1, 0),
     transition: 'color 0.2s ease',
     '&:hover': {
       color: theme.palette.primary.main,
@@ -147,8 +144,9 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     borderRadius: '50%',
     background: theme.palette.type === 'dark' 
-      ? 'rgba(255,255,255,0.05)' 
-      : 'rgba(255,255,255,0.1)',
+      ? 'radial-gradient(circle, rgba(52, 211, 153, 0.08) 0%, rgba(0,0,0,0) 70%)' 
+      : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0,0,0,0) 70%)',
+    pointerEvents: 'none',
     zIndex: 0,
   }
 }));

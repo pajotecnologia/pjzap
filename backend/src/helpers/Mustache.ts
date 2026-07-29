@@ -1,5 +1,6 @@
 import Mustache from "mustache";
 import Contact from "../models/Contact";
+import { parseSpintax } from "./Spintax";
 
 export const greeting = (): string => {
   const greetings = ["Boa madrugada", "Bom dia", "Boa tarde", "Boa noite"];
@@ -53,5 +54,5 @@ export default (body: string, contact: Contact): string => {
     protocol,
     hora
   };
-  return Mustache.render(body, view);
+  return parseSpintax(Mustache.render(body, view));
 };

@@ -19,8 +19,13 @@ const useAuth = () => {
     (config) => {
       const token = localStorage.getItem("token");
       if (token) {
-        config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
-        setIsAuth(true);
+        try {
+          config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
+          setIsAuth(true);
+        } catch (e) {
+          localStorage.removeItem("token");
+          setIsAuth(false);
+        }
       }
       return config;
     },
@@ -38,13 +43,18 @@ const useAuth = () => {
       if (error?.response?.status === 403 && !originalRequest._retry) {
         originalRequest._retry = true;
 
-        console.log('process.env.REACT_APP_BACKEND_URL', process.env.REACT_APP_BACKEND_URL)
-        const { data } = await api.post("/auth/refresh_token");
-        if (data) {
-          localStorage.setItem("token", JSON.stringify(data.token));
-          api.defaults.headers.Authorization = `Bearer ${data.token}`;
+        try {
+          const { data } = await api.post("/auth/refresh_token");
+          if (data) {
+            localStorage.setItem("token", JSON.stringify(data.token));
+            api.defaults.headers.Authorization = `Bearer ${data.token}`;
+          }
+          return api(originalRequest);
+        } catch (err) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("companyId");
+          setIsAuth(false);
         }
-        return api(originalRequest);
       }
       if (error?.response?.status === 401) {
         localStorage.removeItem("token");
@@ -68,8 +78,12 @@ const useAuth = () => {
           setIsAuth(true);
           setUser(data.user);
         } catch (err) {
-          toastError(err);
+          localStorage.removeItem("token");
+          localStorage.removeItem("companyId");
+          setIsAuth(false);
         }
+      } else {
+        setIsAuth(false);
       }
       setLoading(false);
     })();

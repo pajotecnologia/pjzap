@@ -7,20 +7,37 @@ import { makeStyles } from "@material-ui/core/styles";
 import { grey } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(theme => ({
+	cardContainer: {
+		borderRadius: '16px',
+		padding: theme.spacing(1),
+		backgroundColor: theme.palette.type === 'dark' ? '#1E293B' : '#FFFFFF',
+		border: theme.palette.type === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #E2E8F0',
+		boxShadow: theme.palette.type === 'dark' ? '0 4px 20px rgba(0, 0, 0, 0.2)' : '0 4px 20px rgba(0, 0, 0, 0.03)',
+		transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+		'&:hover': {
+			transform: 'translateY(-2px)',
+			boxShadow: theme.palette.type === 'dark' ? '0 8px 30px rgba(0, 0, 0, 0.35)' : '0 8px 30px rgba(16, 185, 129, 0.1)',
+		}
+	},
 	cardAvatar: {
-		fontSize: '55px',
-		color: grey[500],
-		backgroundColor: '#ffffff',
-		width: theme.spacing(7),
-		height: theme.spacing(7)
+		color: theme.palette.primary.main,
+		backgroundColor: theme.palette.type === 'dark' ? 'rgba(52, 211, 153, 0.12)' : 'rgba(16, 185, 129, 0.1)',
+		width: theme.spacing(6.5),
+		height: theme.spacing(6.5),
+		borderRadius: '12px',
 	},
 	cardTitle: {
-		fontSize: '18px',
-		color: theme.palette.text.primary
+		fontSize: '13px',
+		fontWeight: 600,
+		color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
+		textTransform: 'uppercase',
+		letterSpacing: '0.5px',
 	},
 	cardSubtitle: {
-		color: grey[600],
-		fontSize: '14px'
+		color: theme.palette.text.primary,
+		fontSize: '22px',
+		fontWeight: 700,
+		marginTop: '2px',
 	}
 }));
 
@@ -28,7 +45,7 @@ export default function CardCounter(props) {
     const { icon, title, value, loading } = props
 	const classes = useStyles();
     return ( !loading ? 
-        <Card>
+        <Card className={classes.cardContainer}>
             <CardHeader
                 avatar={
                     <Avatar className={classes.cardAvatar}>
@@ -47,7 +64,7 @@ export default function CardCounter(props) {
                 }
             />
         </Card>
-        : <Skeleton variant="rect" height={80} />
+        : <Skeleton variant="rect" height={90} style={{ borderRadius: 16 }} />
     )
     
 }

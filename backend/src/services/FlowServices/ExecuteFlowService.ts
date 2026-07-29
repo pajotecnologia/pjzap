@@ -1,6 +1,7 @@
 import Flow from "../../models/Flow";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
+import TicketTag from "../../models/TicketTag";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import SendInstagramMessageService from "../InstagramServices/SendInstagramMessageService";
@@ -13,11 +14,14 @@ interface Request {
 
 interface FlowNode {
   id: string;
-  type: "trigger" | "message" | "menu" | "transfer_queue" | "close_ticket";
+  type: "trigger" | "message" | "menu" | "transfer_queue" | "close_ticket" | "set_kanban" | "pix_payment";
   title?: string;
   content?: string;
   keyword?: string;
   queueId?: number;
+  tagId?: number;
+  pixValue?: number;
+  pixCopyPaste?: string;
   options?: Array<{ id: string; optionNumber: string; text: string; targetNodeId: string }>;
   targetNodeId?: string;
 }
@@ -154,6 +158,44 @@ const ExecuteFlowService = async ({
         } else if (currentNode.type === "close_ticket") {
           await ticket.update({ status: "closed" });
           return true;
+
+        } else if (currentNode.type === "set_kanban") {
+          if (currentNode.tagId) {
+            await TicketTag.destroy({ where: { ticketId: ticket.id } });
+            await TicketTag.create({ ticketId: ticket.id, tagId: currentNode.tagId });
+          }
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "pix_payment") {
+          const val = Number(currentNode.pixValue) || 1.00;
+          const pixCode = currentNode.pixCopyPaste || `00020126580014BR.GOV.BCB.PIX0136suporte@pjzap.com520400005303986540${val.toFixed(2)}5802BR5915PjZap Pagamento6009SAO PAULO62070503***6304`;
+          const pixMsg = `📱 *Pagamento via Pix*\n\nValor: *R$ ${val.toFixed(2)}*\n\n*Copia e Cola:*\n\`\`\`${pixCode}\`\`\`\n\nApós realizar o pagamento, responda a esta mensagem para dar continuidade.`;
+          
+          if (ticket.channel === "instagram") {
+            await SendInstagramMessageService({
+              body: pixMsg,
+              recipientId: ticket.contact.instagramId || ticket.contact.number,
+              whatsapp: ticket.whatsapp
+            });
+          } else {
+            await SendWhatsAppMessage({
+              body: pixMsg,
+              ticket
+            });
+          }
+
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
         } else {
           break;
         }

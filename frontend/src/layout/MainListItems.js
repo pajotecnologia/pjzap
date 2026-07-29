@@ -82,25 +82,33 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   listItem: {
-    borderRadius: 8,
-    margin: '4px 8px',
-
+    borderRadius: 12,
+    margin: '3px 8px',
     justifyContent: collapsed => collapsed ? 'center' : 'flex-start',
-    minHeight: 48,
-    padding: collapsed => collapsed ? '8px 12px' : '8px 16px',
+    minHeight: 44,
+    padding: collapsed => collapsed ? '8px 10px' : '8px 14px',
+    transition: 'background-color 0.2s ease, color 0.2s ease',
+    '&:hover': {
+      backgroundColor: theme.palette.type === 'light' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(52, 211, 153, 0.12)',
+      '& $listItemIcon': {
+        color: theme.palette.primary.main,
+      }
+    }
   },
   listItemIcon: {
-    minWidth: collapsed => collapsed ? 0 : 40,
-    marginRight: collapsed => collapsed ? 0 : theme.spacing(2),
-    color: theme.palette.text.secondary,
+    minWidth: collapsed => collapsed ? 0 : 36,
+    marginRight: collapsed => collapsed ? 0 : theme.spacing(1.5),
+    color: theme.palette.type === 'light' ? '#64748B' : '#94A3B8',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transition: 'color 0.2s ease',
   },
   listItemText: {
     '& span': {
-      fontSize: '0.9rem',
+      fontSize: '0.875rem',
       fontWeight: 500,
+      letterSpacing: '-0.01em',
     },
     opacity: collapsed => collapsed ? 0 : 1,
     transition: 'opacity 0.2s ease',
@@ -108,21 +116,21 @@ const useStyles = makeStyles((theme) => ({
   },
   subheader: {
     position: "relative",
-    fontSize: "13px",
+    fontSize: "11px",
     textAlign: "left",
-    paddingLeft: 28,
-    color: theme.palette.primary.main,
-    fontWeight: 600,
+    paddingLeft: 24,
+    color: theme.palette.type === 'light' ? '#94A3B8' : '#64748B',
+    fontWeight: 700,
     textTransform: "uppercase",
-    letterSpacing: "0.5px",
+    letterSpacing: "0.8px",
     marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(0.5),
     opacity: collapsed => collapsed ? 0 : 1,
     transition: 'opacity 0.2s ease',
     display: collapsed => collapsed ? 'none' : 'block',
   },
   versionBadge: {
-    backgroundColor: theme.palette.success.main,
+    backgroundColor: theme.palette.primary.main,
     color: "white",
     fontSize: "10px",
     padding: "2px 8px",
@@ -148,9 +156,14 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center'
   },
   activeItem: {
-    //backgroundColor: theme.palette.action.selected + '!important',
-    borderLeft: `3px solid ${theme.palette.primary.main}`,
+    backgroundColor: theme.palette.type === 'light' ? 'rgba(16, 185, 129, 0.12) !important' : 'rgba(52, 211, 153, 0.18) !important',
+    color: `${theme.palette.primary.main} !important`,
+    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.12)',
     '& $listItemIcon': {
+      color: `${theme.palette.primary.main} !important`,
+    },
+    '& $listItemText span': {
+      fontWeight: 600,
       color: theme.palette.primary.main,
     }
   },
@@ -162,9 +175,8 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
   },
   menuWrapper: {
-    width: collapsed => collapsed ? 40 : 280,
-    transition: 'width 0.3s ease',
-    overflow: 'hidden',
+    width: '100%',
+    overflowX: 'hidden',
   },
   versionContainer: {
     fontSize: "12px", 

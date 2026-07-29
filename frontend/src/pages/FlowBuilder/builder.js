@@ -30,6 +30,8 @@ import {
   Add,
   Close,
   AccountTree,
+  ViewColumn,
+  MonetizationOn,
 } from "@material-ui/icons";
 
 import ReactFlow, {
@@ -120,6 +122,9 @@ const useStyles = makeStyles((theme) => ({
   paletteBtnMenu: { borderColor: "#7b1fa2", color: "#ce93d8" },
   paletteBtnTransfer: { borderColor: "#ed6c02", color: "#ffb74d" },
   paletteBtnClose: { borderColor: "#d32f2f", color: "#ef9a9a" },
+  paletteBtnKanban: { borderColor: "#2e7d32", color: "#81c784" },
+  paletteBtnPix: { borderColor: "#f57c00", color: "#ffb74d" },
+
   saveBtn: {
     background: "linear-gradient(135deg, #128C7E 0%, #075E54 100%)",
     color: "#fff",
@@ -201,6 +206,8 @@ const nodeColors = {
   menu: { header: "linear-gradient(135deg, #6a1b9a, #4a148c)", border: "#7b1fa2" },
   transfer_queue: { header: "linear-gradient(135deg, #e65100, #bf360c)", border: "#ed6c02" },
   close_ticket: { header: "linear-gradient(135deg, #b71c1c, #7f0000)", border: "#d32f2f" },
+  set_kanban: { header: "linear-gradient(135deg, #1b5e20, #2e7d32)", border: "#4caf50" },
+  pix_payment: { header: "linear-gradient(135deg, #e65100, #f57c00)", border: "#ff9800" },
 };
 
 const NodeIcons = {
@@ -209,6 +216,8 @@ const NodeIcons = {
   menu: <ListAlt style={{ fontSize: 16 }} />,
   transfer_queue: <TransferWithinAStation style={{ fontSize: 16 }} />,
   close_ticket: <CheckCircle style={{ fontSize: 16 }} />,
+  set_kanban: <ViewColumn style={{ fontSize: 16 }} />,
+  pix_payment: <MonetizationOn style={{ fontSize: 16 }} />,
 };
 
 const NodeLabels = {
@@ -217,6 +226,8 @@ const NodeLabels = {
   menu: "Menu de Opções",
   transfer_queue: "Transferir Fila",
   close_ticket: "Encerrar",
+  set_kanban: "Mover Kanban",
+  pix_payment: "Cobrar Pix",
 };
 
 // ─────────────────────────────────────────────
@@ -581,6 +592,8 @@ const FlowBuilderCanvas = () => {
           {[
             { type: "message", icon: <Chat style={{ fontSize: 15 }} />, cls: classes.paletteBtnMsg, label: "+ Mensagem" },
             { type: "menu", icon: <ListAlt style={{ fontSize: 15 }} />, cls: classes.paletteBtnMenu, label: "+ Menu" },
+            { type: "set_kanban", icon: <ViewColumn style={{ fontSize: 15 }} />, cls: classes.paletteBtnKanban, label: "+ Kanban" },
+            { type: "pix_payment", icon: <MonetizationOn style={{ fontSize: 15 }} />, cls: classes.paletteBtnPix, label: "+ Cobrar Pix" },
             { type: "transfer_queue", icon: <TransferWithinAStation style={{ fontSize: 15 }} />, cls: classes.paletteBtnTransfer, label: "+ Transferir" },
             { type: "close_ticket", icon: <CheckCircle style={{ fontSize: 15 }} />, cls: classes.paletteBtnClose, label: "+ Encerrar" },
           ].map(({ type, icon, cls, label }) => (

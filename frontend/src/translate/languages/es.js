@@ -519,7 +519,7 @@ const messages = {
           chats: "Chat Interno",
           financeiro: "Financiero",
           files: "Lista de archivos",
-          prompts: "Open.Ai",
+          prompts: "Prompts",
           reports: "Informes",
           queueIntegration: "Integraciones",
         },

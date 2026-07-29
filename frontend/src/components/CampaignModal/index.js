@@ -283,7 +283,7 @@ const CampaignModal = ({
         placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
         multiline={true}
         variant="outlined"
-        helperText="Utilize variáveis como {nome}, {numero}, {email} ou defina variáveis personalizadas."
+        helperText="Utilize variáveis ({nome}, {numero}, {email}) ou Spintax para randomizar o texto: {Olá|Oi|Tudo bem}"
         disabled={!campaignEditable && campaign.status !== "CANCELADA"}
       />
     );

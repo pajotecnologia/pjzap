@@ -507,7 +507,7 @@ const messages = {
 			chats: "Internal Chat",
 			financeiro: "Financial",
 			files: "File list",
-			prompts: "Open.Ai",
+			prompts: "Prompts",
 			reports: "Reports",
 			queueIntegration: "Integrations",
 		  },

@@ -77,35 +77,53 @@ export const ClosedAllOpenTickets = async (companyId: number): Promise<void> => 
         //mensagem de encerramento por inatividade
         const bodyExpiresMessageInactive = formatBody(`\u200e ${expiresInactiveMessage}`, showTicket.contact);
 
-        const dataLimite = new Date()
+        const dataLimite = new Date();
         dataLimite.setMinutes(dataLimite.getMinutes() - Number(expiresTicket));
 
+        // Data intermediária para mensagem de Follow-up (Reengajamento automático)
+        const dataMetadeTempo = new Date();
+        dataMetadeTempo.setMinutes(dataMetadeTempo.getMinutes() - Math.floor(Number(expiresTicket) / 2));
+
         if (showTicket.status === "open" && !showTicket.isGroup) {
+          const dataUltimaInteracaoChamado = new Date(showTicket.updatedAt);
 
-          const dataUltimaInteracaoChamado = new Date(showTicket.updatedAt)
+          // 1. Reengajamento intermediário (Follow-up automático)
+          if (
+            dataUltimaInteracaoChamado < dataMetadeTempo &&
+            showTicket.fromMe &&
+            (showTicket.amountUsedBotQueues === 0 || !showTicket.amountUsedBotQueues)
+          ) {
+            const followUpMsg = formatBody(
+              `\u200e Olá {firstName}, notei que você não respondeu. Ainda podemos dar continuidade ao seu atendimento?`,
+              showTicket.contact
+            );
+            const sentMsg = await SendWhatsAppMessage({ body: followUpMsg, ticket: showTicket });
+            await verifyMessage(sentMsg, showTicket, showTicket.contact);
+            await showTicket.update({ amountUsedBotQueues: 1 });
+          }
 
+          // 2. Encerramento por inatividade após expirar o tempo limite total
           if (dataUltimaInteracaoChamado < dataLimite && showTicket.fromMe) {
-
             closeTicket(showTicket, showTicket.status, bodyExpiresMessageInactive);
 
             if (expiresInactiveMessage !== "" && expiresInactiveMessage !== undefined) {
               const sentMessage = await SendWhatsAppMessage({ body: bodyExpiresMessageInactive, ticket: showTicket });
-
               await verifyMessage(sentMessage, showTicket, showTicket.contact);
             }
 
-            await ticketTraking.update({
-              finishedAt: moment().toDate(),
-              closedAt: moment().toDate(),
-              whatsappId: ticket.whatsappId,
-              userId: ticket.userId,
-            })
+            if (ticketTraking) {
+              await ticketTraking.update({
+                finishedAt: moment().toDate(),
+                closedAt: moment().toDate(),
+                whatsappId: ticket.whatsappId,
+                userId: ticket.userId,
+              });
+            }
 
             io.to("open").emit(`company-${companyId}-ticket`, {
               action: "delete",
               ticketId: showTicket.id
             });
-
           }
         }
       }

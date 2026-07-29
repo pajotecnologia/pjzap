@@ -4,6 +4,7 @@ import {
   BelongsTo,
   Column,
   CreatedAt,
+  Default,
   ForeignKey,
   Model,
   PrimaryKey,
@@ -31,6 +32,10 @@ class Prompt extends Model<Prompt> {
   @AllowNull(false)
   @Column
   apiKey: string;
+
+  @Default("openai")
+  @Column
+  provider: string;
 
   @Column({ defaultValue: 10 })
   maxMessages: number;
