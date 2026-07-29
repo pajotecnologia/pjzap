@@ -233,11 +233,12 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
           initialValues={whatsApp}
           enableReinitialize={true}
           validationSchema={SessionSchema}
-          onSubmit={(values, actions) => {
-            setTimeout(() => {
-              handleSaveWhatsApp(values);
+          onSubmit={async (values, actions) => {
+            try {
+              await handleSaveWhatsApp(values);
+            } finally {
               actions.setSubmitting(false);
-            }, 400);
+            }
           }}
         >
           {({ values, touched, errors, isSubmitting }) => (
@@ -542,4 +543,4 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
   );
 };
 
-export default React.memo(WhatsAppModal);
+export default WhatsAppModal;
