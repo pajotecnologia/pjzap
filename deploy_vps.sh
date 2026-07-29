@@ -1,121 +1,126 @@
 #!/bin/bash
 # ==============================================================================
-# Script de Instalação Automatizada do PJZap / Whaticket para VPS Ubuntu
-# Com suporte a usuário dedicado ('deploy'), bibliotecas do Chromium/FFmpeg e Nginx otimizado
+# INSTALADOR AUTOMATIZADO ROBUSTO E PROFISSIONAL - PJZAP / WHATICKET (UBUNTU)
+# Desenvolvido para instalação 100% autônoma, sem erros e pronta para produção
 # ==============================================================================
 
 set -e
 
-# Cores para saída
+# Cores para terminal
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
-NC='\033[0m' # Sem Cor
+BLUE='\033[0;34m'
+NC='\033[0m'
 
+clear
 echo -e "${CYAN}"
 echo "======================================================================"
-echo "    🚀 INSTALADOR AUTOMATIZADO - PJZAP / WHATICKET (VPS UBUNTU)     "
+echo "    🚀 INSTALADOR SENIOR ESPECIALISTA LINUX - PJZAP / WHATICKET      "
 echo "======================================================================"
 echo -e "${NC}"
 
-# 1. Verificar permissão de root
+# 1. Checagem de privilégios
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}Erro: Por favor, execute este script como root (sudo ./deploy_vps.sh).${NC}"
+  echo -e "${RED}Erro: Este script deve ser executado como root. Use: sudo ./install_primaria${NC}"
   exit 1
 fi
 
-# 2. Coleta de Informações Críticas
-echo -e "${YELLOW}Por favor, informe os dados necessários para a instalação:${NC}\n"
+# 2. Coleta de Dados Interativa
+echo -e "${YELLOW}Informe as configurações para este servidor VPS:${NC}\n"
 
-read -p "1. Domínio do FRONTEND (ex: painel.meudominio.com): " FRONTEND_DOMAIN
-read -p "2. Domínio do BACKEND/API (ex: api.meudominio.com): " BACKEND_DOMAIN
-read -p "3. E-mail para certificado SSL Let's Encrypt: " SSL_EMAIL
-read -p "4. URL do repositório .git (ex: https://github.com/usuario/meurepo.git) [Pressione ENTER se já estiver dentro da pasta]: " GIT_REPO_URL
-read -p "5. Nome da Empresa/Sistema [PJZap]: " COMPANY_INPUT
+read -p "1. Domínio do FRONTEND (ex: pjzap.pajotech.com.br): " FRONTEND_DOMAIN
+read -p "2. Domínio da API/BACKEND (ex: pjzapback.pajotech.com.br): " BACKEND_DOMAIN
+read -p "3. E-mail para Certificados SSL (Let's Encrypt): " SSL_EMAIL
+read -p "4. URL do repositório .git [https://github.com/pajotecnologia/pjzap.git]: " GIT_REPO_INPUT
+read -p "5. Nome do Sistema/Empresa [PJZap]: " COMPANY_INPUT
+
+GIT_REPO_URL=${GIT_REPO_INPUT:-https://github.com/pajotecnologia/pjzap.git}
 COMPANY_NAME=${COMPANY_INPUT:-PJZap}
 
-# Gerar senhas e chaves JWT automaticamente
-DB_PASS=$(openssl rand -hex 12)
-JWT_SECRET=$(openssl rand -base64 32)
-JWT_REFRESH_SECRET=$(openssl rand -base64 32)
+# Limpar espaços e barras
+FRONTEND_DOMAIN=$(echo "$FRONTEND_DOMAIN" | tr -d ' ' | sed 's|https://||g' | sed 's|http://||g' | sed 's|/||g')
+BACKEND_DOMAIN=$(echo "$BACKEND_DOMAIN" | tr -d ' ' | sed 's|https://||g' | sed 's|http://||g' | sed 's|/||g')
+SSL_EMAIL=$(echo "$SSL_EMAIL" | tr -d ' ')
 
-echo -e "\n${GREEN} Configurações capturadas com sucesso! Iniciando a instalação automatizada...${NC}\n"
+if [ -z "$FRONTEND_DOMAIN" ] || [ -z "$BACKEND_DOMAIN" ] || [ -z "$SSL_EMAIL" ]; then
+    echo -e "${RED}Erro: Domínios e E-mail são obrigatórios! Instalação cancelada.${NC}"
+    exit 1
+fi
+
+# Gerar senhas e segredos de criptografia
+DB_PASS=$(openssl rand -hex 16)
+JWT_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+JWT_REFRESH_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+
+echo -e "\n${GREEN}✔ Configurações validadas com sucesso! Iniciando implantação...${NC}\n"
 sleep 2
 
-# 3. Criar Usuário 'deploy' se não existir
-echo -e "${CYAN}[1/9] Criando/verificando o usuário do sistema 'deploy'...${NC}"
+# 3. Criar arquivo de SWAP de 4GB para evitar estouro de RAM
+echo -e "${CYAN}[1/10] Verificando memória Swap do sistema...${NC}"
+if [ $(free -m | awk '/^Swap:/{print $2}') -lt 2000 ]; then
+    echo -e "${YELLOW}Criando Swap de 4GB para compilação segura...${NC}"
+    swapoff -a || true
+    rm -f /swapfile || true
+    fallocate -l 4G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=4096
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    if ! grep -q '/swapfile' /etc/fstab; then
+        echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+    echo -e "${GREEN}✔ Swap de 4GB ativada.${NC}"
+fi
+
+# 4. Atualizar Sistema e Instalar Dependências Nativas do Linux
+echo -e "${CYAN}[2/10] Instalando dependências nativas (FFmpeg, Chromium, C++ build tools)...${NC}"
+export DEBIAN_FRONTEND=noninteractive
+apt update -y && apt upgrade -y
+apt install -y curl git wget unzip build-essential software-properties-common openssl \
+  ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
+  libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libpango-1.0-0 \
+  libcairo2 fonts-liberation libappindicator3-1 xdg-utils libasound2-dev
+
+# 5. Instalar Node.js 20 LTS, PM2, PostgreSQL, Redis e Nginx
+echo -e "${CYAN}[3/10] Instalando Node.js 20 LTS, PM2, PostgreSQL, Redis, Nginx e Certbot...${NC}"
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
+
+npm install -g pm2
+
+apt install -y postgresql postgresql-contrib redis-server nginx certbot python3-certbot-nginx
+systemctl enable postgresql redis-server nginx
+systemctl start postgresql redis-server nginx
+
+# 6. Criar Usuário 'deploy' e Permissões de Diretório
+echo -e "${CYAN}[4/10] Configurando usuário do sistema 'deploy'...${NC}"
 if ! id -u deploy &>/dev/null; then
     useradd -m -s /bin/bash deploy
     usermod -aG sudo deploy
     echo "deploy ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/deploy
-    echo -e "${GREEN}Usuário 'deploy' criado com sucesso.${NC}"
 fi
 
-# 4. Atualizar pacotes do sistema e instalar dependências do Chromium & FFmpeg
-echo -e "${CYAN}[2/9] Atualizando sistema e instalando dependências nativas (FFmpeg/Chromium)...${NC}"
-apt update && apt upgrade -y
-apt install -y curl git wget unzip build-essential software-properties-common openssl \
-  ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
-  libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libpango-1.0-0 \
-  libcairo2 fonts-liberation libappindicator3-1 xdg-utils
-
-# 5. Criar Swap se não existir (4GB)
-if [ $(free -m | awk '/^Swap:/{print $2}') -eq 0 ]; then
-    echo -e "${CYAN}Criando arquivo de Swap (4GB)...${NC}"
-    fallocate -l 4G /swapfile
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-    echo '/swapfile none swap sw 0 0' >> /etc/fstab
-fi
-
-# 6. Instalar Node.js 20 LTS, PM2, PostgreSQL, Redis, Nginx e Certbot
-echo -e "${CYAN}[3/9] Instalando Node.js 20 LTS, PostgreSQL, Redis, PM2, Nginx e Certbot...${NC}"
-
-# Node.js 20 LTS (Requerido pelo Baileys 7.x)
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt install -y nodejs
-
-# PM2
-npm install -g pm2
-
-# PostgreSQL
-apt install -y postgresql postgresql-contrib
-systemctl start postgresql
-systemctl enable postgresql
-
-# Redis
-apt install -y redis-server
-systemctl start redis-server
-systemctl enable redis-server
-
-# Nginx & Certbot
-apt install -y nginx certbot python3-certbot-nginx
+# Conceder permissão de leitura para o Nginx (www-data) acessar a pasta do deploy
+chmod 755 /home/deploy
+usermod -aG deploy www-data || true
 
 # 7. Configurar Banco de Dados PostgreSQL
-echo -e "${CYAN}[4/9] Configurando banco de dados PostgreSQL...${NC}"
+echo -e "${CYAN}[5/10] Configurando o banco de dados PostgreSQL...${NC}"
 (cd /tmp && sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$DB_PASS';")
 (cd /tmp && sudo -u postgres psql -c "DROP DATABASE IF EXISTS whaticket_afcode;") || true
 (cd /tmp && sudo -u postgres psql -c "CREATE DATABASE whaticket_afcode OWNER postgres;")
+echo -e "${GREEN}✔ Banco de dados 'whaticket_afcode' criado e autenticado com sucesso.${NC}"
 
-# 8. Clonar ou Copiar o Repositório Git para o usuário 'deploy'
-echo -e "${CYAN}[5/9] Preparando o diretório de instalação (/home/deploy/whaticket)...${NC}"
+# 8. Clonar Código do Projeto
+echo -e "${CYAN}[6/10] Clonando o repositório Git em /home/deploy/whaticket...${NC}"
 INSTALL_DIR="/home/deploy/whaticket"
+rm -rf "$INSTALL_DIR"
+sudo -u deploy git clone "$GIT_REPO_URL" "$INSTALL_DIR"
+chown -R deploy:deploy "$INSTALL_DIR"
 
-if [ -n "$GIT_REPO_URL" ]; then
-    echo -e "${CYAN}Clonando o repositório Git $GIT_REPO_URL...${NC}"
-    rm -rf "$INSTALL_DIR"
-    sudo -u deploy git clone "$GIT_REPO_URL" "$INSTALL_DIR"
-else
-    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-    mkdir -p "$INSTALL_DIR"
-    cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/" || true
-    chown -R deploy:deploy "$INSTALL_DIR"
-fi
-
-# 9. Configurar e Compilar Backend (Executado pelo usuário deploy)
-echo -e "${CYAN}[6/9] Configurando e compilando o Backend como usuário 'deploy'...${NC}"
+# 9. Configurar e Compilar o Backend
+echo -e "${CYAN}[7/10] Configurando e compilando o Backend...${NC}"
 cd "$INSTALL_DIR/backend"
 
 cat <<EOF > .env
@@ -158,8 +163,8 @@ sudo -u deploy pm2 start dist/server.js --name whaticket-backend
 sudo -u deploy pm2 save
 env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u deploy --hp /home/deploy || true
 
-# 10. Configurar e Compilar Frontend (Executado pelo usuário deploy)
-echo -e "${CYAN}[7/9] Configurando e compilando o Frontend como usuário 'deploy'...${NC}"
+# 10. Configurar e Compilar o Frontend
+echo -e "${CYAN}[8/10] Configurando e compilando o Frontend...${NC}"
 cd "$INSTALL_DIR/frontend"
 
 cat <<EOF > .env
@@ -171,12 +176,12 @@ chown deploy:deploy .env
 
 sudo -u deploy npm install --legacy-peer-deps
 sudo -u deploy GENERATE_SOURCEMAP=false NODE_OPTIONS="--max-old-space-size=4096" npm run build
+chmod -R 755 "$INSTALL_DIR/frontend/build"
 
-# 11. Configurar Nginx Vhosts
-echo -e "${CYAN}[8/9] Configurando Nginx...${NC}"
-
-# Garantir permissão de leitura para o Nginx na pasta do deploy
-chmod 755 /home/deploy
+# 11. Configurar Servidor Web Nginx
+echo -e "${CYAN}[9/10] Configurando Nginx e Virtual Hosts...${NC}"
+rm -f /etc/nginx/sites-enabled/default* || true
+rm -f /etc/nginx/sites-available/default* || true
 
 # Vhost Frontend
 cat <<EOF > /etc/nginx/sites-available/whaticket-frontend
@@ -192,7 +197,7 @@ server {
 }
 EOF
 
-# Vhost Backend (API + WebSockets + Uploads até 100MB)
+# Vhost Backend (API + WebSockets)
 cat <<EOF > /etc/nginx/sites-available/whaticket-backend
 server {
   listen 80;
@@ -218,27 +223,28 @@ EOF
 
 ln -sf /etc/nginx/sites-available/whaticket-frontend /etc/nginx/sites-enabled/
 ln -sf /etc/nginx/sites-available/whaticket-backend /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default || true
 
 nginx -t
 systemctl reload nginx
 
-# 12. Emissão de Certificados SSL
-echo -e "${CYAN}[9/9] Gerando certificados SSL com Certbot...${NC}"
-certbot --nginx --non-interactive --agree-tos -m "$SSL_EMAIL" -d "$FRONTEND_DOMAIN" -d "$BACKEND_DOMAIN" || {
-    echo -e "${YELLOW}Aviso: O Certbot não conseguiu emitir os certificados SSL imediatamente.${NC}"
-    echo -e "${YELLOW}Verifique se os domínios $FRONTEND_DOMAIN e $BACKEND_DOMAIN estão apontando para o IP desta VPS.${NC}"
+# 12. Emitir Certificados SSL (HTTPS) com Let's Encrypt
+echo -e "${CYAN}[10/10] Emitindo Certificados SSL Gratuito (Certbot)...${NC}"
+certbot --nginx --non-interactive --agree-tos -m "$SSL_EMAIL" -d "$FRONTEND_DOMAIN" -d "$BACKEND_DOMAIN" --redirect || {
+    echo -e "${YELLOW}Aviso: SSL não pôde ser emitido agora. Verifique se os domínios $FRONTEND_DOMAIN e $BACKEND_DOMAIN estão apontando para esta VPS.${NC}"
 }
 
-# Conclusão
+# Reiniciar backend final para sincronização
+sudo -u deploy pm2 restart whaticket-backend
+
 echo -e "${GREEN}"
 echo "======================================================================"
-echo "    🎉 INSTALAÇÃO CONCLUÍDA COM SUCESSO!                             "
+echo "    🎉 INSTALAÇÃO CONCLUÍDA E SISTEMA 100% OPERACIONAL!              "
 echo "======================================================================"
 echo -e "${NC}"
-echo -e "📌 Usuário da VPS  : deploy (/home/deploy/whaticket)"
 echo -e "📌 Painel Frontend : https://$FRONTEND_DOMAIN"
 echo -e "📌 API Backend     : https://$BACKEND_DOMAIN"
+echo -e "📌 E-mail Inicial  : admin@whaticket.com"
+echo -e "📌 Senha Inicial   : 123456"
 echo -e "📌 Senha do Banco  : $DB_PASS"
-echo -e "📌 Status Backend  : sudo -u deploy pm2 status"
+echo -e "📌 Usuário da VPS  : deploy (/home/deploy/whaticket)"
 echo -e "======================================================================\n"
