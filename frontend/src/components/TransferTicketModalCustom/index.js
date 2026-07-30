@@ -22,6 +22,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
+import { toast } from "react-toastify";
 import useQueues from "../../hooks/useQueues";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
