@@ -2,6 +2,7 @@ import Flow from "../../models/Flow";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import TicketTag from "../../models/TicketTag";
+import Setting from "../../models/Setting";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import SendInstagramMessageService from "../InstagramServices/SendInstagramMessageService";
@@ -67,6 +68,22 @@ const ExecuteFlowService = async ({
       ) || nodes.find((n) => n.type === "trigger" && (!n.keyword || n.keyword === "*"));
 
       if (!triggerNode) continue;
+
+      // 2. Classificar ticket como Lead no CRM se a opcao estiver ativada
+      const autoClassifySetting = await Setting.findOne({
+        where: { key: "autoClassifyFlowBuilderLead", companyId }
+      });
+
+      const isAutoClassifyEnabled = autoClassifySetting ? autoClassifySetting.value === "enabled" : true;
+
+      if (isAutoClassifyEnabled && !ticket.isLead) {
+        const originLabel = ticket.channel === "instagram" ? "FlowBuilder - Instagram" : "FlowBuilder - WhatsApp";
+        await ticket.update({
+          isLead: true,
+          leadOrigin: ticket.leadOrigin || originLabel,
+          leadTemperature: ticket.leadTemperature || "warm"
+        });
+      }
 
       // Encontra próximo nó conectado ao Trigger
       let nextNodeId = triggerNode.targetNodeId;

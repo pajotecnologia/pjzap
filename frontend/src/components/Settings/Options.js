@@ -158,6 +158,9 @@ export default function Options(props) {
   const [sendGreetingMessageOneQueues, setSendGreetingMessageOneQueues] = useState("disabled");
   const [loadingSendGreetingMessageOneQueues, setLoadingSendGreetingMessageOneQueues] = useState(false);
 
+  const [autoClassifyFlowBuilderLead, setAutoClassifyFlowBuilderLead] = useState("enabled");
+  const [loadingAutoClassifyFlowBuilderLead, setLoadingAutoClassifyFlowBuilderLead] = useState(false);
+
   const { update } = useSettings();
 
   useEffect(() => {
@@ -219,6 +222,11 @@ export default function Options(props) {
         setSendGreetingMessageOneQueues(sendGreetingMessageOneQueues.value)
       }	  
 	  
+      const autoClassifyFlowBuilderLeadSetting = settings.find((s) => s.key === "autoClassifyFlowBuilderLead");
+      if (autoClassifyFlowBuilderLeadSetting) {
+        setAutoClassifyFlowBuilderLead(autoClassifyFlowBuilderLeadSetting.value);
+      }
+
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
         setChatbotType(chatbotType.value);
@@ -315,6 +323,17 @@ export default function Options(props) {
     });
 	toast.success("Operação atualizada com sucesso.");
     setLoadingSendGreetingMessageOneQueues(false);
+  }
+
+  async function handleAutoClassifyFlowBuilderLead(value) {
+    setAutoClassifyFlowBuilderLead(value);
+    setLoadingAutoClassifyFlowBuilderLead(true);
+    await update({
+      key: "autoClassifyFlowBuilderLead",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingAutoClassifyFlowBuilderLead(false);
   }
 
   async function handleviewregister(value) {
@@ -693,6 +712,27 @@ export default function Options(props) {
             </Select>
             <FormHelperText>
               {loadingviewgroups && 'Atualizando...'}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+		
+        <Grid xs={12} sm={12} md={12} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id='autoClassifyFlowBuilderLead-label'>
+              Classificar Conversas do FlowBuilder como Lead/CRM Automático?
+            </InputLabel>
+            <Select
+              labelId='autoClassifyFlowBuilderLead-label'
+              value={autoClassifyFlowBuilderLead}
+              onChange={async (e) => {
+                handleAutoClassifyFlowBuilderLead(e.target.value);
+              }}
+            >
+              <MenuItem value={'disabled'}>Desabilitado</MenuItem>
+              <MenuItem value={'enabled'}>Habilitado</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingAutoClassifyFlowBuilderLead && 'Atualizando...'}
             </FormHelperText>
           </FormControl>
         </Grid>
