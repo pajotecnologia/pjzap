@@ -148,7 +148,8 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
         data.whatsappId = selectedWhatsapp
       }
       await api.put(`/tickets/${ticketid}`, data);
-
+      toast.success(i18n.t("transferTicketModal.toasts.success") || "Atendimento transferido com sucesso!");
+      handleClose();
       history.push(`/tickets`);
     } catch (err) {
       setLoading(false);

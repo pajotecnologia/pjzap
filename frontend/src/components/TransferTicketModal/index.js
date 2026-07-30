@@ -70,7 +70,8 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
 				queueId: null,
 				status: "open",
 			});
-			setLoading(false);
+			toast.success(i18n.t("transferTicketModal.toasts.success") || "Atendimento transferido com sucesso!");
+			handleClose();
 			history.push(`/tickets`);
 		} catch (err) {
 			setLoading(false);
