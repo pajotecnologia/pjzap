@@ -359,7 +359,6 @@ const Connections = () => {
       toastError(err);
     }
     setDeletingWhatsApp(null);
-    setConfirmModalOpen(false);
   };
 
   const handleDisconnectWhatsApp = async (whatsAppId) => {
