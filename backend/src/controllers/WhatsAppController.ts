@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
-import { removeWbot, restartWbot } from "../libs/wbot";
+import {
+  clearManualShutdown,
+  markManualShutdown,
+  removeWbot,
+  restartWbot
+} from "../libs/wbot";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
@@ -156,13 +161,22 @@ export const remove = async (
 
   await ShowWhatsAppService(whatsappId, companyId);
 
+  // Sem esta marca o handler de "close" do wbot agenda StartWhatsAppSession
+  // para 2s depois, ou seja, depois do destroy() abaixo — e a sessao volta
+  // apontando para uma linha que nao existe mais.
+  markManualShutdown(+whatsappId);
+
   try {
     await removeWbot(+whatsappId);
   } catch (err) {
     // ignorar erro de deslogue se nao inicializado
   }
 
-  await DeleteWhatsAppService(whatsappId);
+  try {
+    await DeleteWhatsAppService(whatsappId);
+  } finally {
+    clearManualShutdown(+whatsappId);
+  }
 
   const io = getIO();
   io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-whatsapp`, {

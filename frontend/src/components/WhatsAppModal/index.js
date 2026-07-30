@@ -176,9 +176,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
   }, []);
 
   const handleSaveWhatsApp = async (values) => {
+    // status/session/qrcode pertencem ao ciclo de vida da conexao, nao ao
+    // formulario: reenvia-los sobrescreve o estado real da sessao.
     const whatsappData = {
       name: values.name,
-      status: values.status,
       isDefault: Boolean(values.isDefault),
       greetingMessage: values.greetingMessage || "",
       complationMessage: values.complationMessage || "",

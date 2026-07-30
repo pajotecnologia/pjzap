@@ -85,6 +85,21 @@ const retriesQrCodeMap = new Map<number, number>();
 // Contador de tentativas de reconexão para erro 403
 const reconnectAttempts = new Map<number, number>();
 
+// Conexões que o usuário desligou de propósito (desconectar/excluir).
+// Enquanto o id estiver aqui, nenhum reconnect automático é agendado.
+const manualShutdown = new Set<number>();
+
+export const markManualShutdown = (whatsappId: number): void => {
+  manualShutdown.add(whatsappId);
+};
+
+export const clearManualShutdown = (whatsappId: number): void => {
+  manualShutdown.delete(whatsappId);
+};
+
+export const isManualShutdown = (whatsappId: number): boolean =>
+  manualShutdown.has(whatsappId);
+
 export const getWbot = (whatsappId: number): Session => {
   const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
 
@@ -98,18 +113,33 @@ export const removeWbot = async (
   whatsappId: number,
   isLogout = true
 ): Promise<void> => {
-  try {
-    const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
-    if (sessionIndex !== -1) {
-      if (isLogout) {
-        sessions[sessionIndex].logout();
-        sessions[sessionIndex].ws.close();
-      }
+  const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
 
-      sessions.splice(sessionIndex, 1);
+  if (sessionIndex === -1) {
+    return;
+  }
+
+  const session = sessions[sessionIndex];
+
+  try {
+    if (isLogout) {
+      // logout() precisa terminar antes de fechar o socket: fechar por baixo
+      // dele deixa a promise rejeitada sem handler.
+      await session.logout();
     }
   } catch (err) {
     logger.error(err);
+  } finally {
+    try {
+      session.ws.close();
+    } catch (err) {
+      logger.error(err);
+    }
+
+    const currentIndex = sessions.findIndex(s => s.id === whatsappId);
+    if (currentIndex !== -1) {
+      sessions.splice(currentIndex, 1);
+    }
   }
 };
 
@@ -313,6 +343,19 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             const disconect = (lastDisconnect?.error as Boom)?.output?.statusCode;
 
             if (connection === "close") {
+              // Desligamento pedido pelo usuário (desconectar/excluir): apenas
+              // libera a sessão da memória, sem reconectar nem mexer no status
+              // que o controller acabou de gravar. Precisa vir antes de
+              // qualquer outro ramo, inclusive o do 403, que faz return.
+              if (manualShutdown.has(id)) {
+                logger.info(
+                  `Desligamento manual de ${name}: reconnect automatico ignorado.`
+                );
+                reconnectAttempts.delete(id);
+                await removeWbot(id, false);
+                return;
+              }
+
               if (disconect === 403) {
                 logger.warn(`Erro 403 detectado para ${name}. Tentando reconexão inteligente...`);
                 
@@ -345,7 +388,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               }
 
               if (disconect !== DisconnectReason.loggedOut) {
-                removeWbot(id, false);
+                await removeWbot(id, false);
                 setTimeout(() => StartWhatsAppSession(whatsapp, whatsapp.companyId), 2000);
               } else {
                 await whatsapp.update({ status: "PENDING", session: "", number: "" });
@@ -355,7 +398,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   action: "update",
                   session: whatsapp
                 });
-                removeWbot(id, false);
+                await removeWbot(id, false);
                 setTimeout(() => StartWhatsAppSession(whatsapp, whatsapp.companyId), 2000);
               }
             }

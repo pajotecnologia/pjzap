@@ -12,11 +12,16 @@ interface WhatsappData {
   session?: string;
   isDefault?: boolean;
   greetingMessage?: string;
+  farewellMessage?: string;
   complationMessage?: string;
   outOfHoursMessage?: string;
   ratingMessage?: string;
   queueIds?: number[];
   token?: string;
+  channel?: string;
+  facebookPageUserId?: string;
+  facebookUserToken?: string;
+  instagramId?: string;
   //sendIdQueue?: number;
   //timeSendQueue?: number;
   transferQueueId?: number; 
@@ -57,11 +62,16 @@ const UpdateWhatsAppService = async ({
     isDefault,
     session,
     greetingMessage,
+    farewellMessage,
     complationMessage,
     outOfHoursMessage,
     ratingMessage,
     queueIds = [],
     token,
+    channel,
+    facebookPageUserId,
+    facebookUserToken,
+    instagramId,
     transferQueueId,	
     timeToTransfer,	
     promptId,
@@ -121,11 +131,16 @@ const UpdateWhatsAppService = async ({
   if (status !== undefined) updateData.status = status;
   if (session !== undefined) updateData.session = session;
   if (greetingMessage !== undefined) updateData.greetingMessage = greetingMessage;
+  if (farewellMessage !== undefined) updateData.farewellMessage = farewellMessage;
   if (complationMessage !== undefined) updateData.complationMessage = complationMessage;
   if (outOfHoursMessage !== undefined) updateData.outOfHoursMessage = outOfHoursMessage;
   if (ratingMessage !== undefined) updateData.ratingMessage = ratingMessage;
   if (isDefault !== undefined) updateData.isDefault = isDefault;
   if (token !== undefined) updateData.token = token;
+  if (channel !== undefined) updateData.channel = channel;
+  if (facebookPageUserId !== undefined) updateData.facebookPageUserId = facebookPageUserId;
+  if (facebookUserToken !== undefined) updateData.facebookUserToken = facebookUserToken;
+  if (instagramId !== undefined) updateData.instagramId = instagramId;
   if (transferQueueId !== undefined) updateData.transferQueueId = cleanNumber(transferQueueId);
   if (timeToTransfer !== undefined) updateData.timeToTransfer = cleanNumber(timeToTransfer);
   if (promptId !== undefined) updateData.promptId = cleanNumber(promptId);
