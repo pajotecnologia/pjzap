@@ -2166,6 +2166,17 @@ const handleMessage = async (
       return;
     }
 
+    // ── Executar FlowBuilder automatizado se houver fluxo ativo para esta empresa ──
+    if (!msg.key.fromMe && ticket.status !== "open" && !ticket.userId) {
+      try {
+        const ExecuteFlowService = require("../FlowServices/ExecuteFlowService").default;
+        const flowExecuted = await ExecuteFlowService({ ticket, messageBody: bodyMessage, companyId });
+        if (flowExecuted) return;
+      } catch (err) {
+        console.error("Erro ao executar FlowBuilder no WhatsApp:", err);
+      }
+    }
+
     const currentSchedule = await VerifyCurrentSchedule(companyId);
     const scheduleType = await Setting.findOne({
       where: {
