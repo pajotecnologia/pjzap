@@ -551,12 +551,12 @@ const TicketListItemCustom = ({ ticket }) => {
                 <Typography className={classes.contactName}>
                   {truncateText(ticket.contact.name, 21)}
                   {ticket.channel === "instagram" || ticket.whatsapp?.channel === "instagram" ? (
-                    <Tooltip title="Instagram">
+                    <Tooltip title={`Instagram (${ticket.whatsapp?.name || "Meta"})`}>
                       <InstagramIcon className={classes.whatsappIcon} style={{ color: "#e1306c" }} />
                     </Tooltip>
                   ) : (
-                    <Tooltip title="WhatsApp">
-                      <WhatsAppIcon className={classes.whatsappIcon} />
+                    <Tooltip title={`WhatsApp (${ticket.whatsapp?.name || "Conexão"})`}>
+                      <WhatsAppIcon className={classes.whatsappIcon} style={{ color: "#25D366" }} />
                     </Tooltip>
                   )}
                   {ticket.chatbot && (
@@ -595,7 +595,11 @@ const TicketListItemCustom = ({ ticket }) => {
                   {ticket.whatsapp?.name && (
                     <Tooltip title={`Conexão: ${ticket.whatsapp.name}`}>
                       <span className={clsx(classes.tagBadge, classes.connectionBadge)}>
-                        <AndroidIcon className={classes.tagBadgeIcon} />
+                        {ticket.channel === "instagram" || ticket.whatsapp?.channel === "instagram" ? (
+                          <InstagramIcon className={classes.tagBadgeIcon} style={{ color: "#e1306c" }} />
+                        ) : (
+                          <WhatsAppIcon className={classes.tagBadgeIcon} style={{ color: "#25D366" }} />
+                        )}
                         <span className={classes.tagBadgeText}>{ticket.whatsapp.name}</span>
                       </span>
                     </Tooltip>
