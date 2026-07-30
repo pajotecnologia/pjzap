@@ -46,7 +46,7 @@ const UpdateWhatsAppService = async ({
   companyId
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
-    name: Yup.string().min(2),
+    name: Yup.string().min(1),
     status: Yup.string(),
     isDefault: Yup.boolean()
   });
@@ -62,8 +62,6 @@ const UpdateWhatsAppService = async ({
     ratingMessage,
     queueIds = [],
     token,
-    //timeSendQueue,
-    //sendIdQueue = null,
     transferQueueId,	
     timeToTransfer,	
     promptId,
@@ -79,11 +77,20 @@ const UpdateWhatsAppService = async ({
     throw new AppError(err.message);
   }
 
-  const queueIdsList = Array.isArray(queueIds) ? queueIds : [];
-
-  if (queueIdsList.length > 1 && !greetingMessage) {
-    throw new AppError("ERR_WAPP_GREETING_REQUIRED");
+  if (name) {
+    const nameExists = await Whatsapp.findOne({
+      where: {
+        name,
+        id: { [Op.not]: whatsappId },
+        companyId
+      }
+    });
+    if (nameExists) {
+      throw new AppError("ERR_WAPP_NAME_EXISTS");
+    }
   }
+
+  const queueIdsList = Array.isArray(queueIds) ? queueIds : [];
 
   let oldDefaultWhatsapp: Whatsapp | null = null;
 
@@ -107,34 +114,27 @@ const UpdateWhatsAppService = async ({
     return Number(val);
   };
 
-  const parsedTransferQueueId = cleanNumber(transferQueueId);
-  const parsedTimeToTransfer = cleanNumber(timeToTransfer);
-  const parsedPromptId = cleanNumber(promptId);
-  const parsedMaxUseBotQueues = cleanNumber(maxUseBotQueues) ?? 3;
-  const parsedTimeUseBotQueues = cleanNumber(timeUseBotQueues) ?? 0;
-  const parsedExpiresTicket = cleanNumber(expiresTicket) ?? 0;
-
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
-  await whatsapp.update({
-    name,
-    status,
-    session,
-    greetingMessage,
-    complationMessage,
-    outOfHoursMessage,
-    ratingMessage,
-    isDefault,
-    companyId,
-    token,
-    transferQueueId: parsedTransferQueueId,	
-    timeToTransfer: parsedTimeToTransfer,	
-    promptId: parsedPromptId,
-    maxUseBotQueues: parsedMaxUseBotQueues,
-    timeUseBotQueues: parsedTimeUseBotQueues,
-    expiresTicket: parsedExpiresTicket,
-    expiresInactiveMessage
-  });
+  const updateData: any = {};
+  if (name !== undefined) updateData.name = name;
+  if (status !== undefined) updateData.status = status;
+  if (session !== undefined) updateData.session = session;
+  if (greetingMessage !== undefined) updateData.greetingMessage = greetingMessage;
+  if (complationMessage !== undefined) updateData.complationMessage = complationMessage;
+  if (outOfHoursMessage !== undefined) updateData.outOfHoursMessage = outOfHoursMessage;
+  if (ratingMessage !== undefined) updateData.ratingMessage = ratingMessage;
+  if (isDefault !== undefined) updateData.isDefault = isDefault;
+  if (token !== undefined) updateData.token = token;
+  if (transferQueueId !== undefined) updateData.transferQueueId = cleanNumber(transferQueueId);
+  if (timeToTransfer !== undefined) updateData.timeToTransfer = cleanNumber(timeToTransfer);
+  if (promptId !== undefined) updateData.promptId = cleanNumber(promptId);
+  if (maxUseBotQueues !== undefined) updateData.maxUseBotQueues = cleanNumber(maxUseBotQueues) ?? 3;
+  if (timeUseBotQueues !== undefined) updateData.timeUseBotQueues = String(timeUseBotQueues || "0");
+  if (expiresTicket !== undefined) updateData.expiresTicket = cleanNumber(expiresTicket) ?? 0;
+  if (expiresInactiveMessage !== undefined) updateData.expiresInactiveMessage = expiresInactiveMessage;
+
+  await whatsapp.update(updateData);
 
   await AssociateWhatsappQueue(whatsapp, queueIdsList);
 
