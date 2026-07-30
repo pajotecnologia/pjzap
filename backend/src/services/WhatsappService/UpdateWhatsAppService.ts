@@ -114,6 +114,8 @@ const UpdateWhatsAppService = async ({
   const parsedTimeUseBotQueues = cleanNumber(timeUseBotQueues) ?? 0;
   const parsedExpiresTicket = cleanNumber(expiresTicket) ?? 0;
 
+  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+
   await whatsapp.update({
     name,
     status,
