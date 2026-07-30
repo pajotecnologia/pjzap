@@ -300,7 +300,7 @@ const Connections = () => {
   const theme = useTheme();
 
   const { user } = useContext(AuthContext);
-  const { whatsApps, loading } = useContext(WhatsAppsContext);
+  const { whatsApps, loading, fetchWhatsApps } = useContext(WhatsAppsContext);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
@@ -334,7 +334,8 @@ const Connections = () => {
   const handleCloseWhatsAppModal = useCallback(() => {
     setWhatsAppModalOpen(false);
     setSelectedWhatsApp(null);
-  }, [setSelectedWhatsApp, setWhatsAppModalOpen]);
+    if (fetchWhatsApps) fetchWhatsApps();
+  }, [setSelectedWhatsApp, setWhatsAppModalOpen, fetchWhatsApps]);
 
   const handleOpenQrModal = whatsApp => {
     setSelectedWhatsApp(whatsApp);
@@ -355,6 +356,7 @@ const Connections = () => {
     try {
       await api.delete(`/whatsapp/${whatsAppId}`);
       toast.success(i18n.t("connections.toasts.deleted"));
+      if (fetchWhatsApps) fetchWhatsApps();
     } catch (err) {
       toastError(err);
     }
@@ -365,6 +367,7 @@ const Connections = () => {
     try {
       await api.delete(`/whatsappsession/${whatsAppId}`);
       toast.success(i18n.t("connections.toasts.disconnected"));
+      if (fetchWhatsApps) fetchWhatsApps();
     } catch (err) {
       toastError(err);
     }

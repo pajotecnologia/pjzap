@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useReducer, useContext, useCallback } from "react";
 import toastError from "../../errors/toastError";
 
 import api from "../../services/api";
@@ -59,20 +59,21 @@ const useWhatsApps = () => {
 
   const socketManager = useContext(SocketContext);
 
+  const fetchWhatsApps = useCallback(async () => {
+    try {
+      const { data } = await api.get("/whatsapp/?session=0");
+      dispatch({ type: "LOAD_WHATSAPPS", payload: data });
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      toastError(err);
+    }
+  }, []);
+
   useEffect(() => {
     setLoading(true);
-    const fetchSession = async () => {
-      try {
-        const { data } = await api.get("/whatsapp/?session=0");
-        dispatch({ type: "LOAD_WHATSAPPS", payload: data });
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        toastError(err);
-      }
-    };
-    fetchSession();
-  }, []);
+    fetchWhatsApps();
+  }, [fetchWhatsApps]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
@@ -101,7 +102,7 @@ const useWhatsApps = () => {
     };
   }, [socketManager]);
 
-  return { whatsApps, loading };
+  return { whatsApps, loading, fetchWhatsApps };
 };
 
 export default useWhatsApps;
