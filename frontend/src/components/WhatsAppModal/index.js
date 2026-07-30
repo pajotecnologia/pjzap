@@ -57,9 +57,9 @@ const useStyles = makeStyles((theme) => ({
 
 const SessionSchema = Yup.object().shape({
   name: Yup.string()
-    .min(2, "Too Short!")
-    .max(50, "Too Long!")
-    .required("Required"),
+    .min(1, "Muito curto!")
+    .max(100, "Muito longo!")
+    .required("Nome é obrigatório"),
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
@@ -177,20 +177,26 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
 
   const handleSaveWhatsApp = async (values) => {
     const whatsappData = {
-      ...values,
+      name: values.name,
+      status: values.status,
+      isDefault: Boolean(values.isDefault),
+      greetingMessage: values.greetingMessage || "",
+      complationMessage: values.complationMessage || "",
+      outOfHoursMessage: values.outOfHoursMessage || "",
+      ratingMessage: values.ratingMessage || "",
+      token: values.token || "",
+      channel: values.channel || "whatsapp",
+      facebookPageUserId: values.facebookPageUserId || "",
+      facebookUserToken: values.facebookUserToken || "",
       queueIds: selectedQueueIds || [],
       transferQueueId: selectedQueueId ? Number(selectedQueueId) : null,
+      timeToTransfer: values.timeToTransfer ? Number(values.timeToTransfer) : null,
       promptId: selectedPrompt ? Number(selectedPrompt) : null,
       expiresTicket: values.expiresTicket ? Number(values.expiresTicket) : 0,
       maxUseBotQueues: values.maxUseBotQueues ? Number(values.maxUseBotQueues) : 3,
       timeUseBotQueues: values.timeUseBotQueues ? Number(values.timeUseBotQueues) : 0,
+      expiresInactiveMessage: values.expiresInactiveMessage || "",
     };
-    delete whatsappData["queues"];
-    delete whatsappData["session"];
-    delete whatsappData["createdAt"];
-    delete whatsappData["updatedAt"];
-    delete whatsappData["companyId"];
-    delete whatsappData["prompt"];
 
     try {
       if (whatsAppId) {
