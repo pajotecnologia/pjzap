@@ -81,7 +81,7 @@ const UpdateWhatsAppService = async ({
     const nameExists = await Whatsapp.findOne({
       where: {
         name,
-        id: { [Op.ne]: whatsappId },
+        id: { [Op.ne]: Number(whatsappId) },
         companyId
       }
     });
@@ -98,7 +98,7 @@ const UpdateWhatsAppService = async ({
     oldDefaultWhatsapp = await Whatsapp.findOne({
       where: {
         isDefault: true,
-        id: { [Op.ne]: whatsappId },
+        id: { [Op.ne]: Number(whatsappId) },
         companyId
       }
     });
