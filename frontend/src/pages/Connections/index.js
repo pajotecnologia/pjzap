@@ -304,17 +304,9 @@ const Connections = () => {
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const confirmationModalInitialState = {
-    action: "",
-    title: "",
-    message: "",
-    whatsAppId: "",
-    open: false,
-  };
-  const [confirmModalInfo, setConfirmModalInfo] = useState(
-    confirmationModalInitialState
-  );
+  const [deletingWhatsApp, setDeletingWhatsApp] = useState(null);
+  const [disconnectingWhatsApp, setDisconnectingWhatsApp] = useState(null);
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
 
   const handleStartWhatsAppSession = async whatsAppId => {
     try {
@@ -359,42 +351,26 @@ const Connections = () => {
     setWhatsAppModalOpen(true);
   };
 
-  const handleOpenConfirmationModal = (action, whatsAppId) => {
-    if (action === "disconnect") {
-      setConfirmModalInfo({
-        action: action,
-        title: i18n.t("connections.confirmationModal.disconnectTitle"),
-        message: i18n.t("connections.confirmationModal.disconnectMessage"),
-        whatsAppId: whatsAppId,
-      });
-    }
-
-    if (action === "delete") {
-      setConfirmModalInfo({
-        action: action,
-        title: i18n.t("connections.confirmationModal.deleteTitle"),
-        message: i18n.t("connections.confirmationModal.deleteMessage"),
-        whatsAppId: whatsAppId,
-      });
-    }
-    setConfirmModalOpen(true);
-  };
-
-  const handleSubmitConfirmationModal = async () => {
+  const handleDeleteWhatsApp = async (whatsAppId) => {
     try {
-      if (confirmModalInfo.action === "disconnect") {
-        await api.delete(`/whatsappsession/${confirmModalInfo.whatsAppId}`);
-        toast.success(i18n.t("connections.toasts.disconnected"));
-      }
-      if (confirmModalInfo.action === "delete") {
-        await api.delete(`/whatsapp/${confirmModalInfo.whatsAppId}`);
-        toast.success(i18n.t("connections.toasts.deleted"));
-      }
+      await api.delete(`/whatsapp/${whatsAppId}`);
+      toast.success(i18n.t("connections.toasts.deleted"));
     } catch (err) {
       toastError(err);
     }
-    setConfirmModalInfo(confirmationModalInitialState);
+    setDeletingWhatsApp(null);
     setConfirmModalOpen(false);
+  };
+
+  const handleDisconnectWhatsApp = async (whatsAppId) => {
+    try {
+      await api.delete(`/whatsappsession/${whatsAppId}`);
+      toast.success(i18n.t("connections.toasts.disconnected"));
+    } catch (err) {
+      toastError(err);
+    }
+    setDisconnectingWhatsApp(null);
+    setDisconnectModalOpen(false);
   };
 
   const renderCardActions = whatsApp => {
@@ -449,7 +425,7 @@ const Connections = () => {
             className={classes.dangerButton}
             startIcon={<SignalCellularConnectedNoInternet0Bar />}
             onClick={() => {
-              handleOpenConfirmationModal("disconnect", whatsApp.id);
+              setDisconnectingWhatsApp(whatsApp);
             }}
             fullWidth
           >
@@ -491,12 +467,30 @@ const Connections = () => {
   return (
     <MainContainer>
       <ConfirmationModal
-        title={confirmModalInfo.title}
-        open={confirmModalOpen}
-        onClose={() => setConfirmModalOpen(false)}
-        onConfirm={handleSubmitConfirmationModal}
+        title={
+          deletingWhatsApp &&
+          `${i18n.t("connections.confirmationModal.deleteTitle")} ${
+            deletingWhatsApp.name
+          }?`
+        }
+        open={Boolean(deletingWhatsApp)}
+        onClose={() => setDeletingWhatsApp(null)}
+        onConfirm={() => handleDeleteWhatsApp(deletingWhatsApp?.id)}
       >
-        {confirmModalInfo.message}
+        {i18n.t("connections.confirmationModal.deleteMessage")}
+      </ConfirmationModal>
+      <ConfirmationModal
+        title={
+          disconnectingWhatsApp &&
+          `${i18n.t("connections.confirmationModal.disconnectTitle")} ${
+            disconnectingWhatsApp.name
+          }?`
+        }
+        open={Boolean(disconnectingWhatsApp)}
+        onClose={() => setDisconnectingWhatsApp(null)}
+        onConfirm={() => handleDisconnectWhatsApp(disconnectingWhatsApp?.id)}
+      >
+        {i18n.t("connections.confirmationModal.disconnectMessage")}
       </ConfirmationModal>
       <QrcodeModal
         open={qrModalOpen}
@@ -635,7 +629,7 @@ const Connections = () => {
                                 <Button
                                   size="small"
                                   startIcon={<DeleteOutline />}
-                                  onClick={() => handleOpenConfirmationModal("delete", whatsApp.id)}
+                                  onClick={() => setDeletingWhatsApp(whatsApp)}
                                   color="secondary"
                                 >
                                   Excluir
