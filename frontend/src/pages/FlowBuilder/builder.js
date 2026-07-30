@@ -316,6 +316,16 @@ const CustomNode = ({ data, selected }) => {
             {data.queueName || "Selecionar fila..."}
           </div>
         )}
+        {data.type === "set_kanban" && (
+          <div style={{ color: "#2e7d32", fontWeight: 600 }}>
+            {data.tagName ? `📌 Kanban: ${data.tagName}` : "Selecionar coluna do Kanban..."}
+          </div>
+        )}
+        {data.type === "pix_payment" && (
+          <div style={{ color: "#e65100", fontWeight: 600 }}>
+            {data.pixValue ? `💳 Pix: R$ ${Number(data.pixValue).toFixed(2)}` : "Configurar cobrança Pix..."}
+          </div>
+        )}
         {data.type === "close_ticket" && (
           <div style={{ color: "#b71c1c", textAlign: "center", padding: "4px 0" }}>
             ✅ Encerra o ticket automaticamente
@@ -399,6 +409,7 @@ const FlowBuilderCanvas = () => {
 
   const [flow, setFlow] = useState(null);
   const [queues, setQueues] = useState([]);
+  const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -434,6 +445,13 @@ const FlowBuilderCanvas = () => {
 
         const { data: queueData } = await api.get("/queue");
         setQueues(queueData);
+
+        try {
+          const { data: tagData } = await api.get("/tags/list");
+          setTags(Array.isArray(tagData) ? tagData : tagData?.tags || []);
+        } catch (e) {
+          console.error("Erro ao carregar tags do Kanban", e);
+        }
       } catch (err) {
         console.error(err);
         toast.error("Erro ao carregar dados do fluxo.");
@@ -803,6 +821,57 @@ const FlowBuilderCanvas = () => {
                   ))}
                 </Select>
               </FormControl>
+            )}
+
+            {selectedNode.data.type === "set_kanban" && (
+              <FormControl variant="outlined" size="small" fullWidth className={classes.drawerField}>
+                <InputLabel>Selecione a Coluna do Kanban (Tag)</InputLabel>
+                <Select
+                  label="Selecione a Coluna do Kanban (Tag)"
+                  value={selectedNode.data.tagId || ""}
+                  onChange={(e) => {
+                    const tag = tags.find((t) => t.id === e.target.value);
+                    updateSelectedNodeData("tagId", e.target.value);
+                    updateSelectedNodeData("tagName", tag?.name || "");
+                  }}
+                  MenuProps={{ PaperProps: { style: { backgroundColor: "#1e1e2e", color: "#e0e0e0" } } }}
+                >
+                  {tags.map((t) => (
+                    <MenuItem key={t.id} value={t.id} style={{ color: "#e0e0e0" }}>
+                      <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: t.color || "#888", display: "inline-block", marginRight: 8 }} />
+                      {t.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {selectedNode.data.type === "pix_payment" && (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Valor do Pix (R$)"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  type="number"
+                  className={classes.drawerField}
+                  value={selectedNode.data.pixValue || ""}
+                  onChange={(e) => updateSelectedNodeData("pixValue", e.target.value)}
+                  helperText="Exemplo: 50.00"
+                />
+                <TextField
+                  label="Chave / Copia e Cola Pix"
+                  variant="outlined"
+                  size="small"
+                  multiline
+                  rows={3}
+                  fullWidth
+                  className={classes.drawerField}
+                  value={selectedNode.data.pixCopyPaste || ""}
+                  onChange={(e) => updateSelectedNodeData("pixCopyPaste", e.target.value)}
+                  helperText="Cole o código Pix Copia e Cola completo"
+                />
+              </Box>
             )}
 
             {selectedNode.data.type === "close_ticket" && (
