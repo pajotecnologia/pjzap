@@ -1,4 +1,5 @@
 import Whatsapp from "../../models/Whatsapp";
+import Ticket from "../../models/Ticket";
 import AppError from "../../errors/AppError";
 
 const DeleteWhatsAppService = async (id: string): Promise<void> => {
@@ -9,6 +10,11 @@ const DeleteWhatsAppService = async (id: string): Promise<void> => {
   if (!whatsapp) {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
+
+  await Ticket.update(
+    { whatsappId: null },
+    { where: { whatsappId: id } }
+  );
 
   await whatsapp.$set("queues", []);
   await whatsapp.destroy();

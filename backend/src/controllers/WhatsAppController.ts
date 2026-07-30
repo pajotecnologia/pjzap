@@ -156,8 +156,13 @@ export const remove = async (
 
   await ShowWhatsAppService(whatsappId, companyId);
 
+  try {
+    await removeWbot(+whatsappId);
+  } catch (err) {
+    // ignorar erro de deslogue se nao inicializado
+  }
+
   await DeleteWhatsAppService(whatsappId);
-  removeWbot(+whatsappId);
 
   const io = getIO();
   io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-whatsapp`, {
