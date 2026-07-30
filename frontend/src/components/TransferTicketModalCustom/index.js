@@ -130,23 +130,22 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
     if (!selectedQueue || selectedQueue === "") return;
     setLoading(true);
     try {
-      let data = {};
+      let data = {
+        status: "pending"
+      };
 
       if (selectedUser) {
         data.userId = selectedUser.id;
+      } else {
+        data.userId = null;
       }
 
       if (selectedQueue && selectedQueue !== null) {
         data.queueId = selectedQueue;
-
-        if (!selectedUser) {
-          data.status = "pending";
-          data.userId = null;
-        }
       }
 
       if (selectedWhatsapp) {
-        data.whatsappId = selectedWhatsapp
+        data.whatsappId = selectedWhatsapp;
       }
       await api.put(`/tickets/${ticketid}`, data);
       toast.success(i18n.t("transferTicketModal.toasts.success") || "Atendimento transferido com sucesso!");

@@ -69,7 +69,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
 			await api.put(`/tickets/${ticketid}`, {
 				userId: selectedUser.id,
 				queueId: null,
-				status: "open",
+				status: "pending",
 			});
 			toast.success(i18n.t("transferTicketModal.toasts.success") || "Atendimento transferido com sucesso!");
 			handleClose();
