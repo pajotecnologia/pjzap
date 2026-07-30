@@ -207,10 +207,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
         await api.post("/whatsapp", whatsappData);
       }
       toast.success(i18n.t("whatsappModal.success"));
+      handleClose();
     } catch (err) {
       toastError(err);
     }
-    handleClose();
   };
 
   const handleChangeQueue = (e) => {
