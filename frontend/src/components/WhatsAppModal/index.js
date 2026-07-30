@@ -198,9 +198,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
       expiresInactiveMessage: values.expiresInactiveMessage || "",
     };
 
+    const targetWhatsAppId = whatsAppId || whatsAppData?.id || whatsApp?.id;
+
     try {
-      if (whatsAppId) {
-        await api.put(`/whatsapp/${whatsAppId}`, whatsappData);
+      if (targetWhatsAppId) {
+        await api.put(`/whatsapp/${targetWhatsAppId}`, whatsappData);
       } else {
         await api.post("/whatsapp", whatsappData);
       }
