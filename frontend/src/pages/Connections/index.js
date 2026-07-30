@@ -381,24 +381,18 @@ const Connections = () => {
   };
 
   const handleSubmitConfirmationModal = async () => {
-    if (confirmModalInfo.action === "disconnect") {
-      try {
+    try {
+      if (confirmModalInfo.action === "disconnect") {
         await api.delete(`/whatsappsession/${confirmModalInfo.whatsAppId}`);
         toast.success(i18n.t("connections.toasts.disconnected"));
-      } catch (err) {
-        toastError(err);
       }
-    }
-
-    if (confirmModalInfo.action === "delete") {
-      try {
+      if (confirmModalInfo.action === "delete") {
         await api.delete(`/whatsapp/${confirmModalInfo.whatsAppId}`);
         toast.success(i18n.t("connections.toasts.deleted"));
-      } catch (err) {
-        toastError(err);
       }
+    } catch (err) {
+      toastError(err);
     }
-
     setConfirmModalInfo(confirmationModalInitialState);
     setConfirmModalOpen(false);
   };
