@@ -19,137 +19,143 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import ColorModeContext from "../../layout/themeContext";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: theme.palette.type === 'dark' 
-      ? 'radial-gradient(circle at 15% 15%, #1E293B 0%, #0F172A 70%, #020617 100%)' 
-      : 'radial-gradient(circle at 15% 15%, #ECFDF5 0%, #F1F5F9 50%, #E2E8F0 100%)',
-    position: 'relative',
-    overflow: 'hidden',
-    padding: theme.spacing(2),
-  },
-  loginContainer: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 420,
-    zIndex: 1,
-  },
-  loginCard: {
-    padding: theme.spacing(5, 4, 4),
-    borderRadius: 24,
-    backdropFilter: 'blur(16px)',
-    background: theme.palette.type === 'dark'
-      ? 'rgba(30, 41, 59, 0.85)'
-      : 'rgba(255, 255, 255, 0.95)',
-    boxShadow: theme.palette.type === 'dark'
-      ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-      : '0 25px 50px -12px rgba(16, 185, 129, 0.12)',
-    border: theme.palette.type === 'dark'
-      ? '1px solid rgba(255, 255, 255, 0.08)'
-      : '1px solid rgba(226, 232, 240, 0.8)',
-    textAlign: 'center',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  },
-  logoContainer: {
-    width: 90,
-    height: 90,
-    margin: '0 auto -45px',
-    borderRadius: '22px',
-    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 12px 24px rgba(16, 185, 129, 0.3)',
-    border: '4px solid ' + (theme.palette.type === 'dark' ? '#0F172A' : '#FFFFFF'),
-    position: 'relative',
-    zIndex: 2,
-    '& img': {
-      width: '65%',
-      height: 'auto',
-      objectFit: 'contain',
-    }
-  },
-  formTitle: {
-    margin: theme.spacing(4, 0, 1),
-    color: theme.palette.text.primary,
-    fontWeight: 700,
-    fontSize: '1.5rem',
-    letterSpacing: '-0.02em',
-  },
-  formSubtitle: {
-    color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
-    marginBottom: theme.spacing(3),
-    fontSize: '0.875rem',
-  },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(2),
-  },
-  inputField: {
-    marginBottom: theme.spacing(2.5),
-    '& .MuiOutlinedInput-root': {
-      borderRadius: 12,
-      backgroundColor: theme.palette.type === 'dark' ? 'rgba(15, 23, 42, 0.6)' : '#F8FAFC',
-      '& fieldset': {
-        borderColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#E2E8F0',
-      },
-      '&:hover fieldset': {
-        borderColor: theme.palette.primary.main,
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: theme.palette.primary.main,
-        borderWidth: 2,
-      },
+const useStyles = makeStyles((theme) => {
+  const primary = theme.palette.primary?.main || "#10B981";
+  const secondary = theme.palette.secondary?.main || "#6366F1";
+  return {
+    root: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: theme.palette.type === 'dark' 
+        ? 'radial-gradient(circle at 15% 15%, #1E293B 0%, #0F172A 70%, #020617 100%)' 
+        : `radial-gradient(circle at 15% 15%, ${primary}15 0%, #F1F5F9 50%, #E2E8F0 100%)`,
+      position: 'relative',
+      overflow: 'hidden',
+      padding: theme.spacing(2),
     },
-    '& .MuiInputLabel-root': {
+    loginContainer: {
+      position: 'relative',
+      width: '100%',
+      maxWidth: 420,
+      zIndex: 1,
+    },
+    loginCard: {
+      padding: theme.spacing(5, 4, 4),
+      borderRadius: 24,
+      backdropFilter: 'blur(16px)',
+      background: theme.palette.type === 'dark'
+        ? 'rgba(30, 41, 59, 0.85)'
+        : 'rgba(255, 255, 255, 0.95)',
+      boxShadow: theme.palette.type === 'dark'
+        ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+        : `0 25px 50px -12px ${primary}25`,
+      border: theme.palette.type === 'dark'
+        ? '1px solid rgba(255, 255, 255, 0.08)'
+        : '1px solid rgba(226, 232, 240, 0.8)',
+      textAlign: 'center',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    },
+    logoContainer: {
+      width: 90,
+      height: 90,
+      margin: '0 auto -45px',
+      borderRadius: '22px',
+      background: `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: `0 12px 24px ${primary}40`,
+      border: '4px solid ' + (theme.palette.type === 'dark' ? '#0F172A' : '#FFFFFF'),
+      position: 'relative',
+      zIndex: 2,
+      '& img': {
+        width: '65%',
+        height: 'auto',
+        objectFit: 'contain',
+      }
+    },
+    formTitle: {
+      margin: theme.spacing(4, 0, 1),
+      color: theme.palette.text.primary,
+      fontWeight: 700,
+      fontSize: '1.5rem',
+      letterSpacing: '-0.02em',
+    },
+    formSubtitle: {
       color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
-      '&.Mui-focused': {
-        color: theme.palette.primary.main,
+      marginBottom: theme.spacing(3),
+      fontSize: '0.875rem',
+    },
+    form: {
+      width: '100%',
+      marginTop: theme.spacing(2),
+    },
+    inputField: {
+      marginBottom: theme.spacing(2.5),
+      '& .MuiOutlinedInput-root': {
+        borderRadius: 12,
+        backgroundColor: theme.palette.type === 'dark' ? 'rgba(15, 23, 42, 0.6)' : '#F8FAFC',
+        '& fieldset': {
+          borderColor: theme.palette.type === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#E2E8F0',
+        },
+        '&:hover fieldset': {
+          borderColor: primary,
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: primary,
+          borderWidth: 2,
+        },
+      },
+      '& .MuiInputLabel-root': {
+        color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
+        '&.Mui-focused': {
+          color: primary,
+        },
       },
     },
-  },
-  submitButton: {
-    margin: theme.spacing(2, 0, 2),
-    padding: theme.spacing(1.5),
-    borderRadius: 12,
-    fontWeight: 600,
-    fontSize: '1rem',
-    textTransform: 'none',
-    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-    color: '#FFFFFF',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-      boxShadow: '0 6px 20px rgba(16, 185, 129, 0.45)',
-      transform: 'translateY(-1px)',
+    submitButton: {
+      margin: theme.spacing(2, 0, 2),
+      padding: theme.spacing(1.5),
+      borderRadius: 12,
+      fontWeight: 600,
+      fontSize: '1rem',
+      textTransform: 'none',
+      boxShadow: `0 4px 14px ${primary}40`,
+      background: `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`,
+      color: '#FFFFFF',
+      transition: 'all 0.2s ease',
+      '&:hover': {
+        background: `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`,
+        opacity: 0.9,
+        boxShadow: `0 6px 20px ${primary}60`,
+        transform: 'translateY(-1px)',
+      },
     },
-  },
-  linkText: {
-    color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
-    fontWeight: 500,
-    fontSize: '0.875rem',
-    textDecoration: 'none',
-    transition: 'color 0.2s ease',
-    '&:hover': {
-      color: theme.palette.primary.main,
+    linkText: {
+      color: theme.palette.type === 'dark' ? '#94A3B8' : '#64748B',
+      fontWeight: 500,
+      fontSize: '0.875rem',
+      textDecoration: 'none',
+      transition: 'color 0.2s ease',
+      '&:hover': {
+        color: primary,
+      },
     },
-  },
-  decorativeCircle: {
-    position: 'absolute',
-    borderRadius: '50%',
-    background: theme.palette.type === 'dark' 
-      ? 'radial-gradient(circle, rgba(52, 211, 153, 0.08) 0%, rgba(0,0,0,0) 70%)' 
-      : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0,0,0,0) 70%)',
-    pointerEvents: 'none',
-    zIndex: 0,
-  }
-}));
+    decorativeCircle: {
+      position: 'absolute',
+      borderRadius: '50%',
+      background: theme.palette.type === 'dark' 
+        ? `radial-gradient(circle, ${primary}20 0%, rgba(0,0,0,0) 70%)` 
+        : `radial-gradient(circle, ${primary}25 0%, rgba(0,0,0,0) 70%)`,
+      pointerEvents: 'none',
+      zIndex: 0,
+    }
+  };
+});
 
 const Login = () => {
     const theme = useTheme();
@@ -158,6 +164,7 @@ const Login = () => {
     const [user, setUser] = useState({ email: "", password: "" });
     const [showPassword, setShowPassword] = useState(false);
     const { handleLogin, loading } = useContext(AuthContext);
+    const { setCustomTheme } = useContext(ColorModeContext);
     const [viewregister, setviewregister] = useState('disabled');
 
     const handleChangeInput = (e) => {
@@ -169,8 +176,32 @@ const Login = () => {
     };
 
     useEffect(() => {
+        fetchPublicThemeSettings();
         fetchviewregister();
     }, []);
+
+    const fetchPublicThemeSettings = async () => {
+        try {
+            const [resPrimary, resSecondary, resFont] = await Promise.allSettled([
+                api.get("/settings/primaryColor"),
+                api.get("/settings/secondaryColor"),
+                api.get("/settings/fontSize")
+            ]);
+            const pColor = resPrimary.status === "fulfilled" ? resPrimary.value?.data?.value : null;
+            const sColor = resSecondary.status === "fulfilled" ? resSecondary.value?.data?.value : null;
+            const fSize = resFont.status === "fulfilled" ? resFont.value?.data?.value : null;
+
+            if ((pColor || sColor || fSize) && typeof setCustomTheme === "function") {
+                setCustomTheme({
+                    primaryColor: pColor,
+                    secondaryColor: sColor,
+                    fontSize: fSize
+                });
+            }
+        } catch (error) {
+            console.error("Error retrieving public theme settings", error);
+        }
+    };
 
     const fetchviewregister = async () => {
         try {
