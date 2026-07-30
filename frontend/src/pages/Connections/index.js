@@ -400,6 +400,7 @@ const Connections = () => {
     }
 
     setConfirmModalInfo(confirmationModalInitialState);
+    setConfirmModalOpen(false);
   };
 
   const renderCardActions = whatsApp => {
@@ -498,7 +499,7 @@ const Connections = () => {
       <ConfirmationModal
         title={confirmModalInfo.title}
         open={confirmModalOpen}
-        onClose={setConfirmModalOpen}
+        onClose={() => setConfirmModalOpen(false)}
         onConfirm={handleSubmitConfirmationModal}
       >
         {confirmModalInfo.message}

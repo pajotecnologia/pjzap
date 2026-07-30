@@ -10,6 +10,7 @@ const DeleteWhatsAppService = async (id: string): Promise<void> => {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
 
+  await whatsapp.$set("queues", []);
   await whatsapp.destroy();
 };
 
