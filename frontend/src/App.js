@@ -21,19 +21,49 @@ const App = () => {
     const preferredTheme = window.localStorage.getItem("preferredTheme");
     const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
 
+    const [primaryColor, setPrimaryColor] = useState(
+        window.localStorage.getItem("primaryColor") || "#10B981"
+    );
+    const [secondaryColor, setSecondaryColor] = useState(
+        window.localStorage.getItem("secondaryColor") || "#6366F1"
+    );
+    const [fontSize, setFontSize] = useState(
+        Number(window.localStorage.getItem("fontSize")) || 14
+    );
+
+    const setCustomTheme = React.useCallback(({ primaryColor: newPrimary, secondaryColor: newSecondary, fontSize: newFont }) => {
+        if (newPrimary) {
+            setPrimaryColor(newPrimary);
+            window.localStorage.setItem("primaryColor", newPrimary);
+        }
+        if (newSecondary) {
+            setSecondaryColor(newSecondary);
+            window.localStorage.setItem("secondaryColor", newSecondary);
+        }
+        if (newFont) {
+            setFontSize(Number(newFont));
+            window.localStorage.setItem("fontSize", String(newFont));
+        }
+    }, []);
+
     const colorMode = React.useMemo(
         () => ({
             toggleColorMode: () => {
                 setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
             },
+            setCustomTheme,
+            primaryColor,
+            secondaryColor,
+            fontSize
         }),
-        []
+        [primaryColor, secondaryColor, fontSize, setCustomTheme]
     );
 
     const theme = createTheme(
         {
             typography: {
                 fontFamily: '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: fontSize,
                 h6: {
                     fontWeight: 600,
                     letterSpacing: "-0.02em",
@@ -53,10 +83,10 @@ const App = () => {
                     borderRadius: "6px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                    backgroundColor: mode === "light" ? "rgba(16, 185, 129, 0.4)" : "rgba(52, 211, 153, 0.4)",
+                    backgroundColor: primaryColor,
                     borderRadius: "6px",
                     "&:hover": {
-                        backgroundColor: mode === "light" ? "#10B981" : "#34D399",
+                        backgroundColor: primaryColor,
                     }
                 },
             },
@@ -72,11 +102,11 @@ const App = () => {
             },
             palette: {
                 type: mode,
-                primary: { main: mode === "light" ? "#10B981" : "#34D399" },
-                secondary: { main: mode === "light" ? "#6366F1" : "#818CF8" },
-                quicktags: { main: "#10B981" },
+                primary: { main: primaryColor },
+                secondary: { main: secondaryColor },
+                quicktags: { main: primaryColor },
                 sair: { main: mode === "light" ? "#EF4444" : "#F87171" },
-                vcard: { main: mode === "light" ? "#10B981" : "#64748B" },
+                vcard: { main: primaryColor },
                 textPrimary: mode === "light" ? "#0F172A" : "#F8FAFC",
                 borderPrimary: mode === "light" ? "#E2E8F0" : "rgba(255, 255, 255, 0.08)",
                 dark: { main: mode === "light" ? "#1E293B" : "#F8FAFC" },
@@ -85,7 +115,7 @@ const App = () => {
                 ticketlist: mode === "light" ? "#F8FAFC" : "#0F172A",
                 optionsBackground: mode === "light" ? "#FFFFFF" : "#1E293B",
                 options: mode === "light" ? "#F1F5F9" : "#334155",
-                fontecor: mode === "light" ? "#0F766E" : "#34D399",
+                fontecor: primaryColor,
                 fancyBackground: mode === "light" ? "#F8FAFC" : "#0F172A",
                 bordabox: mode === "light" ? "#E2E8F0" : "rgba(255, 255, 255, 0.08)",
                 newmessagebox: mode === "light" ? "#F1F5F9" : "#1E293B",
@@ -101,7 +131,7 @@ const App = () => {
                 messageIcons: mode === "light" ? "#64748B" : "#94A3B8",
                 inputBackground: mode === "light" ? "#FFFFFF" : "#1E293B",
                 barraSuperior: mode === "light" 
-                    ? "linear-gradient(135deg, #0F766E 0%, #0D9488 50%, #10B981 100%)" 
+                    ? `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` 
                     : "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
                 boxticket: mode === "light" ? "#F1F5F9" : "#1E293B",
                 campaigntab: mode === "light" ? "#F1F5F9" : "#1E293B",
@@ -129,10 +159,8 @@ const App = () => {
         window.localStorage.setItem("preferredTheme", mode);
     }, [mode]);
 
-
-
     return (
-        <ColorModeContext.Provider value={{ colorMode }}>
+        <ColorModeContext.Provider value={{ colorMode, setCustomTheme, primaryColor, secondaryColor, fontSize }}>
             <ThemeProvider theme={theme}>
                 <QueryClientProvider client={queryClient}>
                   <SocketContext.Provider value={SocketManager}>

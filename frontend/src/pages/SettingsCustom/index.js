@@ -11,6 +11,7 @@ import CompaniesManager from "../../components/CompaniesManager";
 import PlansManager from "../../components/PlansManager";
 import HelpsManager from "../../components/HelpsManager";
 import Options from "../../components/Settings/Options";
+import Appearance from "../../components/Settings/Appearance";
 import Uploader from "../../components/Settings/Uploader";
 import NewCompaniesManager from "../../pages/Companies";
 
@@ -167,6 +168,7 @@ const SettingsCustom = () => {
           className={classes.tab}
         >
           <Tab label="Opções" value={"options"} />
+          <Tab label="Aparência" value={"appearance"} />
           {schedulesEnabled && <Tab label="Horários" value={"schedules"} />}
 		  {isSuper() ? <Tab label="Logo" value={"uploader"} /> : null}
           {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
@@ -175,6 +177,9 @@ const SettingsCustom = () => {
           {isSuper() ? <Tab label="Ajuda" value={"helps"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
+          <TabPanel className={classes.container} value={tab} name={"appearance"}>
+            <Appearance />
+          </TabPanel>
           <TabPanel
             className={classes.container}
             value={tab}
