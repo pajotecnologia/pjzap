@@ -894,6 +894,7 @@ const FlowBuilderCanvas = () => {
                   helperText="Cole o código Pix Copia e Cola completo"
                 />
               </Box>
+            )}
             {selectedNode.data.type === "condition" && (
               <Box display="flex" flexDirection="column" gap={2}>
                 <TextField
