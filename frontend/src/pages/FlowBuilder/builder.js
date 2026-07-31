@@ -32,6 +32,8 @@ import {
   AccountTree,
   ViewColumn,
   MonetizationOn,
+  CallSplit,
+  Http,
 } from "@material-ui/icons";
 
 import ReactFlow, {
@@ -124,6 +126,8 @@ const useStyles = makeStyles((theme) => ({
   paletteBtnClose: { borderColor: "#d32f2f", color: "#ef9a9a" },
   paletteBtnKanban: { borderColor: "#2e7d32", color: "#81c784" },
   paletteBtnPix: { borderColor: "#f57c00", color: "#ffb74d" },
+  paletteBtnCondition: { borderColor: "#00acc1", color: "#80deea" },
+  paletteBtnWebhook: { borderColor: "#5c6bc0", color: "#9fa8da" },
 
   saveBtn: {
     background: "linear-gradient(135deg, #128C7E 0%, #075E54 100%)",
@@ -208,6 +212,8 @@ const nodeColors = {
   close_ticket: { header: "linear-gradient(135deg, #b71c1c, #7f0000)", border: "#d32f2f" },
   set_kanban: { header: "linear-gradient(135deg, #1b5e20, #2e7d32)", border: "#4caf50" },
   pix_payment: { header: "linear-gradient(135deg, #e65100, #f57c00)", border: "#ff9800" },
+  condition: { header: "linear-gradient(135deg, #00838f, #006064)", border: "#00acc1" },
+  webhook: { header: "linear-gradient(135deg, #4527a0, #283593)", border: "#5c6bc0" },
 };
 
 const NodeIcons = {
@@ -218,6 +224,8 @@ const NodeIcons = {
   close_ticket: <CheckCircle style={{ fontSize: 16 }} />,
   set_kanban: <ViewColumn style={{ fontSize: 16 }} />,
   pix_payment: <MonetizationOn style={{ fontSize: 16 }} />,
+  condition: <CallSplit style={{ fontSize: 16 }} />,
+  webhook: <Http style={{ fontSize: 16 }} />,
 };
 
 const NodeLabels = {
@@ -228,6 +236,8 @@ const NodeLabels = {
   close_ticket: "Encerrar",
   set_kanban: "Mover Kanban",
   pix_payment: "Cobrar Pix",
+  condition: "Condição (If/Else)",
+  webhook: "Webhook (HTTP)",
 };
 
 // ─────────────────────────────────────────────
@@ -324,6 +334,16 @@ const CustomNode = ({ data, selected }) => {
         {data.type === "pix_payment" && (
           <div style={{ color: "#e65100", fontWeight: 600 }}>
             {data.pixValue ? `💳 Pix: R$ ${Number(data.pixValue).toFixed(2)}` : "Configurar cobrança Pix..."}
+          </div>
+        )}
+        {data.type === "condition" && (
+          <div style={{ color: "#00838f", fontWeight: 600 }}>
+            {data.conditionKeyword ? `🔀 Se contiver: "${data.conditionKeyword}"` : "Configurar condição..."}
+          </div>
+        )}
+        {data.type === "webhook" && (
+          <div style={{ color: "#4527a0", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {data.webhookUrl ? `🌐 POST: ${data.webhookUrl}` : "Configurar URL do Webhook..."}
           </div>
         )}
         {data.type === "close_ticket" && (
@@ -610,6 +630,8 @@ const FlowBuilderCanvas = () => {
           {[
             { type: "message", icon: <Chat style={{ fontSize: 15 }} />, cls: classes.paletteBtnMsg, label: "+ Mensagem" },
             { type: "menu", icon: <ListAlt style={{ fontSize: 15 }} />, cls: classes.paletteBtnMenu, label: "+ Menu" },
+            { type: "condition", icon: <CallSplit style={{ fontSize: 15 }} />, cls: classes.paletteBtnCondition, label: "+ Condição" },
+            { type: "webhook", icon: <Http style={{ fontSize: 15 }} />, cls: classes.paletteBtnWebhook, label: "+ Webhook" },
             { type: "set_kanban", icon: <ViewColumn style={{ fontSize: 15 }} />, cls: classes.paletteBtnKanban, label: "+ Kanban" },
             { type: "pix_payment", icon: <MonetizationOn style={{ fontSize: 15 }} />, cls: classes.paletteBtnPix, label: "+ Cobrar Pix" },
             { type: "transfer_queue", icon: <TransferWithinAStation style={{ fontSize: 15 }} />, cls: classes.paletteBtnTransfer, label: "+ Transferir" },
@@ -870,6 +892,34 @@ const FlowBuilderCanvas = () => {
                   value={selectedNode.data.pixCopyPaste || ""}
                   onChange={(e) => updateSelectedNodeData("pixCopyPaste", e.target.value)}
                   helperText="Cole o código Pix Copia e Cola completo"
+                />
+              </Box>
+            {selectedNode.data.type === "condition" && (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Palavra / Termo para Match (Se contiver)"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  className={classes.drawerField}
+                  value={selectedNode.data.conditionKeyword || ""}
+                  onChange={(e) => updateSelectedNodeData("conditionKeyword", e.target.value)}
+                  helperText="Se a mensagem do cliente contiver este termo, o fluxo avança pelo caminho Verdadeiro."
+                />
+              </Box>
+            )}
+
+            {selectedNode.data.type === "webhook" && (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="URL do Webhook (HTTP POST)"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  className={classes.drawerField}
+                  value={selectedNode.data.webhookUrl || ""}
+                  onChange={(e) => updateSelectedNodeData("webhookUrl", e.target.value)}
+                  helperText="Dispara dados do cliente e ticket via JSON POST para n8n, Make ou sistema próprio."
                 />
               </Box>
             )}

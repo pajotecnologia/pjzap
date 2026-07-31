@@ -73,6 +73,9 @@ const LeadInfoModal = ({ open, onClose, ticket, onSaved }) => {
     leadTemperature: "",
     leadOrigin: "",
     leadClosedAt: "",
+    utmSource: "",
+    utmMedium: "",
+    utmCampaign: "",
   });
 
   useEffect(() => {
@@ -85,6 +88,9 @@ const LeadInfoModal = ({ open, onClose, ticket, onSaved }) => {
         leadClosedAt: ticket.leadClosedAt
           ? new Date(ticket.leadClosedAt).toISOString().split("T")[0]
           : "",
+        utmSource: ticket.utmSource || "",
+        utmMedium: ticket.utmMedium || "",
+        utmCampaign: ticket.utmCampaign || "",
       });
     }
   }, [ticket, open]);
@@ -188,6 +194,47 @@ const LeadInfoModal = ({ open, onClose, ticket, onSaved }) => {
               value={form.leadClosedAt}
               onChange={handleChange("leadClosedAt")}
               InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          {/* 🎯 Rastreamento de Tráfego Pago / UTMs */}
+          <Grid item xs={12}>
+            <Typography className={classes.sectionLabel}>🎯 Rastreamento de Anúncios / UTMs</Typography>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="UTM Source (Fonte)"
+              placeholder="ex: facebook / google"
+              variant="outlined"
+              fullWidth
+              size="small"
+              value={form.utmSource || ""}
+              onChange={handleChange("utmSource")}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="UTM Medium (Meio)"
+              placeholder="ex: cpc / Stories"
+              variant="outlined"
+              fullWidth
+              size="small"
+              value={form.utmMedium || ""}
+              onChange={handleChange("utmMedium")}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="UTM Campaign (Campanha)"
+              placeholder="ex: BlackFriday_2026"
+              variant="outlined"
+              fullWidth
+              size="small"
+              value={form.utmCampaign || ""}
+              onChange={handleChange("utmCampaign")}
             />
           </Grid>
         </Grid>

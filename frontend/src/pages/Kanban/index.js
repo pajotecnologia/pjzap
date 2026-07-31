@@ -219,13 +219,81 @@ const Kanban = () => {
     }
   };
 
+  const totalPipelineValue = Object.values(laneTotals).reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
+  const totalTicketsCount = Object.values(laneQuantities).reduce((sum, q) => sum + (parseInt(q, 10) || 0), 0);
+  const averageTicketValue = totalTicketsCount > 0 ? totalPipelineValue / totalTicketsCount : 0;
+
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val || 0);
+  };
+
   return (
-    <div className={classes.root}>
-      <div className={classes.boardContainer}>
+    <div className={classes.root} style={{ flexDirection: "column" }}>
+      {/* 📊 Dashboard Financeiro do Kanban */}
+      <div style={{
+        display: "flex",
+        gap: "16px",
+        marginBottom: "16px",
+        flexWrap: "wrap",
+        alignItems: "center"
+      }}>
+        <div style={{
+          backgroundColor: "white",
+          borderRadius: "10px",
+          padding: "12px 20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          borderLeft: "4px solid #2e7d32"
+        }}>
+          <span style={{ fontSize: "24px" }}>💰</span>
+          <div>
+            <div style={{ fontSize: "11px", color: "#666", fontWeight: "bold", textTransform: "uppercase" }}>Total em Negócios</div>
+            <div style={{ fontSize: "18px", fontWeight: "bold", color: "#2e7d32" }}>{formatCurrency(totalPipelineValue)}</div>
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: "white",
+          borderRadius: "10px",
+          padding: "12px 20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          borderLeft: "4px solid #1976d2"
+        }}>
+          <span style={{ fontSize: "24px" }}>🎯</span>
+          <div>
+            <div style={{ fontSize: "11px", color: "#666", fontWeight: "bold", textTransform: "uppercase" }}>Oportunidades Ativas</div>
+            <div style={{ fontSize: "18px", fontWeight: "bold", color: "#1976d2" }}>{totalTicketsCount} leads</div>
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: "white",
+          borderRadius: "10px",
+          padding: "12px 20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          borderLeft: "4px solid #9c27b0"
+        }}>
+          <span style={{ fontSize: "24px" }}>📈</span>
+          <div>
+            <div style={{ fontSize: "11px", color: "#666", fontWeight: "bold", textTransform: "uppercase" }}>Ticket Médio</div>
+            <div style={{ fontSize: "18px", fontWeight: "bold", color: "#9c27b0" }}>{formatCurrency(averageTicketValue)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className={classes.boardContainer} style={{ height: "calc(100% - 80px)" }}>
         <Board
           data={file}
           onCardMoveAcrossLanes={handleCardMove}
-          laneStyle={{ maxHeight: "80vh", minWidth: "280px", width: "280px" }}
+          laneStyle={{ maxHeight: "75vh", minWidth: "280px", width: "280px" }}
           cardStyle={{ backgroundColor: "white", padding: "12px", marginBottom: "12px" }}
           hideCardDeleteIcon
           style={{ backgroundColor: 'transparent', height: "100%", fontFamily: "'Roboto', sans-serif" }}

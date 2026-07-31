@@ -32,6 +32,13 @@ interface TicketData {
   integrationId?: number | null;
   promptId?: number | null;
   lastMessage?: string;
+  isLead?: boolean;
+  leadValue?: number;
+  leadTemperature?: string;
+  leadOrigin?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
 }
 
 interface Request {
@@ -254,7 +261,14 @@ const UpdateTicketService = async ({
       whatsappId,
       chatbot,
       queueOptionId,
-      lastMessage: lastMessage !== null ? lastMessage : ticket.lastMessage
+      lastMessage: lastMessage !== null ? lastMessage : ticket.lastMessage,
+      isLead: ticketData.isLead !== undefined ? ticketData.isLead : ticket.isLead,
+      leadValue: ticketData.leadValue !== undefined ? ticketData.leadValue : ticket.leadValue,
+      leadTemperature: ticketData.leadTemperature !== undefined ? ticketData.leadTemperature : ticket.leadTemperature,
+      leadOrigin: ticketData.leadOrigin !== undefined ? ticketData.leadOrigin : ticket.leadOrigin,
+      utmSource: ticketData.utmSource !== undefined ? ticketData.utmSource : ticket.utmSource,
+      utmMedium: ticketData.utmMedium !== undefined ? ticketData.utmMedium : ticket.utmMedium,
+      utmCampaign: ticketData.utmCampaign !== undefined ? ticketData.utmCampaign : ticket.utmCampaign
     });
 
     await ticket.reload();

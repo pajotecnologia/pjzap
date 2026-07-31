@@ -213,6 +213,45 @@ const ExecuteFlowService = async ({
           }
           currentNode = nodes.find((n) => n.id === targetId);
 
+        } else if (currentNode.type === "condition") {
+          const keyword = (currentNode.conditionKeyword || "").toLowerCase().trim();
+          const match = Boolean(keyword && trimmedMsg.includes(keyword));
+          let targetId = match ? currentNode.targetNodeIdTrue : currentNode.targetNodeIdFalse;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "webhook") {
+          if (currentNode.webhookUrl) {
+            try {
+              const axios = require("axios");
+              await axios.post(currentNode.webhookUrl, {
+                contact: ticket.contact,
+                ticket: {
+                  id: ticket.id,
+                  status: ticket.status,
+                  leadValue: ticket.leadValue,
+                  leadTemperature: ticket.leadTemperature,
+                  leadOrigin: ticket.leadOrigin,
+                  utmSource: ticket.utmSource,
+                  utmMedium: ticket.utmMedium,
+                  utmCampaign: ticket.utmCampaign
+                },
+                messageBody
+              }, { timeout: 5000 });
+            } catch (wErr: any) {
+              console.error("Erro ao disparar Webhook no FlowBuilder:", wErr?.message || wErr);
+            }
+          }
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
         } else {
           break;
         }

@@ -174,6 +174,19 @@ class Ticket extends Model<Ticket> {
   @AllowNull(true)
   @Column(DataType.DATE)
   leadClosedAt: Date;
+
+  // ── Rastreamento de Tráfego Pago / UTMs ──────────────
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  utmSource: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  utmMedium: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  utmCampaign: string;
 }
 
 export default Ticket;
