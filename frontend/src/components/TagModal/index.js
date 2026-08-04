@@ -115,7 +115,15 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 	};
 
 	const handleSaveTag = async values => {
-		const tagData = { ...values, userId: user.id, kanban };
+		const tagData = {
+			...values,
+			name: values.name || tag.name,
+			color: values.color || tag.color,
+			userId: user.id,
+			kanban: Number(kanban),
+			msgMsg: values.msgMsg !== undefined ? values.msgMsg : (tag.msgMsg || ""),
+			flowId: values.flowId ? Number(values.flowId) : (tag.flowId ? Number(tag.flowId) : null)
+		};
 		try {
 			if (tagId) {
 				await api.put(`/tags/${tagId}`, tagData);
@@ -204,25 +212,23 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 										margin="dense"
 									/>
 								</div>
-								{(user.profile === "admin" || user.profile === "supervisor") && (
-                                <>
-								<div className={classes.multFieldLine}>
-        							<FormControlLabel
-          								control={
-            								<Checkbox
-             									checked={kanban === 1}
-             									onChange={handleKanbanChange}
-              									value={kanban}
-              									color="primary"
-            								/>
-          								}
-          								label="Kanban"
-          								labelPlacement="start"
-        							/>
-      							</div>
-								{kanban === 1 && (
+								<div className={classes.multFieldLine} style={{ marginTop: 10 }}>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={Boolean(Number(kanban) === 1 || kanban === true)}
+												onChange={handleKanbanChange}
+												color="primary"
+											/>
+										}
+										label="Exibir no Painel Kanban"
+										labelPlacement="start"
+									/>
+								</div>
+
+								{Boolean(Number(kanban) === 1 || kanban === true) && (
 									<>
-									<div className={classes.multFieldLine}>
+									<div className={classes.multFieldLine} style={{ marginTop: 10 }}>
 										<Field
 											as={TextField}
 											label="Mensagem de Automação"
@@ -231,33 +237,31 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 											rows={3}
 											variant="outlined"
 											margin="dense"
-											onChange={(e) => setTag(prev => ({ ...prev, msgMsg: e.target.value }))}
 											fullWidth
-											helperText="Enviada automaticamente ao mover o card para esta coluna."
+											helperText="Texto enviado automaticamente ao cliente ao mover o card para esta coluna."
 										/>
 									</div>
 									<div className={classes.multFieldLine} style={{ marginTop: 10 }}>
-										<Field
-											as={Select}
-											label="Disparar Fluxo"
-											name="flowId"
-											variant="outlined"
-											margin="dense"
-											displayEmpty
-											fullWidth
-											onChange={(e) => setTag(prev => ({ ...prev, flowId: e.target.value }))}
-										>
-											<MenuItem value=""><em>Nenhum fluxo</em></MenuItem>
-											{flows.map(flow => (
-												<MenuItem key={flow.id} value={flow.id}>{flow.name}</MenuItem>
-											))}
-										</Field>
+										<FormControl variant="outlined" margin="dense" fullWidth>
+											<InputLabel id="flow-select-label">Disparar Fluxo do FlowBuilder</InputLabel>
+											<Field
+												as={Select}
+												label="Disparar Fluxo do FlowBuilder"
+												labelId="flow-select-label"
+												name="flowId"
+												displayEmpty
+												fullWidth
+											>
+												<MenuItem value=""><em>Nenhum fluxo</em></MenuItem>
+												{flows.map(flow => (
+													<MenuItem key={flow.id} value={flow.id}>{flow.name}</MenuItem>
+												))}
+											</Field>
+										</FormControl>
 									</div>
 									</>
 								)}
-      							<br />
-                                </>
-								)}
+								<br />
 								{colorPickerModalOpen && (
 									<div>
 										<ColorBox
