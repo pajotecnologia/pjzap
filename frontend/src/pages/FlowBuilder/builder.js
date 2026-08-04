@@ -62,37 +62,55 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100vh - 64px)",
     display: "flex",
     flexDirection: "column",
-    backgroundColor: "#f0f2f5",
+    backgroundColor: "#0f0f1a",
+    overflow: "hidden",
   },
   toolbar: {
-    padding: "10px 20px",
-    backgroundColor: "#1a1a2e",
-    borderBottom: "1px solid #16213e",
+    padding: "6px 14px",
+    backgroundColor: "#161626",
+    borderBottom: "1px solid #252538",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
+    gap: 10,
+    boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
     zIndex: 10,
   },
   toolbarLeft: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
+    flexShrink: 0,
   },
   toolbarCenter: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "center",
+    gap: 5,
+    flexWrap: "wrap",
+    maxWidth: "calc(100vw - 420px)",
+    maxHeight: 76,
+    overflowY: "auto",
+    padding: "2px 0",
+    "&::-webkit-scrollbar": {
+      width: 4,
+      height: 4,
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "rgba(255,255,255,0.2)",
+      borderRadius: 2,
+    },
   },
   toolbarRight: {
     display: "flex",
     alignItems: "center",
     gap: 8,
+    flexShrink: 0,
   },
   flowNameInput: {
     "& input": {
       color: "#ffffff",
-      fontSize: "1.1rem",
+      fontSize: "0.92rem",
       fontWeight: 600,
     },
     "& .MuiInput-underline:before": {
@@ -107,19 +125,21 @@ const useStyles = makeStyles((theme) => ({
   },
   paletteBtn: {
     color: "#fff",
-    border: "1px solid rgba(255,255,255,0.25)",
-    borderRadius: 8,
-    padding: "5px 12px",
-    fontSize: "0.78rem",
+    border: "1px solid rgba(255,255,255,0.2)",
+    borderRadius: 6,
+    padding: "4px 8px",
+    fontSize: "0.72rem",
     fontWeight: 600,
     textTransform: "none",
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     gap: 4,
     cursor: "pointer",
-    transition: "all 0.2s",
+    whiteSpace: "nowrap",
+    transition: "all 0.15s ease-in-out",
     "&:hover": {
       backgroundColor: "rgba(255,255,255,0.12)",
+      transform: "translateY(-1px)",
     },
   },
   paletteBtnMsg: { borderColor: "#1976d2", color: "#64b5f6" },
@@ -137,8 +157,9 @@ const useStyles = makeStyles((theme) => ({
     background: "linear-gradient(135deg, #128C7E 0%, #075E54 100%)",
     color: "#fff",
     fontWeight: 700,
-    padding: "7px 18px",
-    borderRadius: 8,
+    fontSize: "0.78rem",
+    padding: "5px 14px",
+    borderRadius: 6,
     textTransform: "none",
     boxShadow: "0 4px 12px rgba(18,140,126,0.4)",
     "&:hover": {
@@ -150,30 +171,31 @@ const useStyles = makeStyles((theme) => ({
   },
   // Painel lateral de edição
   drawerPaper: {
-    width: 340,
-    padding: 20,
+    width: 320,
+    padding: 16,
     top: "64px",
     height: "calc(100% - 64px)",
-    backgroundColor: "#1e1e2e",
+    backgroundColor: "#161626",
     color: "#e0e0e0",
-    borderLeft: "1px solid #2a2a3e",
+    borderLeft: "1px solid #252538",
   },
   drawerField: {
     "& .MuiOutlinedInput-root": {
       color: "#e0e0e0",
+      fontSize: "0.85rem",
       "& fieldset": { borderColor: "rgba(255,255,255,0.2)" },
       "&:hover fieldset": { borderColor: "rgba(255,255,255,0.5)" },
       "&.Mui-focused fieldset": { borderColor: "#25D366" },
     },
-    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.5)" },
+    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" },
     "& .MuiInputLabel-root.Mui-focused": { color: "#25D366" },
-    "& .MuiFormHelperText-root": { color: "rgba(255,255,255,0.4)" },
-    "& .MuiSelect-root": { color: "#e0e0e0" },
+    "& .MuiFormHelperText-root": { color: "rgba(255,255,255,0.4)", fontSize: "0.75rem" },
+    "& .MuiSelect-root": { color: "#e0e0e0", fontSize: "0.85rem" },
     "& .MuiSelect-icon": { color: "rgba(255,255,255,0.5)" },
   },
   drawerDivider: {
     backgroundColor: "rgba(255,255,255,0.1)",
-    margin: "16px 0",
+    margin: "12px 0",
   },
 }));
 
@@ -181,30 +203,30 @@ const useStyles = makeStyles((theme) => ({
 //  ESTILOS DOS NÓS (inline, para o ReactFlow)
 // ─────────────────────────────────────────────
 const nodeBaseStyle = {
-  borderRadius: 12,
-  boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
-  minWidth: 220,
-  fontSize: 13,
+  borderRadius: 10,
+  boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+  minWidth: 190,
+  fontSize: 12,
   fontFamily: "'Roboto', sans-serif",
 };
 
 const headerStyle = {
   display: "flex",
   alignItems: "center",
-  gap: 6,
-  padding: "10px 14px",
-  borderRadius: "10px 10px 0 0",
+  gap: 5,
+  padding: "7px 10px",
+  borderRadius: "8px 8px 0 0",
   fontWeight: 700,
-  fontSize: 13,
+  fontSize: 12,
   color: "#fff",
 };
 
 const bodyStyle = {
-  padding: "10px 14px 12px",
+  padding: "8px 10px 10px",
   backgroundColor: "#ffffff",
-  borderRadius: "0 0 10px 10px",
+  borderRadius: "0 0 8px 8px",
   color: "#333",
-  fontSize: 12,
+  fontSize: 11,
 };
 
 // Cores por tipo
@@ -501,6 +523,16 @@ const FlowBuilderCanvas = () => {
     };
     fetchData();
   }, [flowId]);
+
+  // ── Centralizar e enquadrar o fluxo na tela automaticamente ao carregar
+  useEffect(() => {
+    if (reactFlowInstance && !loading && nodes.length > 0) {
+      const timer = setTimeout(() => {
+        reactFlowInstance.fitView({ padding: 0.25, duration: 400 });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [reactFlowInstance, loading]);
 
   // ── Conectar nós
   const onConnect = useCallback(
