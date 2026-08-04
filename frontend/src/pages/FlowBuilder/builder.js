@@ -557,6 +557,15 @@ const FlowBuilderCanvas = () => {
     setDrawerOpen(true);
   }, []);
 
+  // ── Clique em uma conexão (linha) → remover a ligação
+  const onEdgeClick = useCallback(
+    (event, edge) => {
+      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+      toast.success("Ligação/Conexão removida!");
+    },
+    [setEdges]
+  );
+
   // ── Fechar painel
   const closeDrawer = () => {
     setDrawerOpen(false);
@@ -722,11 +731,12 @@ const FlowBuilderCanvas = () => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
           onInit={setReactFlowInstance}
           nodeTypes={nodeTypes}
           fitView
           fitViewOptions={{ padding: 0.2 }}
-          deleteKeyCode="Delete"
+          deleteKeyCode={["Delete", "Backspace"]}
           minZoom={0.3}
           maxZoom={2}
           style={{ background: "#0f0f1a" }}
