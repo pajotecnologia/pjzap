@@ -947,6 +947,30 @@ const FlowBuilderCanvas = () => {
               </Box>
             )}
 
+            {selectedNode.data.type === "delay" && (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Tempo de Atraso (em segundos)"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  type="number"
+                  className={classes.drawerField}
+                  value={selectedNode.data.delaySeconds || ""}
+                  onChange={(e) => updateSelectedNodeData("delaySeconds", e.target.value)}
+                  helperText="Tempo em segundos que o sistema aguardará antes de passar para o próximo nó."
+                />
+              </Box>
+            )}
+
+            {selectedNode.data.type === "randomizer" && (
+              <Paper style={{ backgroundColor: "rgba(236,64,122,0.12)", padding: 16, borderRadius: 8, border: "1px solid rgba(236,64,122,0.3)" }}>
+                <Typography variant="body2" style={{ color: "#f48fb1", textAlign: "center" }}>
+                  🎲 Este nó sorteia aleatoriamente entre as saídas conectadas a ele (Teste A/B ou Rodízio).
+                </Typography>
+              </Paper>
+            )}
+
             {selectedNode.data.type === "close_ticket" && (
               <Paper style={{ backgroundColor: "rgba(183,28,28,0.12)", padding: 16, borderRadius: 8, border: "1px solid rgba(183,28,28,0.3)" }}>
                 <Typography variant="body2" style={{ color: "#ef9a9a", textAlign: "center" }}>
