@@ -95,10 +95,37 @@ const ErrorMessage = styled.div`
   border-radius: 8px;
 `;
 
+const LOCAL_VERSION_LOGS = [
+  {
+    version: "Versão 7.0.0 - Lançamento Especial PJZap PRO",
+    changes: [
+      "🤖 <strong>FlowBuilder Avançado</strong>: Adicionados nós de Webhook (HTTP POST), Atraso (Delay), Sorteio (Randomizador A/B), Cobrança Pix e Transição Automática de Kanban.",
+      "🚀 <strong>Motor de Automação Visual</strong>: Execução autônoma integrada aos listeners do WhatsApp e Instagram Direct.",
+      "⚡ <strong>Layout Responsivo FlowBuilder</strong>: Interface compactada com botão de enquadramento automático (fitView) e fontes otimizadas.",
+      "✂️ <strong>Remoção Simplificada de Ligações</strong>: Exclusão de fios com clique direto sobre a linha ou usando as teclas Delete / Backspace.",
+      "📊 <strong>Kanban CRM Automático</strong>: Disparo autônomo de mensagens de saudação ou acionamento de fluxos ao mover cards entre colunas.",
+      "💰 <strong>Dashboard Financeiro no Kanban</strong>: Exibição de faturamento total e ticket médio acumulado por coluna do funil.",
+      "🔗 <strong>Rastreamento de Tráfego (UTMs)</strong>: Captura e exibição de utm_source, utm_medium, utm_campaign, utm_content e utm_term nos cards de leads.",
+      "📱 <strong>Visualização Multicanal</strong>: Ícone do canal (WhatsApp / Instagram) + Nome da Conexão visíveis nos cards dos tickets.",
+      "🔄 <strong>Transferência de Tickets Aprimorada</strong>: Mudança imediata de aba para 'Pendente', desvinculação instantânea do atendente anterior e notificações via WebSockets (react-toastify).",
+      "💳 <strong>Campanhas de Disparo em Massa</strong>: Suporte a envio por Tags do Kanban ou Listas de Contatos com validação estrita de conexão.",
+      "🎨 <strong>Branding & Customização White-Label</strong>: Gerenciamento dinâmico de logotipos, temas claro/escuro, cores primárias/secundárias e tamanho de fonte global."
+    ]
+  },
+  {
+    version: "Versão 6.3.0 - Estabilidade e Performance",
+    changes: [
+      "🔧 Correção e sanitização do gerenciamento de conexões WhatsApp/Baileys.",
+      "⚡ Atualizações em tempo real das mensagens e trocas de abas via WebSockets.",
+      "📁 Suporte estendido para upload e envio de mídias de até 50MB."
+    ]
+  }
+];
+
 const VersionLog = () => {
-  const [versionLog, setVersionLog] = useState([]);
+  const [versionLog, setVersionLog] = useState(LOCAL_VERSION_LOGS);
   const history = useHistory();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
   const [error, setError] = useState(null);
   
@@ -110,25 +137,6 @@ const VersionLog = () => {
       }, 1000);
     }
   }, [user, history]);
-
-  useEffect(() => {
-    const fetchReadme = async () => {
-      try {
-        const response = await axios.get(
-          'https://api.github.com/repos/packtypebot/logs/contents/README.md'
-        );
-        const decodedContent = decodeBase64(response.data.content);
-        const parsedLog = parseVersionLog(decodedContent);
-        setVersionLog(parsedLog);
-        setLoading(false);
-      } catch (error) {
-        setError('Erro ao carregar o log de versões. Por favor, tente novamente mais tarde.');
-        setLoading(false);
-      }
-    };
-
-    fetchReadme();
-  }, []);
 
   const decodeBase64 = (str) => {
     return decodeURIComponent(
