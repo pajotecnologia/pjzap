@@ -38,17 +38,12 @@ import { logger } from "./utils/logger";
 const nodemailer = require('nodemailer');
 const CronJob = require('cron').CronJob;
 
-import RedisMock from "ioredis-mock";
-
-const connection = process.env.REDIS_URI || "";
+const connection = process.env.REDIS_URI || "redis://127.0.0.1:6379";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
 const limiterDuration = process.env.REDIS_OPT_LIMITER_DURATION || 3000;
 
-const mockClient = new RedisMock();
 const bullOpts: any = {
-  createClient: (type: string) => {
-    return mockClient;
-  }
+  redis: connection
 };
 
 interface ProcessCampaignData {

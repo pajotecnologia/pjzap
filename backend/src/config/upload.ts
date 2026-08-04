@@ -46,5 +46,8 @@ export default {
       const fileName = typeArch && typeArch !== "announcements" ? file.originalname.replace('/', '-').replace(/ /g, "_") : new Date().getTime() + '_' + file.originalname.replace('/', '-').replace(/ /g, "_");
       return cb(null, fileName);
     }
-  })
+  }),
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB
+  }
 };

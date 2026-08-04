@@ -15,7 +15,7 @@ interface Request {
 
 interface FlowNode {
   id: string;
-  type: "trigger" | "message" | "menu" | "transfer_queue" | "close_ticket" | "set_kanban" | "pix_payment";
+  type: "trigger" | "message" | "menu" | "transfer_queue" | "close_ticket" | "set_kanban" | "pix_payment" | "condition" | "webhook" | "delay" | "randomizer";
   title?: string;
   content?: string;
   keyword?: string;
@@ -23,6 +23,11 @@ interface FlowNode {
   tagId?: number;
   pixValue?: number;
   pixCopyPaste?: string;
+  conditionKeyword?: string;
+  targetNodeIdTrue?: string;
+  targetNodeIdFalse?: string;
+  webhookUrl?: string;
+  delaySeconds?: number;
   options?: Array<{ id: string; optionNumber: string; text: string; targetNodeId: string }>;
   targetNodeId?: string;
 }
@@ -95,8 +100,15 @@ const ExecuteFlowService = async ({
       if (!nextNodeId) continue;
 
       let currentNode = nodes.find((n) => n.id === nextNodeId);
+      const visitedNodes = new Set<string>();
 
       while (currentNode) {
+        if (visitedNodes.has(currentNode.id)) {
+          console.warn(`[FlowBuilder] Loop infinito detectado no nó ${currentNode.id}. Abortando execução.`);
+          break;
+        }
+        visitedNodes.add(currentNode.id);
+
         if (currentNode.type === "message") {
           let textToSend = currentNode.content || "";
           textToSend = textToSend.replace(/{nome}/gi, ticket.contact.name || "Cliente");
@@ -251,6 +263,26 @@ const ExecuteFlowService = async ({
             targetId = c?.targetNodeId;
           }
           currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "delay") {
+          const ms = (Number(currentNode.delaySeconds) || 1) * 1000;
+          await new Promise(resolve => setTimeout(resolve, ms));
+
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "randomizer") {
+          const outConnections = connections.filter((conn) => conn.sourceNodeId === currentNode?.id);
+          if (outConnections.length > 0) {
+            const randomConn = outConnections[Math.floor(Math.random() * outConnections.length)];
+            currentNode = nodes.find((n) => n.id === randomConn.targetNodeId);
+          } else {
+            break;
+          }
 
         } else {
           break;

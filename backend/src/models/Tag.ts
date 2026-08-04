@@ -9,7 +9,8 @@ import {
   BelongsToMany,
   ForeignKey,
   BelongsTo,
-  HasMany
+  HasMany,
+  DataType
 } from "sequelize-typescript";
 import Company from "./Company";
 import Ticket from "./Ticket";
@@ -49,6 +50,12 @@ class Tag extends Model<Tag> {
 
   @Column
   kanban: number;
+
+  @Column(DataType.TEXT)
+  msgMsg: string;
+
+  @Column
+  flowId: number;
 }
 
 export default Tag;

@@ -34,6 +34,8 @@ import {
   MonetizationOn,
   CallSplit,
   Http,
+  HourglassEmpty,
+  Shuffle,
 } from "@material-ui/icons";
 
 import ReactFlow, {
@@ -128,6 +130,8 @@ const useStyles = makeStyles((theme) => ({
   paletteBtnPix: { borderColor: "#f57c00", color: "#ffb74d" },
   paletteBtnCondition: { borderColor: "#00acc1", color: "#80deea" },
   paletteBtnWebhook: { borderColor: "#5c6bc0", color: "#9fa8da" },
+  paletteBtnDelay: { borderColor: "#ffb300", color: "#ffd54f" },
+  paletteBtnRandom: { borderColor: "#ec407a", color: "#f48fb1" },
 
   saveBtn: {
     background: "linear-gradient(135deg, #128C7E 0%, #075E54 100%)",
@@ -214,6 +218,8 @@ const nodeColors = {
   pix_payment: { header: "linear-gradient(135deg, #e65100, #f57c00)", border: "#ff9800" },
   condition: { header: "linear-gradient(135deg, #00838f, #006064)", border: "#00acc1" },
   webhook: { header: "linear-gradient(135deg, #4527a0, #283593)", border: "#5c6bc0" },
+  delay: { header: "linear-gradient(135deg, #ff8f00, #ffb300)", border: "#ffca28" },
+  randomizer: { header: "linear-gradient(135deg, #c2185b, #d81b60)", border: "#ec407a" },
 };
 
 const NodeIcons = {
@@ -226,6 +232,8 @@ const NodeIcons = {
   pix_payment: <MonetizationOn style={{ fontSize: 16 }} />,
   condition: <CallSplit style={{ fontSize: 16 }} />,
   webhook: <Http style={{ fontSize: 16 }} />,
+  delay: <HourglassEmpty style={{ fontSize: 16 }} />,
+  randomizer: <Shuffle style={{ fontSize: 16 }} />,
 };
 
 const NodeLabels = {
@@ -238,6 +246,8 @@ const NodeLabels = {
   pix_payment: "Cobrar Pix",
   condition: "Condição (If/Else)",
   webhook: "Webhook (HTTP)",
+  delay: "Atraso (Delay)",
+  randomizer: "Sorteio (A/B)",
 };
 
 // ─────────────────────────────────────────────
@@ -344,6 +354,16 @@ const CustomNode = ({ data, selected }) => {
         {data.type === "webhook" && (
           <div style={{ color: "#4527a0", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {data.webhookUrl ? `🌐 POST: ${data.webhookUrl}` : "Configurar URL do Webhook..."}
+          </div>
+        )}
+        {data.type === "delay" && (
+          <div style={{ color: "#ff8f00", fontWeight: 600 }}>
+            {data.delaySeconds ? `⏳ Aguardar: ${data.delaySeconds} seg` : "Configurar atraso..."}
+          </div>
+        )}
+        {data.type === "randomizer" && (
+          <div style={{ color: "#c2185b", fontWeight: 600 }}>
+            🎲 Sorteia um dos caminhos
           </div>
         )}
         {data.type === "close_ticket" && (
@@ -631,6 +651,8 @@ const FlowBuilderCanvas = () => {
             { type: "message", icon: <Chat style={{ fontSize: 15 }} />, cls: classes.paletteBtnMsg, label: "+ Mensagem" },
             { type: "menu", icon: <ListAlt style={{ fontSize: 15 }} />, cls: classes.paletteBtnMenu, label: "+ Menu" },
             { type: "condition", icon: <CallSplit style={{ fontSize: 15 }} />, cls: classes.paletteBtnCondition, label: "+ Condição" },
+            { type: "randomizer", icon: <Shuffle style={{ fontSize: 15 }} />, cls: classes.paletteBtnRandom, label: "+ Sorteio" },
+            { type: "delay", icon: <HourglassEmpty style={{ fontSize: 15 }} />, cls: classes.paletteBtnDelay, label: "+ Atraso" },
             { type: "webhook", icon: <Http style={{ fontSize: 15 }} />, cls: classes.paletteBtnWebhook, label: "+ Webhook" },
             { type: "set_kanban", icon: <ViewColumn style={{ fontSize: 15 }} />, cls: classes.paletteBtnKanban, label: "+ Kanban" },
             { type: "pix_payment", icon: <MonetizationOn style={{ fontSize: 15 }} />, cls: classes.paletteBtnPix, label: "+ Cobrar Pix" },

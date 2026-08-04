@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
@@ -50,6 +50,7 @@ const useStyles = makeStyles(theme => ({
 const Chat = () => {
 	const classes = useStyles();
 	const { ticketId } = useParams();
+	const theme = useTheme();
 
     // Definindo os logos para modo claro e escuro
     const logoLight = `${process.env.REACT_APP_BACKEND_URL}/public/logotipos/interno.png`;

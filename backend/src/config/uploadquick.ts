@@ -43,5 +43,8 @@ export default {
       const fileName = `${new Date().getTime()}_${file.originalname.replace("/", "-")}`;
       return cb(null, fileName);
     }
-  })
+  }),
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB
+  }
 };

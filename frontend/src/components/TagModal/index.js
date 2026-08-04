@@ -76,21 +76,27 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 	const initialState = {
 		name: "",
 		color: "",
-		kanban: 0
+		kanban: 0,
+		msgMsg: "",
+		flowId: ""
 	};
 
 	const [tag, setTag] = useState(initialState);
 	const [ kanban, setKanban] = useState(0);
+	const [flows, setFlows] = useState([]);
 
 	useEffect(() => {
 		try {
 			(async () => {
+				const { data: flowData } = await api.get("/flows");
+				setFlows(flowData.flows || flowData || []);
+				
 				if (!tagId) return;
 
 				const { data } = await api.get(`/tags/${tagId}`);
 				setKanban(data.kanban);
 				setTag(prevState => {
-					return { ...prevState, ...data };
+					return { ...prevState, ...data, msgMsg: data.msgMsg || "", flowId: data.flowId || "" };
 				});
 			})()
 		} catch (err) {
@@ -214,6 +220,41 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
           								labelPlacement="start"
         							/>
       							</div>
+								{kanban === 1 && (
+									<>
+									<div className={classes.multFieldLine}>
+										<Field
+											as={TextField}
+											label="Mensagem de Automação"
+											name="msgMsg"
+											multiline
+											rows={3}
+											variant="outlined"
+											margin="dense"
+											onChange={(e) => setTag(prev => ({ ...prev, msgMsg: e.target.value }))}
+											fullWidth
+											helperText="Enviada automaticamente ao mover o card para esta coluna."
+										/>
+									</div>
+									<div className={classes.multFieldLine} style={{ marginTop: 10 }}>
+										<Field
+											as={Select}
+											label="Disparar Fluxo"
+											name="flowId"
+											variant="outlined"
+											margin="dense"
+											displayEmpty
+											fullWidth
+											onChange={(e) => setTag(prev => ({ ...prev, flowId: e.target.value }))}
+										>
+											<MenuItem value=""><em>Nenhum fluxo</em></MenuItem>
+											{flows.map(flow => (
+												<MenuItem key={flow.id} value={flow.id}>{flow.name}</MenuItem>
+											))}
+										</Field>
+									</div>
+									</>
+								)}
       							<br />
                                 </>
 								)}
