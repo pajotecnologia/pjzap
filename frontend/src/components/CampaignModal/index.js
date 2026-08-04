@@ -74,9 +74,10 @@ const useStyles = makeStyles((theme) => ({
 
 const CampaignSchema = Yup.object().shape({
   name: Yup.string()
-    .min(2, "Too Short!")
-    .max(50, "Too Long!")
-    .required("Required"),
+    .min(3, "Mínimo 3 caracteres")
+    .max(50, "Nome muito longo!")
+    .required("Nome da campanha é obrigatório"),
+  whatsappId: Yup.mixed().required("Selecione uma Conexão do WhatsApp"),
 });
 
 const CampaignModal = ({
@@ -224,8 +225,10 @@ const CampaignModal = ({
       Object.entries(values).forEach(([key, value]) => {
         if (key === "scheduledAt" && value !== "" && value !== null) {
           dataValues[key] = moment(value).format("YYYY-MM-DD HH:mm:ss");
+        } else if (value === "" || value === "Nenhuma") {
+          dataValues[key] = null;
         } else {
-          dataValues[key] = value === "" ? null : value;
+          dataValues[key] = value;
         }
       });
 

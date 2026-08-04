@@ -60,7 +60,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const data = req.body as StoreData;
-  console.log('data------- store:', data);
 
   const schema = Yup.object().shape({
     name: Yup.string().required()
@@ -72,73 +71,56 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  if (typeof data.tagListId === 'number') {
+  const tagIdNum = Number(data.tagListId);
 
-    const tagId = data.tagListId;
+  if (!isNaN(tagIdNum) && tagIdNum > 0) {
+    const tagId = tagIdNum;
     const campanhaNome = data.name;
 
-    async function createContactListFromTag(tagId) {
+    try {
+      const ticketTags = await TicketTag.findAll({ where: { tagId } });
+      const ticketIds = ticketTags.map((ticketTag) => ticketTag.ticketId);
+
+      const tickets = await Ticket.findAll({ where: { id: ticketIds } });
+      const contactIds = tickets.map((ticket) => ticket.contactId);
+
+      const contacts = await Contact.findAll({ where: { id: contactIds } });
 
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
+      const randomName = `${campanhaNome} | TAG: ${tagId} - ${formattedDate}`;
+      const contactList = await ContactList.create({ name: randomName, companyId });
 
-      try {
-        const ticketTags = await TicketTag.findAll({ where: { tagId } });
-        const ticketIds = ticketTags.map((ticketTag) => ticketTag.ticketId);
+      const { id: contactListId } = contactList;
 
-        const tickets = await Ticket.findAll({ where: { id: ticketIds } });
-        const contactIds = tickets.map((ticket) => ticket.contactId);
+      const contactListItems = contacts.map((contact) => ({
+        name: contact.name,
+        number: contact.number,
+        email: contact.email,
+        contactListId,
+        companyId,
+        isWhatsappValid: true,
+      }));
 
-        const contacts = await Contact.findAll({ where: { id: contactIds } });
+      await ContactListItem.bulkCreate(contactListItems);
 
-        const randomName = `${campanhaNome} | TAG: ${tagId} - ${formattedDate}` // Implement your own function to generate a random name
-        const contactList = await ContactList.create({ name: randomName, companyId: companyId });
-
-        const { id: contactListId } = contactList;
-
-        const contactListItems = contacts.map((contact) => ({
-          name: contact.name,
-          number: contact.number,
-          email: contact.email,
-          contactListId,
-          companyId,
-          isWhatsappValid: true,
-
-        }));
-
-        await ContactListItem.bulkCreate(contactListItems);
-
-        // Return the ContactList ID
-        return contactListId;
-      } catch (error) {
-        console.error('Error creating contact list:', error);
-        throw error;
-      }
-    }
-
-
-    createContactListFromTag(tagId)
-      .then(async (contactListId) => {
-        const record = await CreateService({
-          ...data,
-          companyId,
-          contactListId: contactListId,
-        });
-        const io = getIO();
-        io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-campaign`, {
-          action: "create",
-          record
-        });
-        return res.status(200).json(record);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        return res.status(500).json({ error: 'Error creating contact list' });
+      const record = await CreateService({
+        ...data,
+        companyId,
+        contactListId
       });
 
-  } else { // SAI DO CHECK DE TAG
-
-
+      const io = getIO();
+      io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-campaign`, {
+        action: "create",
+        record
+      });
+      return res.status(200).json(record);
+    } catch (error: any) {
+      console.error("Error creating campaign from tag:", error);
+      throw new AppError(error.message || "Erro ao criar lista de contatos por Tag");
+    }
+  } else {
     const record = await CreateService({
       ...data,
       companyId
