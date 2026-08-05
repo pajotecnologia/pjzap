@@ -199,6 +199,37 @@ const useStyles = makeStyles((theme) => ({
   },
   canvas: {
     flex: 1,
+    "& .react-flow__controls": {
+      backgroundColor: "#161626",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.6)",
+      borderRadius: 8,
+      border: "1px solid #252538",
+      overflow: "hidden",
+    },
+    "& .react-flow__controls-button": {
+      backgroundColor: "#161626 !important",
+      borderBottom: "1px solid #252538 !important",
+      color: "#ffffff !important",
+      fill: "#ffffff !important",
+      width: "32px !important",
+      height: "32px !important",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.15s ease",
+      "&:hover": {
+        backgroundColor: "#128C7E !important",
+      },
+      "& svg": {
+        fill: "#ffffff !important",
+        stroke: "#ffffff !important",
+        width: "16px !important",
+        height: "16px !important",
+      },
+      "& path": {
+        fill: "#ffffff !important",
+      },
+    },
   },
   drawerPaper: {
     width: 340,
