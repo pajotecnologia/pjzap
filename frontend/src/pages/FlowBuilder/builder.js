@@ -17,6 +17,12 @@ import {
   FormControl,
   InputLabel,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  InputAdornment,
 } from "@material-ui/core";
 import {
   ArrowBack,
@@ -29,13 +35,20 @@ import {
   CheckCircle,
   Add,
   Close,
-  AccountTree,
   ViewColumn,
   MonetizationOn,
   CallSplit,
   Http,
   HourglassEmpty,
   Shuffle,
+  RadioButtonChecked,
+  FormatListBulleted,
+  ViewCarousel,
+  Code,
+  Security,
+  CenterFocusStrong,
+  Send,
+  Search,
 } from "@material-ui/icons";
 
 import ReactFlow, {
@@ -55,7 +68,7 @@ import "reactflow/dist/style.css";
 import api from "../../services/api";
 
 // ─────────────────────────────────────────────
-//  ESTILOS GERAIS
+//  ESTILOS GERAIS DA PÁGINA E DA PALETA
 // ─────────────────────────────────────────────
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,147 +78,192 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#0f0f1a",
     overflow: "hidden",
   },
-  toolbar: {
-    padding: "6px 14px",
+  header: {
+    padding: "8px 16px",
     backgroundColor: "#161626",
     borderBottom: "1px solid #252538",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 10,
+    gap: 12,
     boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
     zIndex: 10,
   },
-  toolbarLeft: {
+  headerLeft: {
     display: "flex",
     alignItems: "center",
-    gap: 6,
-    flexShrink: 0,
+    gap: 12,
   },
-  toolbarCenter: {
+  headerRight: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-    flexWrap: "wrap",
-    maxWidth: "calc(100vw - 420px)",
-    maxHeight: 76,
-    overflowY: "auto",
-    padding: "2px 0",
-    "&::-webkit-scrollbar": {
-      width: 4,
-      height: 4,
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: "rgba(255,255,255,0.2)",
-      borderRadius: 2,
-    },
-  },
-  toolbarRight: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    flexShrink: 0,
+    gap: 10,
   },
   flowNameInput: {
     "& input": {
       color: "#ffffff",
-      fontSize: "0.92rem",
-      fontWeight: 600,
+      fontSize: "1.05rem",
+      fontWeight: 700,
     },
     "& .MuiInput-underline:before": {
-      borderBottomColor: "rgba(255,255,255,0.3)",
+      borderBottomColor: "rgba(255,255,255,0.2)",
     },
     "& .MuiInput-underline:hover:before": {
-      borderBottomColor: "rgba(255,255,255,0.6)",
+      borderBottomColor: "rgba(255,255,255,0.5)",
     },
     "& .MuiInput-underline:after": {
-      borderBottomColor: "#25D366",
+      borderBottomColor: "#128C7E",
     },
   },
-  paletteBtn: {
-    color: "#fff",
-    border: "1px solid rgba(255,255,255,0.2)",
-    borderRadius: 6,
-    padding: "4px 8px",
-    fontSize: "0.72rem",
-    fontWeight: 600,
-    textTransform: "none",
-    display: "inline-flex",
+  mainContent: {
+    flex: 1,
+    display: "flex",
+    position: "relative",
+    overflow: "hidden",
+  },
+  // Barra Lateral de Componentes (Estilo FlowSender)
+  sidebar: {
+    width: 240,
+    backgroundColor: "#161626",
+    borderRight: "1px solid #252538",
+    display: "flex",
+    flexDirection: "column",
+    zIndex: 5,
+    boxShadow: "2px 0 10px rgba(0,0,0,0.3)",
+  },
+  sidebarHeader: {
+    padding: "12px 16px",
+    borderBottom: "1px solid #252538",
+    display: "flex",
     alignItems: "center",
-    gap: 4,
+    justifyContent: "space-between",
+  },
+  sidebarSearch: {
+    padding: "8px 12px",
+    "& .MuiOutlinedInput-root": {
+      color: "#fff",
+      fontSize: "0.8rem",
+      backgroundColor: "#0f0f1a",
+      borderRadius: 8,
+      "& fieldset": { borderColor: "rgba(255,255,255,0.15)" },
+      "&:hover fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+      "&.Mui-focused fieldset": { borderColor: "#128C7E" },
+    },
+  },
+  sidebarScroll: {
+    flex: 1,
+    overflowY: "auto",
+    padding: "8px 12px 20px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    "&::-webkit-scrollbar": { width: 4 },
+    "&::-webkit-scrollbar-thumb": { backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 2 },
+  },
+  categoryTitle: {
+    fontSize: "0.72rem",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: "0.6px",
+    color: "rgba(255,255,255,0.4)",
+    marginBottom: 8,
+  },
+  paletteCard: {
+    backgroundColor: "#1e1e32",
+    borderRadius: 8,
+    padding: "8px 10px",
+    border: "1px solid rgba(255,255,255,0.08)",
     cursor: "pointer",
-    whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
     transition: "all 0.15s ease-in-out",
     "&:hover": {
-      backgroundColor: "rgba(255,255,255,0.12)",
-      transform: "translateY(-1px)",
+      backgroundColor: "#272742",
+      transform: "translateX(2px)",
+      borderColor: "rgba(255,255,255,0.25)",
+      boxShadow: "0 3px 8px rgba(0,0,0,0.3)",
     },
   },
-  paletteBtnMsg: { borderColor: "#1976d2", color: "#64b5f6" },
-  paletteBtnMenu: { borderColor: "#7b1fa2", color: "#ce93d8" },
-  paletteBtnTransfer: { borderColor: "#ed6c02", color: "#ffb74d" },
-  paletteBtnClose: { borderColor: "#d32f2f", color: "#ef9a9a" },
-  paletteBtnKanban: { borderColor: "#2e7d32", color: "#81c784" },
-  paletteBtnPix: { borderColor: "#f57c00", color: "#ffb74d" },
-  paletteBtnCondition: { borderColor: "#00acc1", color: "#80deea" },
-  paletteBtnWebhook: { borderColor: "#5c6bc0", color: "#9fa8da" },
-  paletteBtnDelay: { borderColor: "#ffb300", color: "#ffd54f" },
-  paletteBtnRandom: { borderColor: "#ec407a", color: "#f48fb1" },
-
+  paletteIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 6,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    flexShrink: 0,
+  },
+  paletteLabel: {
+    fontSize: "0.82rem",
+    fontWeight: 600,
+    color: "#e0e0e0",
+  },
+  canvas: {
+    flex: 1,
+  },
+  // Painel lateral de edição ("Configurar Node")
+  drawerPaper: {
+    width: 340,
+    padding: 18,
+    top: "64px",
+    height: "calc(100% - 64px)",
+    backgroundColor: "#161626",
+    color: "#e0e0e0",
+    borderLeft: "1px solid #252538",
+    boxShadow: "-4px 0 20px rgba(0,0,0,0.4)",
+    overflowY: "auto",
+  },
+  drawerField: {
+    marginBottom: 14,
+    "& .MuiOutlinedInput-root": {
+      color: "#e0e0e0",
+      fontSize: "0.85rem",
+      backgroundColor: "#0f0f1a",
+      "& fieldset": { borderColor: "rgba(255,255,255,0.2)" },
+      "&:hover fieldset": { borderColor: "rgba(255,255,255,0.4)" },
+      "&.Mui-focused fieldset": { borderColor: "#128C7E" },
+    },
+    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#128C7E" },
+    "& .MuiFormHelperText-root": { color: "rgba(255,255,255,0.4)", fontSize: "0.75rem" },
+    "& .MuiSelect-root": { color: "#e0e0e0", fontSize: "0.85rem" },
+    "& .MuiSelect-icon": { color: "rgba(255,255,255,0.5)" },
+  },
   saveBtn: {
     background: "linear-gradient(135deg, #128C7E 0%, #075E54 100%)",
     color: "#fff",
     fontWeight: 700,
-    fontSize: "0.78rem",
-    padding: "5px 14px",
-    borderRadius: 6,
+    fontSize: "0.82rem",
+    padding: "6px 16px",
+    borderRadius: 8,
     textTransform: "none",
     boxShadow: "0 4px 12px rgba(18,140,126,0.4)",
     "&:hover": {
       background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
     },
   },
-  canvas: {
-    flex: 1,
-  },
-  // Painel lateral de edição
-  drawerPaper: {
-    width: 320,
-    padding: 16,
-    top: "64px",
-    height: "calc(100% - 64px)",
-    backgroundColor: "#161626",
-    color: "#e0e0e0",
-    borderLeft: "1px solid #252538",
-  },
-  drawerField: {
-    "& .MuiOutlinedInput-root": {
-      color: "#e0e0e0",
-      fontSize: "0.85rem",
-      "& fieldset": { borderColor: "rgba(255,255,255,0.2)" },
-      "&:hover fieldset": { borderColor: "rgba(255,255,255,0.5)" },
-      "&.Mui-focused fieldset": { borderColor: "#25D366" },
+  testBtn: {
+    borderColor: "#128C7E",
+    color: "#25D366",
+    fontWeight: 700,
+    fontSize: "0.82rem",
+    borderRadius: 8,
+    textTransform: "none",
+    "&:hover": {
+      backgroundColor: "rgba(37, 211, 102, 0.1)",
     },
-    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#25D366" },
-    "& .MuiFormHelperText-root": { color: "rgba(255,255,255,0.4)", fontSize: "0.75rem" },
-    "& .MuiSelect-root": { color: "#e0e0e0", fontSize: "0.85rem" },
-    "& .MuiSelect-icon": { color: "rgba(255,255,255,0.5)" },
-  },
-  drawerDivider: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    margin: "12px 0",
   },
 }));
 
 // ─────────────────────────────────────────────
-//  ESTILOS DOS NÓS (inline, para o ReactFlow)
+//  ESTILOS E DEFINIÇÃO DE CORES DOS NÓS
 // ─────────────────────────────────────────────
 const nodeBaseStyle = {
   borderRadius: 10,
-  boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-  minWidth: 190,
+  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+  minWidth: 200,
   fontSize: 12,
   fontFamily: "'Roboto', sans-serif",
 };
@@ -213,8 +271,8 @@ const nodeBaseStyle = {
 const headerStyle = {
   display: "flex",
   alignItems: "center",
-  gap: 5,
-  padding: "7px 10px",
+  gap: 6,
+  padding: "8px 12px",
   borderRadius: "8px 8px 0 0",
   fontWeight: 700,
   fontSize: 12,
@@ -222,55 +280,89 @@ const headerStyle = {
 };
 
 const bodyStyle = {
-  padding: "8px 10px 10px",
+  padding: "10px 12px",
   backgroundColor: "#ffffff",
   borderRadius: "0 0 8px 8px",
   color: "#333",
   fontSize: 11,
 };
 
-// Cores por tipo
 const nodeColors = {
-  trigger: { header: "linear-gradient(135deg, #128C7E, #075E54)", border: "#128C7E" },
-  message: { header: "linear-gradient(135deg, #1565c0, #0d47a1)", border: "#1976d2" },
-  menu: { header: "linear-gradient(135deg, #6a1b9a, #4a148c)", border: "#7b1fa2" },
-  transfer_queue: { header: "linear-gradient(135deg, #e65100, #bf360c)", border: "#ed6c02" },
-  close_ticket: { header: "linear-gradient(135deg, #b71c1c, #7f0000)", border: "#d32f2f" },
-  set_kanban: { header: "linear-gradient(135deg, #1b5e20, #2e7d32)", border: "#4caf50" },
-  pix_payment: { header: "linear-gradient(135deg, #e65100, #f57c00)", border: "#ff9800" },
-  condition: { header: "linear-gradient(135deg, #00838f, #006064)", border: "#00acc1" },
-  webhook: { header: "linear-gradient(135deg, #4527a0, #283593)", border: "#5c6bc0" },
-  delay: { header: "linear-gradient(135deg, #ff8f00, #ffb300)", border: "#ffca28" },
-  randomizer: { header: "linear-gradient(135deg, #c2185b, #d81b60)", border: "#ec407a" },
+  trigger: { header: "linear-gradient(135deg, #128C7E, #075E54)", border: "#128C7E", bg: "#128C7E" },
+  message: { header: "linear-gradient(135deg, #1565c0, #0d47a1)", border: "#1976d2", bg: "#1976d2" },
+  buttons: { header: "linear-gradient(135deg, #00897b, #004d40)", border: "#009688", bg: "#009688" },
+  list_menu: { header: "linear-gradient(135deg, #5e35b1, #311b92)", border: "#673ab7", bg: "#673ab7" },
+  carousel: { header: "linear-gradient(135deg, #d81b60, #880e4f)", border: "#e91e63", bg: "#e91e63" },
+  set_variable: { header: "linear-gradient(135deg, #fb8c00, #e65100)", border: "#ff9800", bg: "#ff9800" },
+  menu: { header: "linear-gradient(135deg, #6a1b9a, #4a148c)", border: "#7b1fa2", bg: "#7b1fa2" },
+  condition: { header: "linear-gradient(135deg, #00838f, #006064)", border: "#00acc1", bg: "#00acc1" },
+  randomizer: { header: "linear-gradient(135deg, #c2185b, #ad1457)", border: "#ec407a", bg: "#ec407a" },
+  delay: { header: "linear-gradient(135deg, #ff8f00, #ff6f00)", border: "#ffca28", bg: "#ffca28" },
+  anti_ban: { header: "linear-gradient(135deg, #43a047, #1b5e20)", border: "#4caf50", bg: "#4caf50" },
+  webhook: { header: "linear-gradient(135deg, #3949ab, #1a237e)", border: "#5c6bc0", bg: "#5c6bc0" },
+  set_kanban: { header: "linear-gradient(135deg, #2e7d32, #1b5e20)", border: "#4caf50", bg: "#4caf50" },
+  pix_payment: { header: "linear-gradient(135deg, #ef6c00, #e65100)", border: "#ff9800", bg: "#ff9800" },
+  transfer_queue: { header: "linear-gradient(135deg, #ed6c02, #bf360c)", border: "#ed6c02", bg: "#ed6c02" },
+  close_ticket: { header: "linear-gradient(135deg, #c62828, #8e0000)", border: "#d32f2f", bg: "#d32f2f" },
 };
 
 const NodeIcons = {
   trigger: <PlayArrow style={{ fontSize: 16 }} />,
   message: <Chat style={{ fontSize: 16 }} />,
+  buttons: <RadioButtonChecked style={{ fontSize: 16 }} />,
+  list_menu: <FormatListBulleted style={{ fontSize: 16 }} />,
+  carousel: <ViewCarousel style={{ fontSize: 16 }} />,
+  set_variable: <Code style={{ fontSize: 16 }} />,
   menu: <ListAlt style={{ fontSize: 16 }} />,
-  transfer_queue: <TransferWithinAStation style={{ fontSize: 16 }} />,
-  close_ticket: <CheckCircle style={{ fontSize: 16 }} />,
+  condition: <CallSplit style={{ fontSize: 16 }} />,
+  randomizer: <Shuffle style={{ fontSize: 16 }} />,
+  delay: <HourglassEmpty style={{ fontSize: 16 }} />,
+  anti_ban: <Security style={{ fontSize: 16 }} />,
+  webhook: <Http style={{ fontSize: 16 }} />,
   set_kanban: <ViewColumn style={{ fontSize: 16 }} />,
   pix_payment: <MonetizationOn style={{ fontSize: 16 }} />,
-  condition: <CallSplit style={{ fontSize: 16 }} />,
-  webhook: <Http style={{ fontSize: 16 }} />,
-  delay: <HourglassEmpty style={{ fontSize: 16 }} />,
-  randomizer: <Shuffle style={{ fontSize: 16 }} />,
+  transfer_queue: <TransferWithinAStation style={{ fontSize: 16 }} />,
+  close_ticket: <CheckCircle style={{ fontSize: 16 }} />,
 };
 
 const NodeLabels = {
-  trigger: "Gatilho",
-  message: "Mensagem",
-  menu: "Menu de Opções",
-  transfer_queue: "Transferir Fila",
-  close_ticket: "Encerrar",
+  trigger: "Gatilho Inicial",
+  message: "Mensagem de Texto",
+  buttons: "Botões Interativos",
+  list_menu: "Lista Interativa",
+  carousel: "Carrossel de Cards",
+  set_variable: "Salvar Variável",
+  menu: "Menu Numérico",
+  condition: "Condição (If/Else)",
+  randomizer: "Sorteio (A/B)",
+  delay: "Atraso (Delay)",
+  anti_ban: "Pausa Anti-Ban",
+  webhook: "Webhook (HTTP)",
   set_kanban: "Mover Kanban",
   pix_payment: "Cobrar Pix",
-  condition: "Condição (If/Else)",
-  webhook: "Webhook (HTTP)",
-  delay: "Atraso (Delay)",
-  randomizer: "Sorteio (A/B)",
+  transfer_queue: "Transferir Fila",
+  close_ticket: "Encerrar Ticket",
 };
+
+// Categorias para a Barra Lateral
+const PALETTE_CATEGORIES = [
+  {
+    title: "Comunicação & Mídias",
+    items: ["trigger", "message", "buttons", "list_menu", "carousel"],
+  },
+  {
+    title: "Lógica & Condicionais",
+    items: ["menu", "condition", "randomizer", "set_variable"],
+  },
+  {
+    title: "Atrasos & Proteção",
+    items: ["delay", "anti_ban", "webhook"],
+  },
+  {
+    title: "CRM, Cobrança & Ações",
+    items: ["set_kanban", "pix_payment", "transfer_queue", "close_ticket"],
+  },
+];
 
 // ─────────────────────────────────────────────
 //  COMPONENTE DE NÓ CUSTOMIZADO
@@ -288,7 +380,6 @@ const CustomNode = ({ data, selected }) => {
         transition: "all 0.15s ease",
       }}
     >
-      {/* Handle de entrada (não mostra no trigger) */}
       {!isFirst && (
         <Handle
           type="target"
@@ -298,104 +389,104 @@ const CustomNode = ({ data, selected }) => {
             width: 12,
             height: 12,
             border: "2px solid white",
-            top: -6,
           }}
         />
       )}
 
-      {/* Cabeçalho */}
       <div style={{ ...headerStyle, background: color.header }}>
         {NodeIcons[data.type]}
-        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {data.label || NodeLabels[data.type]}
-        </span>
+        <span>{data.title || NodeLabels[data.type]}</span>
       </div>
 
-      {/* Corpo do nó */}
       <div style={bodyStyle}>
         {data.type === "trigger" && (
           <div>
-            <span style={{ color: "#888", fontSize: 11 }}>Palavra-chave:</span>
-            <div style={{ fontWeight: 600, marginTop: 2, color: "#075E54" }}>
-              {data.keyword || "*"}
-            </div>
+            <strong>Gatilho:</strong> {data.keyword ? `"${data.keyword}"` : "Todas (*)"}
           </div>
         )}
         {data.type === "message" && (
-          <div
-            style={{
-              maxHeight: 60,
-              overflow: "hidden",
-              color: "#555",
-              lineHeight: 1.4,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-            }}
-          >
-            {data.content || "Clique para editar..."}
+          <div style={{ color: "#555", wordBreak: "break-word" }}>
+            {data.content ? (data.content.length > 50 ? `${data.content.substring(0, 50)}...` : data.content) : "Mensagem vazia..."}
+          </div>
+        )}
+        {data.type === "buttons" && (
+          <div>
+            <div style={{ fontWeight: 600 }}>{data.title || "Mensagem c/ Botões"}</div>
+            <div style={{ fontSize: 10, color: "#666" }}>
+              {(data.buttons || []).length} botões configurados
+            </div>
+          </div>
+        )}
+        {data.type === "list_menu" && (
+          <div>
+            <div style={{ fontWeight: 600 }}>{data.title || "Lista de Opções"}</div>
+            <div style={{ fontSize: 10, color: "#666" }}>
+              {(data.options || []).length} itens na lista
+            </div>
+          </div>
+        )}
+        {data.type === "carousel" && (
+          <div>
+            <div style={{ fontWeight: 600 }}>Carrossel</div>
+            <div style={{ fontSize: 10, color: "#666" }}>
+              {(data.cards || []).length} cards no carrossel
+            </div>
+          </div>
+        )}
+        {data.type === "set_variable" && (
+          <div>
+            <strong>Variável:</strong> {data.variableName || "campo"}
           </div>
         )}
         {data.type === "menu" && (
           <div>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              {data.content || "Título do menu"}
+            <div style={{ color: "#555", marginBottom: 4 }}>
+              {data.content ? `${data.content.substring(0, 30)}...` : "Menu"}
             </div>
-            {(data.options || []).slice(0, 3).map((opt) => (
-              <div key={opt.id} style={{ fontSize: 11, color: "#666", marginLeft: 4 }}>
-                {opt.optionNumber}. {opt.text}
+            {(data.options || []).map((opt) => (
+              <div key={opt.id} style={{ fontSize: 10, color: "#444" }}>
+                🔹 {opt.optionNumber || "#"}. {opt.text}
               </div>
             ))}
-            {(data.options || []).length > 3 && (
-              <div style={{ fontSize: 10, color: "#aaa", marginTop: 2 }}>
-                + {data.options.length - 3} opção(ões)
-              </div>
-            )}
-          </div>
-        )}
-        {data.type === "transfer_queue" && (
-          <div style={{ color: "#e65100", fontWeight: 600 }}>
-            {data.queueName || "Selecionar fila..."}
-          </div>
-        )}
-        {data.type === "set_kanban" && (
-          <div style={{ color: "#2e7d32", fontWeight: 600 }}>
-            {data.tagName ? `📌 Kanban: ${data.tagName}` : "Selecionar coluna do Kanban..."}
-          </div>
-        )}
-        {data.type === "pix_payment" && (
-          <div style={{ color: "#e65100", fontWeight: 600 }}>
-            {data.pixValue ? `💳 Pix: R$ ${Number(data.pixValue).toFixed(2)}` : "Configurar cobrança Pix..."}
           </div>
         )}
         {data.type === "condition" && (
-          <div style={{ color: "#00838f", fontWeight: 600 }}>
-            {data.conditionKeyword ? `🔀 Se contiver: "${data.conditionKeyword}"` : "Configurar condição..."}
-          </div>
-        )}
-        {data.type === "webhook" && (
-          <div style={{ color: "#4527a0", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {data.webhookUrl ? `🌐 POST: ${data.webhookUrl}` : "Configurar URL do Webhook..."}
-          </div>
-        )}
-        {data.type === "delay" && (
-          <div style={{ color: "#ff8f00", fontWeight: 600 }}>
-            {data.delaySeconds ? `⏳ Aguardar: ${data.delaySeconds} seg` : "Configurar atraso..."}
+          <div>
+            <div>Palavra: <strong>{data.conditionKeyword || "..."}</strong></div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 10 }}>
+              <span style={{ color: "green", fontWeight: 700 }}>VERDADEIRO</span>
+              <span style={{ color: "red", fontWeight: 700 }}>FALSO</span>
+            </div>
           </div>
         )}
         {data.type === "randomizer" && (
-          <div style={{ color: "#c2185b", fontWeight: 600 }}>
-            🎲 Sorteia um dos caminhos
+          <div>Sorteio A/B entre conexões de saída</div>
+        )}
+        {data.type === "delay" && (
+          <div>Aguardar <strong>{data.delaySeconds || 1}s</strong></div>
+        )}
+        {data.type === "anti_ban" && (
+          <div>Pausa <strong>{data.minDelaySeconds || 3}s - {data.maxDelaySeconds || 8}s</strong> (Aleatório)</div>
+        )}
+        {data.type === "webhook" && (
+          <div style={{ fontSize: 10, wordBreak: "break-all" }}>
+            URL: {data.webhookUrl || "Não configurada"}
           </div>
         )}
+        {data.type === "set_kanban" && (
+          <div>Mover para Tag ID #{data.tagId || "---"}</div>
+        )}
+        {data.type === "pix_payment" && (
+          <div>Valor: <strong>R$ {Number(data.pixValue || 1).toFixed(2)}</strong></div>
+        )}
+        {data.type === "transfer_queue" && (
+          <div>Fila ID: #{data.queueId || "---"}</div>
+        )}
         {data.type === "close_ticket" && (
-          <div style={{ color: "#b71c1c", textAlign: "center", padding: "4px 0" }}>
-            ✅ Encerra o ticket automaticamente
-          </div>
+          <div>Encerrar atendimento</div>
         )}
       </div>
 
-      {/* Handle de saída */}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -404,146 +495,197 @@ const CustomNode = ({ data, selected }) => {
           width: 12,
           height: 12,
           border: "2px solid white",
-          bottom: -6,
         }}
       />
     </div>
   );
 };
 
-const nodeTypes = { custom: CustomNode };
-
-// ─────────────────────────────────────────────
-//  FUNÇÕES DE CONVERSÃO (dados DB ↔ ReactFlow)
-// ─────────────────────────────────────────────
-const dbNodesToRF = (dbNodes) => {
-  return dbNodes.map((n, idx) => ({
-    id: n.id,
-    type: "custom",
-    position: n.position || { x: 100 + (idx % 3) * 280, y: 100 + Math.floor(idx / 3) * 220 },
-    data: { ...n },
-  }));
+const nodeTypes = {
+  custom: CustomNode,
 };
 
-const dbConnectionsToRF = (connections, dbNodes) => {
-  if (connections && connections.length > 0) {
-    return connections.map((c, idx) => ({
-      id: `e_${idx}`,
-      source: c.sourceNodeId,
-      target: c.targetNodeId,
-      markerEnd: { type: MarkerType.ArrowClosed, color: "#128C7E" },
-      style: { stroke: "#128C7E", strokeWidth: 2 },
-      animated: true,
-    }));
-  }
-  // Inferir conexões sequenciais pelos targetNodeId
-  const edges = [];
-  dbNodes.forEach((n) => {
-    if (n.targetNodeId) {
-      edges.push({
-        id: `e_${n.id}_${n.targetNodeId}`,
-        source: n.id,
-        target: n.targetNodeId,
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#128C7E" },
-        style: { stroke: "#128C7E", strokeWidth: 2 },
-        animated: true,
-      });
+// ─────────────────────────────────────────────
+//  MODAL DE TESTAR FLUXO
+// ─────────────────────────────────────────────
+const TestFlowModal = ({ open, onClose, flowId }) => {
+  const [number, setNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleTest = async () => {
+    if (!number || number.length < 8) {
+      toast.error("Por favor, informe um número de WhatsApp válido.");
+      return;
     }
-  });
-  return edges;
+    setLoading(true);
+    try {
+      await api.post(`/flows/${flowId}/test`, { number });
+      toast.success("🚀 Fluxo disparado com sucesso para o WhatsApp de teste!");
+      onClose();
+    } catch (err) {
+      toast.error(err?.response?.data?.error || "Erro ao testar fluxo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>▶️ Testar Fluxo no WhatsApp</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2" style={{ marginBottom: 16, color: "#666" }}>
+          Informe o seu número de WhatsApp com DDD para disparar a execução deste robô imediatamente:
+        </Typography>
+        <TextField
+          autoFocus
+          fullWidth
+          label="Número do WhatsApp (DDD + Número)"
+          variant="outlined"
+          placeholder="Ex: 5511999999999"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="secondary">Cancelar</Button>
+        <Button
+          onClick={handleTest}
+          color="primary"
+          variant="contained"
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={16} /> : <Send />}
+        >
+          Disparar Teste
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
-
-const rfNodesToDb = (rfNodes) =>
-  rfNodes.map((n) => ({ ...n.data, position: n.position }));
-
-const rfEdgesToConnections = (rfEdges) =>
-  rfEdges.map((e) => ({ sourceNodeId: e.source, targetNodeId: e.target }));
 
 // ─────────────────────────────────────────────
 //  COMPONENTE PRINCIPAL
 // ─────────────────────────────────────────────
-const FlowBuilderCanvas = () => {
+const FlowBuilderInner = () => {
   const classes = useStyles();
-  const history = useHistory();
   const { flowId } = useParams();
-  const reactFlowWrapper = useRef(null);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
-
-  const [flow, setFlow] = useState(null);
-  const [queues, setQueues] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const history = useHistory();
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
+  const [flowName, setFlowName] = useState("Novo Fluxo");
+  const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [queues, setQueues] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openTestModal, setOpenTestModal] = useState(false);
+  const reactFlowInstance = useRef(null);
 
-  // ── Carrega dados
+  // Carrega dados do fluxo, filas e tags
   useEffect(() => {
-    const fetchData = async () => {
+    async function loadData() {
       try {
-        const { data: flowData } = await api.get(`/flows/${flowId}`);
-        setFlow(flowData);
-
-        let dbNodes = [];
-        let dbConnections = [];
-
-        if (flowData.nodes) {
-          dbNodes = typeof flowData.nodes === "string"
-            ? JSON.parse(flowData.nodes)
-            : flowData.nodes;
-        }
-        if (flowData.connections) {
-          dbConnections = typeof flowData.connections === "string"
-            ? JSON.parse(flowData.connections)
-            : flowData.connections;
-        }
-
-        setNodes(dbNodesToRF(dbNodes));
-        setEdges(dbConnectionsToRF(dbConnections, dbNodes));
-
         const { data: queueData } = await api.get("/queue");
-        setQueues(queueData);
+        setQueues(queueData || []);
 
-        try {
-          const { data: tagData } = await api.get("/tags/list");
-          setTags(Array.isArray(tagData) ? tagData : tagData?.tags || []);
-        } catch (e) {
-          console.error("Erro ao carregar tags do Kanban", e);
+        const { data: tagData } = await api.get("/tags");
+        setTags(tagData.tags || tagData || []);
+
+        if (flowId) {
+          const { data: flowData } = await api.get(`/flows/${flowId}`);
+          setFlowName(flowData.name || "Novo Fluxo");
+
+          const parsedNodes = typeof flowData.nodes === "string" ? JSON.parse(flowData.nodes) : flowData.nodes;
+          const parsedEdges = typeof flowData.connections === "string" ? JSON.parse(flowData.connections) : flowData.connections;
+
+          if (Array.isArray(parsedNodes) && parsedNodes.length > 0) {
+            setNodes(
+              parsedNodes.map((n) => ({
+                id: n.id,
+                type: "custom",
+                position: n.position || { x: 250, y: 100 },
+                data: { ...n },
+              }))
+            );
+          } else {
+            setNodes([
+              {
+                id: "trigger_1",
+                type: "custom",
+                position: { x: 250, y: 100 },
+                data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*" },
+              },
+            ]);
+          }
+
+          if (Array.isArray(parsedEdges)) {
+            setEdges(
+              parsedEdges.map((c, idx) => ({
+                id: `e_${c.sourceNodeId}_${c.targetNodeId}_${idx}`,
+                source: c.sourceNodeId,
+                target: c.targetNodeId,
+                type: "smoothstep",
+                animated: true,
+                style: { stroke: "#128C7E", strokeWidth: 2 },
+                markerEnd: { type: MarkerType.ArrowClosed, color: "#128C7E" },
+              }))
+            );
+          }
         }
       } catch (err) {
-        console.error(err);
-        toast.error("Erro ao carregar dados do fluxo.");
+        toast.error("Erro ao carregar o fluxo.");
       } finally {
         setLoading(false);
       }
-    };
-    fetchData();
-  }, [flowId]);
-
-  // ── Centralizar e enquadrar o fluxo na tela automaticamente ao carregar
-  useEffect(() => {
-    if (reactFlowInstance && !loading && nodes.length > 0) {
-      const timer = setTimeout(() => {
-        reactFlowInstance.fitView({ padding: 0.25, duration: 400 });
-      }, 150);
-      return () => clearTimeout(timer);
     }
-  }, [reactFlowInstance, loading]);
+    loadData();
+  }, [flowId, setNodes, setEdges]);
 
-  // ── Conectar nós
+  // Salva o fluxo
+  const handleSave = async () => {
+    try {
+      const formattedNodes = nodes.map((n) => ({
+        ...n.data,
+        id: n.id,
+        position: n.position,
+      }));
+
+      const formattedConnections = edges.map((e) => ({
+        sourceNodeId: e.source,
+        targetNodeId: e.target,
+      }));
+
+      const payload = {
+        name: flowName,
+        nodes: JSON.stringify(formattedNodes),
+        connections: JSON.stringify(formattedConnections),
+        active: true,
+      };
+
+      if (flowId) {
+        await api.put(`/flows/${flowId}`, payload);
+        toast.success("✅ Fluxo salvo com sucesso!");
+      } else {
+        const { data } = await api.post("/flows", payload);
+        toast.success("✅ Fluxo criado com sucesso!");
+        history.push(`/flowbuilder/${data.id}`);
+      }
+    } catch (err) {
+      toast.error("Erro ao salvar fluxo.");
+    }
+  };
+
+  // Conectar nós por borda
   const onConnect = useCallback(
     (params) =>
       setEdges((eds) =>
         addEdge(
           {
             ...params,
-            markerEnd: { type: MarkerType.ArrowClosed, color: "#128C7E" },
-            style: { stroke: "#128C7E", strokeWidth: 2 },
+            type: "smoothstep",
             animated: true,
+            style: { stroke: "#128C7E", strokeWidth: 2 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: "#128C7E" },
           },
           eds
         )
@@ -551,508 +693,584 @@ const FlowBuilderCanvas = () => {
     [setEdges]
   );
 
-  // ── Clique num nó → abrir painel de edição
-  const onNodeClick = useCallback((event, node) => {
-    setSelectedNode(node);
-    setDrawerOpen(true);
-  }, []);
-
-  // ── Clique em uma conexão (linha) → remover a ligação
+  // Apagar conexão com clique na linha
   const onEdgeClick = useCallback(
     (event, edge) => {
+      event.stopPropagation();
       setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-      toast.success("Ligação/Conexão removida!");
+      toast.info("Linha de conexão removida!");
     },
     [setEdges]
   );
 
-  // ── Fechar painel
-  const closeDrawer = () => {
-    setDrawerOpen(false);
-    setSelectedNode(null);
-  };
-
-  // ── Atualizar campo de dado no nó selecionado
-  const updateSelectedNodeData = (field, value) => {
-    if (!selectedNode) return;
-    setSelectedNode((prev) => ({ ...prev, data: { ...prev.data, [field]: value } }));
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === selectedNode.id ? { ...n, data: { ...n.data, [field]: value } } : n
-      )
-    );
-  };
-
-  // ── Adicionar novo nó na tela
+  // Adiciona novo nó
   const handleAddNode = (type) => {
-    const id = `node_${Date.now()}`;
-    const center = reactFlowInstance
-      ? reactFlowInstance.project({
-          x: (reactFlowWrapper.current?.offsetWidth || 600) / 2 - 110,
-          y: (reactFlowWrapper.current?.offsetHeight || 400) / 2 - 80,
-        })
-      : { x: 200, y: 200 };
-
-    const defaultData = {
-      id,
-      type,
-      label: NodeLabels[type],
-    };
-
-    if (type === "message") {
-      defaultData.content = "Digite aqui a mensagem...";
-    } else if (type === "menu") {
-      defaultData.content = "Escolha uma opção:";
-      defaultData.options = [
-        { id: "opt_1", optionNumber: "1", text: "Suporte" },
-        { id: "opt_2", optionNumber: "2", text: "Vendas" },
-      ];
-    }
-
+    const newId = `${type}_${Date.now()}`;
     const newNode = {
-      id,
+      id: newId,
       type: "custom",
-      position: center,
-      data: defaultData,
+      position: {
+        x: 250 + Math.random() * 80,
+        y: 150 + Math.random() * 80,
+      },
+      data: {
+        id: newId,
+        type,
+        title: NodeLabels[type],
+        content: type === "message" ? "Olá! Como posso ajudar?" : "",
+        buttons: type === "buttons" ? [{ id: "btn_1", text: "Opção 1" }] : [],
+        options: type === "list_menu" ? [{ id: "opt_1", optionNumber: "1", text: "Item 1" }] : [],
+        cards: type === "carousel" ? [{ title: "Card 1", description: "Descrição do card 1", buttonText: "Ver mais" }] : [],
+      },
     };
 
     setNodes((nds) => [...nds, newNode]);
     setSelectedNode(newNode);
-    setDrawerOpen(true);
-    toast.success(`Nó "${NodeLabels[type]}" adicionado!`);
   };
 
-  // ── Deletar nó selecionado
-  const handleDeleteSelectedNode = () => {
+  // Clique no nó para abrir editor no Drawer
+  const onNodeClick = (event, node) => {
+    setSelectedNode(node);
+  };
+
+  // Atualizar dados do nó no state
+  const updateNodeData = (key, value) => {
     if (!selectedNode) return;
-    if (selectedNode.data.type === "trigger") {
-      toast.error("O nó de gatilho não pode ser deletado.");
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === selectedNode.id) {
+          const updatedData = { ...n.data, [key]: value };
+          setSelectedNode({ ...n, data: updatedData });
+          return { ...n, data: updatedData };
+        }
+        return n;
+      })
+    );
+  };
+
+  // Excluir nó selecionado
+  const handleDeleteSelectedNode = () => {
+    if (!selectedNode || selectedNode.data.type === "trigger") {
+      toast.warning("O nó inicial Gatilho não pode ser excluído.");
       return;
     }
     setNodes((nds) => nds.filter((n) => n.id !== selectedNode.id));
-    setEdges((eds) =>
-      eds.filter((e) => e.source !== selectedNode.id && e.target !== selectedNode.id)
-    );
-    closeDrawer();
-    toast.success("Nó removido.");
-  };
-
-  // ── Salvar fluxo
-  const handleSaveFlow = async () => {
-    setSaving(true);
-    try {
-      const dbNodes = rfNodesToDb(nodes);
-      const connections = rfEdgesToConnections(edges);
-      await api.put(`/flows/${flowId}`, {
-        name: flow.name,
-        nodes: JSON.stringify(dbNodes),
-        connections: JSON.stringify(connections),
-      });
-      toast.success("Fluxo salvo com sucesso!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro ao salvar o fluxo.");
-    } finally {
-      setSaving(false);
-    }
+    setEdges((eds) => eds.filter((e) => e.source !== selectedNode.id && e.target !== selectedNode.id));
+    setSelectedNode(null);
+    toast.info("Nó excluído com sucesso.");
   };
 
   if (loading) {
     return (
-      <Box className={classes.root} display="flex" justifyContent="center" alignItems="center">
-        <CircularProgress color="primary" />
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="#0f0f1a">
+        <CircularProgress style={{ color: "#128C7E" }} />
       </Box>
     );
   }
 
   return (
     <div className={classes.root}>
-      {/* ── TOOLBAR ── */}
-      <div className={classes.toolbar}>
-        <div className={classes.toolbarLeft}>
-          <Tooltip title="Voltar à lista de fluxos">
-            <IconButton size="small" style={{ color: "#fff" }} onClick={() => history.push("/flowbuilder")}>
+      {/* ─────────────────────────────────────────────
+          1. HEADER DA PÁGINA
+      ───────────────────────────────────────────── */}
+      <div className={classes.header}>
+        <div className={classes.headerLeft}>
+          <Tooltip title="Voltar para lista de fluxos">
+            <IconButton onClick={() => history.push("/flowbuilder")} style={{ color: "#fff" }}>
               <ArrowBack />
             </IconButton>
           </Tooltip>
-          <AccountTree style={{ color: "#25D366", fontSize: 22, marginRight: 4 }} />
           <TextField
-            value={flow?.name || ""}
-            onChange={(e) => setFlow({ ...flow, name: e.target.value })}
-            variant="standard"
+            value={flowName}
+            onChange={(e) => setFlowName(e.target.value)}
             className={classes.flowNameInput}
-            InputProps={{ disableUnderline: false }}
-            style={{ minWidth: 200 }}
           />
         </div>
 
-        {/* Paleta de nós */}
-        <div className={classes.toolbarCenter}>
-          {[
-            { type: "message", icon: <Chat style={{ fontSize: 15 }} />, cls: classes.paletteBtnMsg, label: "+ Mensagem" },
-            { type: "menu", icon: <ListAlt style={{ fontSize: 15 }} />, cls: classes.paletteBtnMenu, label: "+ Menu" },
-            { type: "condition", icon: <CallSplit style={{ fontSize: 15 }} />, cls: classes.paletteBtnCondition, label: "+ Condição" },
-            { type: "randomizer", icon: <Shuffle style={{ fontSize: 15 }} />, cls: classes.paletteBtnRandom, label: "+ Sorteio" },
-            { type: "delay", icon: <HourglassEmpty style={{ fontSize: 15 }} />, cls: classes.paletteBtnDelay, label: "+ Atraso" },
-            { type: "webhook", icon: <Http style={{ fontSize: 15 }} />, cls: classes.paletteBtnWebhook, label: "+ Webhook" },
-            { type: "set_kanban", icon: <ViewColumn style={{ fontSize: 15 }} />, cls: classes.paletteBtnKanban, label: "+ Kanban" },
-            { type: "pix_payment", icon: <MonetizationOn style={{ fontSize: 15 }} />, cls: classes.paletteBtnPix, label: "+ Cobrar Pix" },
-            { type: "transfer_queue", icon: <TransferWithinAStation style={{ fontSize: 15 }} />, cls: classes.paletteBtnTransfer, label: "+ Transferir" },
-            { type: "close_ticket", icon: <CheckCircle style={{ fontSize: 15 }} />, cls: classes.paletteBtnClose, label: "+ Encerrar" },
-          ].map(({ type, icon, cls, label }) => (
-            <button
-              key={type}
-              className={`${classes.paletteBtn} ${cls}`}
-              onClick={() => handleAddNode(type)}
-            >
-              {icon} {label}
-            </button>
-          ))}
-        </div>
-
-        <div className={classes.toolbarRight}>
+        <div className={classes.headerRight}>
           <Button
-            className={classes.saveBtn}
-            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />}
-            onClick={handleSaveFlow}
-            disabled={saving}
+            variant="outlined"
+            className={classes.testBtn}
+            onClick={() => setOpenTestModal(true)}
+            startIcon={<PlayArrow />}
           >
-            {saving ? "Salvando..." : "Salvar Fluxo"}
+            Testar Fluxo
+          </Button>
+
+          <Button
+            variant="contained"
+            className={classes.saveBtn}
+            onClick={handleSave}
+            startIcon={<Save />}
+          >
+            Salvar Fluxo
           </Button>
         </div>
       </div>
 
-      {/* ── CANVAS REACTFLOW ── */}
-      <div className={classes.canvas} ref={reactFlowWrapper}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
-          onEdgeClick={onEdgeClick}
-          onInit={setReactFlowInstance}
-          nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          deleteKeyCode={["Delete", "Backspace"]}
-          minZoom={0.3}
-          maxZoom={2}
-          style={{ background: "#0f0f1a" }}
-        >
-          <MiniMap
-            style={{ backgroundColor: "#1a1a2e", border: "1px solid #2a2a3e" }}
-            nodeColor={(n) => nodeColors[n.data?.type]?.border || "#888"}
-            maskColor="rgba(0,0,0,0.5)"
-          />
-          <Controls style={{ backgroundColor: "#1a1a2e", border: "1px solid #2a2a3e" }} />
-          <Background color="#2a2a3e" gap={20} size={1} />
-        </ReactFlow>
+      {/* ─────────────────────────────────────────────
+          2. CONTEÚDO PRINCIPAL (PALETA + CANVAS)
+      ───────────────────────────────────────────── */}
+      <div className={classes.mainContent}>
+        {/* PALETA LATERAL DE COMPONENTES */}
+        <div className={classes.sidebar}>
+          <div className={classes.sidebarHeader}>
+            <Typography variant="button" style={{ fontWeight: 800, color: "#fff" }}>
+              COMPONENTES
+            </Typography>
+          </div>
+
+          <div className={classes.sidebarSearch}>
+            <TextField
+              placeholder="Pesquisar nó..."
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search style={{ color: "rgba(255,255,255,0.4)", fontSize: 18 }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </div>
+
+          <div className={classes.sidebarScroll}>
+            {PALETTE_CATEGORIES.map((cat, idx) => {
+              const filteredItems = cat.items.filter((itemKey) =>
+                NodeLabels[itemKey].toLowerCase().includes(searchTerm)
+              );
+              if (filteredItems.length === 0) return null;
+
+              return (
+                <div key={idx}>
+                  <div className={classes.categoryTitle}>{cat.title}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {filteredItems.map((itemKey) => {
+                      const color = nodeColors[itemKey] || nodeColors.message;
+                      return (
+                        <div
+                          key={itemKey}
+                          className={classes.paletteCard}
+                          onClick={() => handleAddNode(itemKey)}
+                        >
+                          <div className={classes.paletteIconBox} style={{ background: color.header }}>
+                            {NodeIcons[itemKey]}
+                          </div>
+                          <span className={classes.paletteLabel}>{NodeLabels[itemKey]}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CANVAS REACTFLOW */}
+        <div className={classes.canvas}>
+          <ReactFlowProvider>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onEdgeClick={onEdgeClick}
+              onNodeClick={onNodeClick}
+              nodeTypes={nodeTypes}
+              fitView
+              attributionPosition="bottom-right"
+              ref={reactFlowInstance}
+            >
+              <Background color="#252538" gap={20} size={1} />
+              <Controls style={{ backgroundColor: "#161626", fill: "#fff", borderColor: "#252538" }} />
+              <MiniMap style={{ backgroundColor: "#161626" }} nodeColor={(n) => nodeColors[n.data?.type]?.bg || "#128C7E"} />
+            </ReactFlow>
+          </ReactFlowProvider>
+        </div>
       </div>
 
-      {/* ── PAINEL LATERAL DE EDIÇÃO ── */}
+      {/* ─────────────────────────────────────────────
+          3. DRAWER DE CONFIGURAÇÃO DO NÓ ("Configurar Node")
+      ───────────────────────────────────────────── */}
       <Drawer
         anchor="right"
-        open={drawerOpen}
-        onClose={closeDrawer}
-        variant="persistent"
+        open={Boolean(selectedNode)}
+        onClose={() => setSelectedNode(null)}
         classes={{ paper: classes.drawerPaper }}
       >
         {selectedNode && (
-          <Box>
-            {/* Cabeçalho do painel */}
+          <div>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <div style={{ color: nodeColors[selectedNode.data.type]?.border }}>
-                  {NodeIcons[selectedNode.data.type]}
-                </div>
-                <Typography variant="subtitle1" style={{ color: "#fff", fontWeight: 700 }}>
-                  {NodeLabels[selectedNode.data.type]}
-                </Typography>
-              </Box>
-              <IconButton size="small" style={{ color: "#aaa" }} onClick={closeDrawer}>
-                <Close fontSize="small" />
+              <Typography variant="h6" style={{ fontWeight: 700, color: "#fff" }}>
+                Configurar Node
+              </Typography>
+              <IconButton size="small" onClick={() => setSelectedNode(null)} style={{ color: "#fff" }}>
+                <Close />
               </IconButton>
             </Box>
 
             <Divider className={classes.drawerDivider} />
 
-            {/* Rótulo do nó */}
-            <TextField
-              label="Rótulo (título do nó)"
-              variant="outlined"
-              size="small"
-              fullWidth
-              className={classes.drawerField}
-              style={{ marginBottom: 16 }}
-              value={selectedNode.data.label || ""}
-              onChange={(e) => updateSelectedNodeData("label", e.target.value)}
-            />
-
-            {/* Campos específicos por tipo */}
+            {/* GATILHO */}
             {selectedNode.data.type === "trigger" && (
-              <TextField
-                label="Palavra-chave Gatilho"
-                variant="outlined"
-                size="small"
-                fullWidth
-                className={classes.drawerField}
-                value={selectedNode.data.keyword || ""}
-                onChange={(e) => updateSelectedNodeData("keyword", e.target.value)}
-                helperText="Use * para acionar em qualquer mensagem inicial"
-              />
-            )}
-
-            {selectedNode.data.type === "message" && (
-              <TextField
-                label="Conteúdo da Mensagem"
-                variant="outlined"
-                size="small"
-                multiline
-                rows={5}
-                fullWidth
-                className={classes.drawerField}
-                value={selectedNode.data.content || ""}
-                onChange={(e) => updateSelectedNodeData("content", e.target.value)}
-                helperText="Suporta variáveis como {nome}, {protocolo}"
-              />
-            )}
-
-            {selectedNode.data.type === "menu" && (
-              <Box>
+              <div className={classes.drawerField}>
                 <TextField
-                  label="Título do Menu"
-                  variant="outlined"
-                  size="small"
+                  label="Palavra-chave Gatilho"
                   fullWidth
-                  className={classes.drawerField}
-                  style={{ marginBottom: 12 }}
-                  value={selectedNode.data.content || ""}
-                  onChange={(e) => updateSelectedNodeData("content", e.target.value)}
+                  variant="outlined"
+                  value={selectedNode.data.keyword || ""}
+                  onChange={(e) => updateNodeData("keyword", e.target.value)}
+                  helperText="Digite a palavra-chave para disparar este fluxo. Use '*' para acionar em qualquer mensagem inicial."
                 />
-                <Typography variant="caption" style={{ color: "#aaa", fontWeight: 600, marginBottom: 8, display: "block" }}>
-                  Opções do Menu
+              </div>
+            )}
+
+            {/* MENSAGEM */}
+            {selectedNode.data.type === "message" && (
+              <div className={classes.drawerField}>
+                <TextField
+                  label="Texto da mensagem"
+                  multiline
+                  rows={5}
+                  fullWidth
+                  variant="outlined"
+                  value={selectedNode.data.content || ""}
+                  onChange={(e) => updateNodeData("content", e.target.value)}
+                  helperText="Você pode usar as variáveis: {nome}"
+                />
+              </div>
+            )}
+
+            {/* BOTÕES INTERATIVOS */}
+            {selectedNode.data.type === "buttons" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Título da Mensagem"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.title || ""}
+                    onChange={(e) => updateNodeData("title", e.target.value)}
+                  />
+                </div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Texto Principal"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.content || ""}
+                    onChange={(e) => updateNodeData("content", e.target.value)}
+                  />
+                </div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Rodapé (Footer)"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.footer || ""}
+                    onChange={(e) => updateNodeData("footer", e.target.value)}
+                  />
+                </div>
+                <Typography variant="subtitle2" style={{ color: "#fff", marginBottom: 8 }}>
+                  Botões de Clique:
                 </Typography>
-                {(selectedNode.data.options || []).map((opt, idx) => (
-                  <Box key={opt.id} display="flex" gap={1} mb={1} alignItems="center">
+                {(selectedNode.data.buttons || []).map((btn, idx) => (
+                  <div key={btn.id} style={{ display: "flex", gap: 6, marginBottom: 8 }}>
                     <TextField
-                      variant="outlined"
-                      size="small"
-                      className={classes.drawerField}
-                      style={{ width: 52 }}
-                      value={opt.optionNumber}
-                      disabled
-                    />
-                    <TextField
-                      variant="outlined"
                       size="small"
                       fullWidth
-                      className={classes.drawerField}
-                      value={opt.text}
+                      variant="outlined"
+                      value={btn.text}
                       onChange={(e) => {
-                        const newOpts = [...selectedNode.data.options];
-                        newOpts[idx] = { ...newOpts[idx], text: e.target.value };
-                        updateSelectedNodeData("options", newOpts);
+                        const newBtns = [...selectedNode.data.buttons];
+                        newBtns[idx].text = e.target.value;
+                        updateNodeData("buttons", newBtns);
                       }}
+                      className={classes.drawerField}
                     />
                     <IconButton
                       size="small"
-                      style={{ color: "#ef9a9a" }}
                       onClick={() => {
-                        const newOpts = selectedNode.data.options.filter((_, i) => i !== idx);
-                        updateSelectedNodeData("options", newOpts);
+                        const newBtns = selectedNode.data.buttons.filter((_, i) => i !== idx);
+                        updateNodeData("buttons", newBtns);
                       }}
+                      style={{ color: "#ff5252" }}
                     >
-                      <Delete fontSize="small" />
+                      <Delete />
                     </IconButton>
-                  </Box>
+                  </div>
                 ))}
                 <Button
                   size="small"
+                  variant="outlined"
+                  style={{ color: "#128C7E", borderColor: "#128C7E" }}
                   startIcon={<Add />}
-                  style={{ color: "#ce93d8", marginTop: 4, textTransform: "none" }}
                   onClick={() => {
-                    const opts = selectedNode.data.options || [];
-                    const newOpt = {
-                      id: `opt_${Date.now()}`,
-                      optionNumber: String(opts.length + 1),
-                      text: "Nova opção",
-                    };
-                    updateSelectedNodeData("options", [...opts, newOpt]);
+                    const newBtns = [
+                      ...(selectedNode.data.buttons || []),
+                      { id: `btn_${Date.now()}`, text: `Botão ${(selectedNode.data.buttons || []).length + 1}` },
+                    ];
+                    updateNodeData("buttons", newBtns);
                   }}
                 >
-                  Adicionar Opção
+                  Adicionar Botão
                 </Button>
-              </Box>
+              </div>
             )}
 
-            {selectedNode.data.type === "transfer_queue" && (
-              <FormControl variant="outlined" size="small" fullWidth className={classes.drawerField}>
-                <InputLabel>Selecione a Fila</InputLabel>
-                <Select
-                  label="Selecione a Fila"
-                  value={selectedNode.data.queueId || ""}
-                  onChange={(e) => {
-                    const queue = queues.find((q) => q.id === e.target.value);
-                    updateSelectedNodeData("queueId", e.target.value);
-                    updateSelectedNodeData("queueName", queue?.name || "");
-                  }}
-                  MenuProps={{ PaperProps: { style: { backgroundColor: "#1e1e2e", color: "#e0e0e0" } } }}
-                >
-                  {queues.map((q) => (
-                    <MenuItem key={q.id} value={q.id} style={{ color: "#e0e0e0" }}>
-                      {q.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-
-            {selectedNode.data.type === "set_kanban" && (
-              <FormControl variant="outlined" size="small" fullWidth className={classes.drawerField}>
-                <InputLabel>Selecione a Coluna do Kanban (Tag)</InputLabel>
-                <Select
-                  label="Selecione a Coluna do Kanban (Tag)"
-                  value={selectedNode.data.tagId || ""}
-                  onChange={(e) => {
-                    const tag = tags.find((t) => t.id === e.target.value);
-                    updateSelectedNodeData("tagId", e.target.value);
-                    updateSelectedNodeData("tagName", tag?.name || "");
-                  }}
-                  MenuProps={{ PaperProps: { style: { backgroundColor: "#1e1e2e", color: "#e0e0e0" } } }}
-                >
-                  {tags.map((t) => (
-                    <MenuItem key={t.id} value={t.id} style={{ color: "#e0e0e0" }}>
-                      <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: t.color || "#888", display: "inline-block", marginRight: 8 }} />
-                      {t.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-
-            {selectedNode.data.type === "pix_payment" && (
-              <Box display="flex" flexDirection="column" gap={2}>
-                <TextField
-                  label="Valor do Pix (R$)"
-                  variant="outlined"
+            {/* LISTA INTERATIVA */}
+            {selectedNode.data.type === "list_menu" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Título do Menu"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.title || ""}
+                    onChange={(e) => updateNodeData("title", e.target.value)}
+                  />
+                </div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Texto de Apresentação"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.content || ""}
+                    onChange={(e) => updateNodeData("content", e.target.value)}
+                  />
+                </div>
+                <Typography variant="subtitle2" style={{ color: "#fff", marginBottom: 8 }}>
+                  Itens da Lista:
+                </Typography>
+                {(selectedNode.data.options || []).map((opt, idx) => (
+                  <Paper key={opt.id} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <TextField
+                        size="small"
+                        label="Título do Item"
+                        fullWidth
+                        variant="outlined"
+                        value={opt.text}
+                        onChange={(e) => {
+                          const newOpts = [...selectedNode.data.options];
+                          newOpts[idx].text = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        className={classes.drawerField}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const newOpts = selectedNode.data.options.filter((_, i) => i !== idx);
+                          updateNodeData("options", newOpts);
+                        }}
+                        style={{ color: "#ff5252" }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </div>
+                  </Paper>
+                ))}
+                <Button
                   size="small"
-                  fullWidth
+                  variant="outlined"
+                  style={{ color: "#128C7E", borderColor: "#128C7E" }}
+                  startIcon={<Add />}
+                  onClick={() => {
+                    const newOpts = [
+                      ...(selectedNode.data.options || []),
+                      { id: `opt_${Date.now()}`, optionNumber: `${(selectedNode.data.options || []).length + 1}`, text: `Item ${(selectedNode.data.options || []).length + 1}` },
+                    ];
+                    updateNodeData("options", newOpts);
+                  }}
+                >
+                  Adicionar Item na Lista
+                </Button>
+              </div>
+            )}
+
+            {/* SALVAR VARIÁVEL */}
+            {selectedNode.data.type === "set_variable" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Nome da Variável"
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Ex: cpf, email, cidade"
+                    value={selectedNode.data.variableName || ""}
+                    onChange={(e) => updateNodeData("variableName", e.target.value)}
+                  />
+                </div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Mensagem de Pergunta ao Cliente"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Ex: Por favor, digite o seu CPF:"
+                    value={selectedNode.data.variablePrompt || ""}
+                    onChange={(e) => updateNodeData("variablePrompt", e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* PAUSA ANTI-BAN */}
+            {selectedNode.data.type === "anti_ban" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Tempo Mínimo de Espera (segundos)"
+                    type="number"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.minDelaySeconds || 3}
+                    onChange={(e) => updateNodeData("minDelaySeconds", Number(e.target.value))}
+                  />
+                </div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Tempo Máximo de Espera (segundos)"
+                    type="number"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.maxDelaySeconds || 8}
+                    onChange={(e) => updateNodeData("maxDelaySeconds", Number(e.target.value))}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* DELAY */}
+            {selectedNode.data.type === "delay" && (
+              <div className={classes.drawerField}>
+                <TextField
+                  label="Tempo de Atraso (segundos)"
                   type="number"
-                  className={classes.drawerField}
-                  value={selectedNode.data.pixValue || ""}
-                  onChange={(e) => updateSelectedNodeData("pixValue", e.target.value)}
-                  helperText="Exemplo: 50.00"
-                />
-                <TextField
-                  label="Chave / Copia e Cola Pix"
-                  variant="outlined"
-                  size="small"
-                  multiline
-                  rows={3}
                   fullWidth
-                  className={classes.drawerField}
-                  value={selectedNode.data.pixCopyPaste || ""}
-                  onChange={(e) => updateSelectedNodeData("pixCopyPaste", e.target.value)}
-                  helperText="Cole o código Pix Copia e Cola completo"
-                />
-              </Box>
-            )}
-            {selectedNode.data.type === "condition" && (
-              <Box display="flex" flexDirection="column" gap={2}>
-                <TextField
-                  label="Palavra / Termo para Match (Se contiver)"
                   variant="outlined"
-                  size="small"
-                  fullWidth
-                  className={classes.drawerField}
-                  value={selectedNode.data.conditionKeyword || ""}
-                  onChange={(e) => updateSelectedNodeData("conditionKeyword", e.target.value)}
-                  helperText="Se a mensagem do cliente contiver este termo, o fluxo avança pelo caminho Verdadeiro."
+                  value={selectedNode.data.delaySeconds || 1}
+                  onChange={(e) => updateNodeData("delaySeconds", Number(e.target.value))}
                 />
-              </Box>
+              </div>
             )}
 
+            {/* WEBHOOK */}
             {selectedNode.data.type === "webhook" && (
-              <Box display="flex" flexDirection="column" gap={2}>
+              <div className={classes.drawerField}>
                 <TextField
                   label="URL do Webhook (HTTP POST)"
-                  variant="outlined"
-                  size="small"
                   fullWidth
-                  className={classes.drawerField}
+                  variant="outlined"
+                  placeholder="https://sua-api.com/webhook"
                   value={selectedNode.data.webhookUrl || ""}
-                  onChange={(e) => updateSelectedNodeData("webhookUrl", e.target.value)}
-                  helperText="Dispara dados do cliente e ticket via JSON POST para n8n, Make ou sistema próprio."
+                  onChange={(e) => updateNodeData("webhookUrl", e.target.value)}
                 />
-              </Box>
+              </div>
             )}
 
-            {selectedNode.data.type === "delay" && (
-              <Box display="flex" flexDirection="column" gap={2}>
-                <TextField
-                  label="Tempo de Atraso (em segundos)"
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  type="number"
-                  className={classes.drawerField}
-                  value={selectedNode.data.delaySeconds || ""}
-                  onChange={(e) => updateSelectedNodeData("delaySeconds", e.target.value)}
-                  helperText="Tempo em segundos que o sistema aguardará antes de passar para o próximo nó."
-                />
-              </Box>
+            {/* COBRAR PIX */}
+            {selectedNode.data.type === "pix_payment" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Valor da Cobrança (R$)"
+                    type="number"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.pixValue || 1.00}
+                    onChange={(e) => updateNodeData("pixValue", e.target.value)}
+                  />
+                </div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Chave Pix / Código Copia e Cola"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.pixCopyPaste || ""}
+                    onChange={(e) => updateNodeData("pixCopyPaste", e.target.value)}
+                  />
+                </div>
+              </div>
             )}
 
-            {selectedNode.data.type === "randomizer" && (
-              <Paper style={{ backgroundColor: "rgba(236,64,122,0.12)", padding: 16, borderRadius: 8, border: "1px solid rgba(236,64,122,0.3)" }}>
-                <Typography variant="body2" style={{ color: "#f48fb1", textAlign: "center" }}>
-                  🎲 Este nó sorteia aleatoriamente entre as saídas conectadas a ele (Teste A/B ou Rodízio).
-                </Typography>
-              </Paper>
+            {/* MOVER KANBAN */}
+            {selectedNode.data.type === "set_kanban" && (
+              <div className={classes.drawerField}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Coluna do Kanban (Tag)</InputLabel>
+                  <Select
+                    value={selectedNode.data.tagId || ""}
+                    onChange={(e) => updateNodeData("tagId", e.target.value)}
+                    label="Coluna do Kanban (Tag)"
+                  >
+                    <MenuItem value=""><em>Nenhuma</em></MenuItem>
+                    {tags.map((t) => (
+                      <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
             )}
 
-            {selectedNode.data.type === "close_ticket" && (
-              <Paper style={{ backgroundColor: "rgba(183,28,28,0.12)", padding: 16, borderRadius: 8, border: "1px solid rgba(183,28,28,0.3)" }}>
-                <Typography variant="body2" style={{ color: "#ef9a9a", textAlign: "center" }}>
-                  Este nó encerra o ticket do cliente automaticamente ao ser atingido no fluxo.
-                </Typography>
-              </Paper>
+            {/* TRANSFERIR FILA */}
+            {selectedNode.data.type === "transfer_queue" && (
+              <div className={classes.drawerField}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Fila de Destino</InputLabel>
+                  <Select
+                    value={selectedNode.data.queueId || ""}
+                    onChange={(e) => updateNodeData("queueId", e.target.value)}
+                    label="Fila de Destino"
+                  >
+                    <MenuItem value=""><em>Nenhuma</em></MenuItem>
+                    {queues.map((q) => (
+                      <MenuItem key={q.id} value={q.id}>{q.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
             )}
 
             <Divider className={classes.drawerDivider} />
 
-            {/* Deletar nó */}
             {selectedNode.data.type !== "trigger" && (
               <Button
                 fullWidth
                 variant="outlined"
+                style={{ color: "#ff5252", borderColor: "#ff5252" }}
                 startIcon={<Delete />}
-                style={{ color: "#ef9a9a", borderColor: "rgba(183,28,28,0.5)", textTransform: "none", marginTop: 8 }}
                 onClick={handleDeleteSelectedNode}
               >
-                Remover este nó
+                Excluir Nó
               </Button>
             )}
-
-            <Box mt={2}>
-              <Typography variant="caption" style={{ color: "rgba(255,255,255,0.25)", fontSize: 10 }}>
-                ID: {selectedNode.id}
-              </Typography>
-            </Box>
-          </Box>
+          </div>
         )}
       </Drawer>
+
+      {/* MODAL DE TESTE */}
+      <TestFlowModal
+        open={openTestModal}
+        onClose={() => setOpenTestModal(false)}
+        flowId={flowId}
+      />
     </div>
   );
 };
 
-// Wrapper com ReactFlowProvider (obrigatório)
-const FlowBuilderCanvasWithProvider = () => (
-  <ReactFlowProvider>
-    <FlowBuilderCanvas />
-  </ReactFlowProvider>
-);
-
-export default FlowBuilderCanvasWithProvider;
+export default FlowBuilderInner;

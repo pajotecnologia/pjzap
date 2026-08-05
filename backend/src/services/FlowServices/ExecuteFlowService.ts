@@ -1,6 +1,5 @@
 import Flow from "../../models/Flow";
 import Ticket from "../../models/Ticket";
-import Message from "../../models/Message";
 import TicketTag from "../../models/TicketTag";
 import Setting from "../../models/Setting";
 import CreateMessageService from "../MessageServices/CreateMessageService";
@@ -15,9 +14,27 @@ interface Request {
 
 interface FlowNode {
   id: string;
-  type: "trigger" | "message" | "menu" | "transfer_queue" | "close_ticket" | "set_kanban" | "pix_payment" | "condition" | "webhook" | "delay" | "randomizer";
+  type: 
+    | "trigger" 
+    | "message" 
+    | "menu" 
+    | "buttons" 
+    | "list_menu" 
+    | "carousel" 
+    | "set_variable" 
+    | "anti_ban" 
+    | "transfer_queue" 
+    | "close_ticket" 
+    | "set_kanban" 
+    | "pix_payment" 
+    | "condition" 
+    | "webhook" 
+    | "delay" 
+    | "randomizer";
   title?: string;
   content?: string;
+  footer?: string;
+  thumbnailUrl?: string;
   keyword?: string;
   queueId?: number;
   tagId?: number;
@@ -28,7 +45,14 @@ interface FlowNode {
   targetNodeIdFalse?: string;
   webhookUrl?: string;
   delaySeconds?: number;
-  options?: Array<{ id: string; optionNumber: string; text: string; targetNodeId: string }>;
+  minDelaySeconds?: number;
+  maxDelaySeconds?: number;
+  variableName?: string;
+  variablePrompt?: string;
+  buttonLabel?: string;
+  buttons?: Array<{ id: string; text: string }>;
+  options?: Array<{ id: string; optionNumber: string; text: string; description?: string; targetNodeId: string }>;
+  cards?: Array<{ title: string; description: string; imageUrl?: string; buttonText?: string }>;
   targetNodeId?: string;
 }
 
@@ -137,7 +161,149 @@ const ExecuteFlowService = async ({
           };
           await CreateMessageService({ messageData, companyId });
 
-          // Avança para o próximo nó conectado
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "buttons") {
+          let textToSend = "";
+          if (currentNode.title) textToSend += `*${currentNode.title}*\n\n`;
+          textToSend += currentNode.content || "Escolha uma opção:";
+          if (currentNode.footer) textToSend += `\n\n_${currentNode.footer}_`;
+
+          if (currentNode.buttons && Array.isArray(currentNode.buttons)) {
+            textToSend += "\n\n";
+            currentNode.buttons.forEach((btn, idx) => {
+              textToSend += `[ ${btn.text || `Opção ${idx + 1}`} ]\n`;
+            });
+          }
+
+          textToSend = textToSend.replace(/{nome}/gi, ticket.contact.name || "Cliente");
+
+          if (ticket.channel === "instagram") {
+            await SendInstagramMessageService({
+              body: textToSend,
+              recipientId: ticket.contact.instagramId || ticket.contact.number,
+              whatsapp: ticket.whatsapp
+            });
+          } else {
+            await SendWhatsAppMessage({
+              body: textToSend,
+              ticket
+            });
+          }
+
+          const messageData = {
+            id: `flow_btn_${Date.now()}`,
+            ticketId: ticket.id,
+            contactId: ticket.contactId,
+            body: textToSend,
+            fromMe: true,
+            read: true,
+            mediaType: "chat"
+          };
+          await CreateMessageService({ messageData, companyId });
+
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "list_menu") {
+          let listText = "";
+          if (currentNode.title) listText += `📋 *${currentNode.title}*\n\n`;
+          listText += currentNode.content || "Selecione um item da lista:\n\n";
+          
+          if (currentNode.options && Array.isArray(currentNode.options)) {
+            currentNode.options.forEach((opt, idx) => {
+              listText += `🔹 *${opt.optionNumber || idx + 1}. ${opt.text}*\n`;
+              if (opt.description) listText += `   _${opt.description}_\n`;
+            });
+          }
+          if (currentNode.footer) listText += `\n_${currentNode.footer}_`;
+
+          if (ticket.channel === "instagram") {
+            await SendInstagramMessageService({
+              body: listText,
+              recipientId: ticket.contact.instagramId || ticket.contact.number,
+              whatsapp: ticket.whatsapp
+            });
+          } else {
+            await SendWhatsAppMessage({
+              body: listText,
+              ticket
+            });
+          }
+
+          const messageData = {
+            id: `flow_list_${Date.now()}`,
+            ticketId: ticket.id,
+            contactId: ticket.contactId,
+            body: listText,
+            fromMe: true,
+            read: true,
+            mediaType: "chat"
+          };
+          await CreateMessageService({ messageData, companyId });
+          return true;
+
+        } else if (currentNode.type === "carousel") {
+          if (currentNode.cards && Array.isArray(currentNode.cards)) {
+            for (const card of currentNode.cards) {
+              let cardMsg = `🎠 *${card.title}*\n${card.description}`;
+              if (card.buttonText) cardMsg += `\n\n👉 [ ${card.buttonText} ]`;
+
+              if (ticket.channel === "instagram") {
+                await SendInstagramMessageService({
+                  body: cardMsg,
+                  recipientId: ticket.contact.instagramId || ticket.contact.number,
+                  whatsapp: ticket.whatsapp
+                });
+              } else {
+                await SendWhatsAppMessage({
+                  body: cardMsg,
+                  ticket
+                });
+              }
+            }
+          }
+
+          let targetId = currentNode.targetNodeId;
+          if (!targetId) {
+            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
+            targetId = c?.targetNodeId;
+          }
+          currentNode = nodes.find((n) => n.id === targetId);
+
+        } else if (currentNode.type === "set_variable") {
+          const varName = currentNode.variableName || "campo_personalizado";
+          const varPrompt = currentNode.variablePrompt || `Por favor, digite o seu ${varName}:`;
+
+          if (ticket.channel === "instagram") {
+            await SendInstagramMessageService({
+              body: varPrompt,
+              recipientId: ticket.contact.instagramId || ticket.contact.number,
+              whatsapp: ticket.whatsapp
+            });
+          } else {
+            await SendWhatsAppMessage({
+              body: varPrompt,
+              ticket
+            });
+          }
+          return true;
+
+        } else if (currentNode.type === "anti_ban") {
+          const min = Number(currentNode.minDelaySeconds) || 3;
+          const max = Number(currentNode.maxDelaySeconds) || 8;
+          const randomDelaySec = Math.floor(Math.random() * (max - min + 1)) + min;
+          await new Promise(resolve => setTimeout(resolve, randomDelaySec * 1000));
+
           let targetId = currentNode.targetNodeId;
           if (!targetId) {
             const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
@@ -176,7 +342,7 @@ const ExecuteFlowService = async ({
             mediaType: "chat"
           };
           await CreateMessageService({ messageData, companyId });
-          return true; // Aguarda a resposta do cliente na próxima mensagem
+          return true;
 
         } else if (currentNode.type === "transfer_queue") {
           if (currentNode.queueId) {

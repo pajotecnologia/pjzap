@@ -4,6 +4,7 @@ import ListFlowsService from "../services/FlowServices/ListFlowsService";
 import ShowFlowService from "../services/FlowServices/ShowFlowService";
 import UpdateFlowService from "../services/FlowServices/UpdateFlowService";
 import DeleteFlowService from "../services/FlowServices/DeleteFlowService";
+import TestFlowService from "../services/FlowServices/TestFlowService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
@@ -54,4 +55,13 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
 
   await DeleteFlowService({ id: flowId, companyId });
   return res.status(200).json({ message: "Flow deleted" });
+};
+
+export const testFlow = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { flowId } = req.params;
+  const { number } = req.body;
+
+  await TestFlowService({ flowId: Number(flowId), number, companyId });
+  return res.status(200).json({ message: "Flow test triggered successfully" });
 };
