@@ -10,7 +10,9 @@ import {
   Box,
   Divider,
   Chip,
-  Grid
+  Tabs,
+  Tab,
+  Button
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import PaletteIcon from "@material-ui/icons/Palette";
@@ -25,6 +27,10 @@ import HeadsetMicIcon from "@material-ui/icons/HeadsetMic";
 import CodeIcon from "@material-ui/icons/Code";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
+import CloudDoneIcon from "@material-ui/icons/CloudDone";
+import QrCodeIcon from "@material-ui/icons/CropFree";
+import CameraAltIcon from "@material-ui/icons/CameraAlt";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -47,6 +53,15 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 12,
     color: "#ffffff",
     boxShadow: "0 4px 20px rgba(18,140,126,0.3)"
+  },
+  tabsContainer: {
+    marginBottom: theme.spacing(3),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
+  tabButton: {
+    fontWeight: 700,
+    fontSize: "0.9rem",
+    textTransform: "none",
   },
   accordion: {
     marginBottom: theme.spacing(2),
@@ -96,11 +111,27 @@ const useStyles = makeStyles(theme => ({
     alignItems: "center",
     gap: theme.spacing(1)
   },
+  channelCard: {
+    padding: theme.spacing(3),
+    borderRadius: 12,
+    marginBottom: theme.spacing(3),
+    backgroundColor: theme.palette.type === 'dark' ? '#1e1e2d' : '#ffffff',
+    border: "1px solid rgba(0,0,0,0.08)",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+  },
+  channelTitle: {
+    fontWeight: 800,
+    fontSize: "1.2rem",
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1.5),
+    marginBottom: theme.spacing(1),
+  },
   videoGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: theme.spacing(3),
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(2),
   },
   helpPaper: {
     position: 'relative',
@@ -141,152 +172,148 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const MANUAL_SECTIONS = [
+const SETUP_FLUXO_STEPS = [
   {
     id: "step1",
     title: "1. Personalização da Marca & Aparência (White-Label)",
     icon: <PaletteIcon style={{ color: "#e91e63" }} />,
-    summary: "Como deixar o sistema com as cores, logotipos e fontes da sua empresa.",
-    description: "Permite customizar a identidade visual completa da plataforma desde a tela de login até o painel interno.",
+    summary: "Branding & Cores da Empresa",
+    description: "Deixe a plataforma com a identidade visual da sua marca desde a tela de login até o painel interno.",
     steps: [
       "Acesse no menu lateral esquerdo: Configurações > Aparência.",
-      "Faça upload da imagem do Logo da Tela de Login e do Logo Interno (exibido na barra superior).",
-      "Defina a Cor Primária (ex: tom verde da sua empresa) e Cor Secundária para destacar botões e ícones.",
-      "Ajuste o Tamanho da Fonte Global para a melhor legibilidade da sua equipe.",
-      "Alterne entre Tema Claro e Tema Escuro (Dark Mode) conforme sua preferência.",
-      "Clique em Salvar para aplicar as alterações em tempo real."
+      "Faça upload da imagem do Logo da Tela de Login e do Logo Interno (exibido no topo do sistema).",
+      "Defina a Cor Primária (ex: tom verde/azul da sua marca) e a Cor Secundária para botões e destaques.",
+      "Ajuste o Tamanho da Fonte Global para garantir legibilidade ideal para a sua equipe.",
+      "Alterne entre Tema Claro (Light) e Tema Escuro (Dark Mode) conforme a preferência da empresa.",
+      "Clique no botão Salvar."
     ]
   },
   {
     id: "step2",
     title: "2. Setores & Filas de Atendimento (Queues)",
     icon: <DeviceHubIcon style={{ color: "#ff9800" }} />,
-    summary: "Organização por departamentos com horários de funcionamento.",
-    description: "As filas segregam os atendimentos em setores específicos (ex: Comercial, Suporte Técnico, Financeiro).",
+    summary: "Departamentos & Horários",
+    description: "Segregue os atendimentos por setor (Vendas, Suporte, Financeiro) com regras e horários de funcionamento.",
     steps: [
-      "Acesse o menu Filas > Adicionar Fila.",
-      "Digite o Nome da Fila (ex: Vendas) e selecione a Cor de identificação.",
-      "Digite a Mensagem de Saudação enviada automaticamente assim que o cliente entra na fila.",
-      "Configure o Horário de Atendimento (dias da semana e intervalos de horário).",
-      "Configure a Mensagem Fora de Expediente enviada caso o cliente envie mensagem à noite ou finais de semana.",
-      "Clique em Salvar."
+      "Acesse no menu lateral: Filas > Adicionar Fila.",
+      "Digite o Nome da Fila (ex: 'Vendas') e selecione uma Cor de identificação.",
+      "Digite a Mensagem de Saudação automática enviada assim que o cliente é direcionado para esta fila.",
+      "Configure o Horário de Atendimento (dias da semana e turnos de expediente).",
+      "Escreva a Mensagem Fora de Expediente enviada se o cliente chamar à noite ou nos finais de semana.",
+      "Clique no botão Salvar."
     ]
   },
   {
     id: "step3",
     title: "3. Cadastro de Usuários & Permissões da Equipe",
     icon: <PeopleIcon style={{ color: "#2196f3" }} />,
-    summary: "Gestão de acessos para atendentes e administradores.",
-    description: "Cadastre sua equipe dando acesso restrito a setores e funções específicas.",
+    summary: "Atendentes & Administradores",
+    description: "Cadastre sua equipe dando acessos restritos a setores e funções específicas do sistema.",
     steps: [
-      "Acesse o menu Usuários > Adicionar Usuário.",
-      "Preencha o Nome, E-mail de login e Senha inicial do atendente.",
-      "Defina o Perfil: escolha 'User' para atendente comum ou 'Admin' para acesso total a relatórios e configurações.",
-      "Em Filas, selecione quais departamentos este atendente terá permissão para visualizar e responder.",
-      "Clique em Salvar."
+      "Acesse no menu lateral: Usuários > Adicionar Usuário.",
+      "Preencha o Nome completo, E-mail de login e Senha inicial do atendente.",
+      "Defina o Perfil: escolha 'User' para atendente comum ou 'Admin' para gerentes com acesso total.",
+      "Em Filas, marque quais setores este atendente terá permissão para visualizar e responder.",
+      "Clique no botão Salvar."
     ]
   },
   {
     id: "step4",
     title: "4. Conexões de WhatsApp & Instagram Direct",
     icon: <PhonelinkSetupIcon style={{ color: "#4caf50" }} />,
-    summary: "Conecte seus números de WhatsApp e páginas do Instagram.",
-    description: "Vincule seus canais de comunicação para receber e responder todas as mensagens em um único lugar.",
+    summary: "Vinculação de Canais de Mensagem",
+    description: "Conecte seus números de WhatsApp (QR Code ou API Cloud Oficial) e contas de Instagram Direct.",
     steps: [
-      "Acesse o menu Conexões > Adicionar Conexão.",
-      "Selecione o Canal desejado: 'WhatsApp (QR Code)' ou 'Instagram Direct (API Meta)'.",
-      "Digite o Nome da Conexão e selecione as Filas associadas a este número.",
-      "No campo Token, crie uma chave secreta da sua escolha (ex: 'token_api_123') para autorizar integrações externas.",
-      "Clique em Salvar.",
-      "Na lista de conexões, clique no botão QR CODE e escaneie com o WhatsApp do seu celular (Menu > Aparelhos conectados > Conectar um aparelho)."
+      "Acesse no menu lateral: Conexões > Adicionar Conexão.",
+      "Selecione o Canal: 'WhatsApp (QR Code)', 'WhatsApp Cloud API Oficial (Meta WABA)' ou 'Instagram Direct (API Meta)'.",
+      "Digite o Nome da Conexão e selecione as Filas que responderão a este número/conta.",
+      "Digite um Token da sua escolha para autorizar integrações externas de Webhook.",
+      "Clique em Salvar. Se escolheu QR Code, clique no botão azul QR CODE e escaneie no aplicativo do WhatsApp no celular."
     ]
   },
   {
     id: "step5",
-    title: "5. Funil de Vendas Kanban, Tags & Disparos Automáticos",
+    title: "5. Funil Kanban CRM, Tags & Automação de Colunas",
     icon: <ViewColumnIcon style={{ color: "#9c27b0" }} />,
-    summary: "Gestão visual de leads, métricas financeiras e automações de coluna.",
-    description: "Transforme suas Tags em colunas do Kanban CRM para acompanhar o progresso de cada oportunidade de negócio.",
+    summary: "CRM Visual & Métricas Financeiras",
+    description: "Organize seus leads em etapas visuais, acompanhe faturamento acumulado, UTMs e dispare automações ao mover cards.",
     steps: [
-      "Acesse o menu Tags > Adicionar Tag.",
-      "Digite o Nome da etapa (ex: '1. Novo Lead', '2. Proposta Enviada', '3. Fechado').",
-      "Escolha a Cor da Tag e marque o campo 'Marcar como Kanban = Sim'.",
-      "Em Mensagem de Automação, escreva um texto para ser enviado automaticamente ao cliente assim que o card for movido para esta coluna.",
-      "Em Disparar Fluxo, selecione um robô do FlowBuilder para ser executado ao arrastar o card.",
-      "No menu Kanban, visualize o quadro de colunas, o faturamento acumulado por etapa e os dados de UTMs dos leads."
+      "Acesse no menu lateral: Tags > Adicionar Tag.",
+      "Digite o Nome da etapa (ex: '1. Novo Lead', '2. Proposta Enviada', '3. Venda Fechada').",
+      "Escolha a Cor e marque o checkbox 'Exibir no Painel Kanban = Sim'.",
+      "Em Mensagem de Automação, digite o texto enviado automaticamente ao cliente assim que o card for movido para esta coluna.",
+      "Em Disparar Fluxo, selecione um robô do FlowBuilder para ser executado ao mover o card.",
+      "No menu Kanban, acompanhe o quadro de colunas, faturamento total por etapa e os rastreadores de tráfego (UTMs)."
     ]
   },
   {
     id: "step6",
     title: "6. Construtor Visual de Chatbots (FlowBuilder)",
     icon: <AccountTreeIcon style={{ color: "#00bcd4" }} />,
-    summary: "Automação inteligente de triagem, menus, cobranças Pix e Webhooks.",
-    description: "Crie fluxos de atendimento automatizados completos usando um editor visual 'drag and drop'.",
+    summary: "Robôs de Triagem & Vendas",
+    description: "Crie automações visuais inteligentes com mensagens, botões clicáveis, menus, condicionais, webhooks e cobrança Pix.",
     steps: [
-      "Acesse o menu FlowBuilder > Criar Novo Fluxo.",
-      "Gatilho: Configure a palavra-chave no nó inicial (use '*' para responder a qualquer mensagem inicial).",
-      "Adicionar Nós: Arraste nós da barra superior: + Mensagem, + Menu, + Condição, + Webhook, + Atraso, + Sorteio, + Cobrar Pix, + Kanban.",
-      "Conectar Bloco a Bloco: Clique na bolinha de saída de um nó e arraste até o nó de destino para criar o fio de conexão.",
-      "Remover Conexão: Para excluir uma linha, basta clicar com o mouse sobre ela ou selecioná-la e pressionar a tecla Delete no teclado.",
-      "Configuração dos Nós: Clique no nó para abrir o painel lateral e preencher os textos, valores ou URLs.",
-      "Clique em Salvar Fluxo e ative a chave Status."
+      "Acesse no menu lateral: FlowBuilder > Criar Novo Fluxo.",
+      "Gatilho Inicial: No nó inicial, defina a palavra-chave que aciona o robô (use '*' para responder a qualquer mensagem inicial).",
+      "Adicionar Componentes: Clique nos itens da barra lateral COMPONENTES (Texto, Botões Interativos, Lista, Condição, Delay, Pix, Webhook).",
+      "Conectar Nós: Clique na bolinha inferior de um nó e arraste até o nó de destino para criar a linha de conexão.",
+      "Editar/Excluir: Clique no nó para abrir a gaveta de edição à direita. Para excluir, selecione e pressione Delete no teclado.",
+      "Testar Fluxo: Clique no botão 'Testar Fluxo' no topo, digite seu WhatsApp e valide a execução direta no celular antes de ativar!"
     ]
   },
   {
     id: "step7",
     title: "7. Respostas Rápidas (Quick Answers)",
     icon: <FlashOnIcon style={{ color: "#ffc107" }} />,
-    summary: "Atalhos por barra '/' para agilizar respostas repetitivas.",
+    summary: "Atalhos por Barra '/' no Chat",
     description: "Cadastre respostas padrão para que sua equipe envie informações completas com apenas dois cliques.",
     steps: [
-      "Acesse o menu Respostas Rápidas > Adicionar.",
+      "Acesse no menu lateral: Respostas Rápidas > Adicionar.",
       "No campo Atalho, digite a palavra sem espaços (ex: 'pix', 'endereco', 'horario').",
-      "Digite o texto completo da resposta e anexe arquivos/mídias se necessário.",
-      "Durante o atendimento no chat, o atendente digita '/' para abrir a lista de atalhos e clica na resposta desejada."
+      "Digite o texto completo da resposta e anexe arquivos ou mídias se necessário.",
+      "Durante a conversa na Central de Atendimento, o atendente digita '/' para abrir a lista de atalhos e clica na opção desejada."
     ]
   },
   {
     id: "step8",
     title: "8. Disparos em Massa & Campanhas",
     icon: <SendIcon style={{ color: "#3f51b5" }} />,
-    summary: "Envio de mensagens em lote para listas ou segmentos do Kanban.",
-    description: "Realize transmissões ativas de marketing e avisos para milhares de contatos com segurança.",
+    summary: "Envios em Lote Ativos",
+    description: "Realize transmissões em massa para uma Lista de Contatos ou para leads de uma Tag específica do Kanban.",
     steps: [
-      "Para enviar para uma planilha: Acesse Listas de Contatos e importe seu arquivo CSV/Excel.",
-      "Para enviar por segmento: Certifique-se de que seus contatos possuem uma Tag do Kanban atribuída.",
-      "Acesse o menu Campanhas > Nova Campanha.",
-      "Digite o Nome da Campanha e selecione a Conexão do WhatsApp emissora.",
-      "Selecione a Lista de Contatos ou a Tag do Kanban de destino.",
-      "Escreva as variações de mensagem (suporta spintax ex: '{Olá|Oi|Tudo bem}') e escolha a data/hora do disparo.",
-      "Clique em Salvar."
+      "Para enviar via planilha: Acesse Listas de Contatos e importe seu arquivo CSV/Excel de telefones.",
+      "Para enviar via segmento do Kanban: Certifique-se de que os contatos estão marcados com a Tag desejada.",
+      "Acesse no menu lateral: Campanhas > Nova Campanha.",
+      "Selecione a Conexão emissora do WhatsApp e escolha a Lista de Contatos ou Tag de destino.",
+      "Escreva as mensagens com suporte a variações (spintax ex: '{Olá|Oi|Tudo bem}') e agende a data/hora do disparo."
     ]
   },
   {
     id: "step9",
-    title: "9. Central de Atendimento ao Vivo",
+    title: "9. Central de Atendimento ao Vivo & Mídias",
     icon: <HeadsetMicIcon style={{ color: "#4caf50" }} />,
-    summary: "Operação diária da equipe de atendimento em tempo real.",
-    description: "Gerencie conversas simultâneas de WhatsApp e Instagram Direct com recursos avançados.",
+    summary: "Operação Diária dos Atendentes",
+    description: "Gerencie chamados de WhatsApp e Instagram em tempo real com recursos avançados de chat.",
     steps: [
-      "Aba Aguardando: Onde entram novas conversas ou clientes triados pelo robô. Clique em 'Aceitar' para iniciar.",
-      "Aba Atendendo: Onde ficam os chamados ativos do seu usuário.",
-      "Envio de Mídias: Envie áudios simulando gravação em tempo real, fotos, vídeos ou PDFs de até 50MB.",
-      "Transferência: Clique em 'Transferir' para passar o chamado para outro atendente ou fila.",
-      "Encerrar: Clique no ícone de Check verde (✅) para resolver e arquivar a conversa."
+      "Aba Aguardando: Onde entram novas conversas ou clientes triados pelo robô. Clique em 'Aceitar' para puxar o atendimento.",
+      "Aba Atendendo: Onde ficam os chamados ativos sob a responsabilidade do seu usuário.",
+      "Mídias & Áudios: Envie áudios simulando gravação em tempo real (Ptt), imagens, vídeos e arquivos PDF de até 50MB.",
+      "Transferência: Clique no botão 'Transferir' para passar a conversa para outro atendente ou fila de destino.",
+      "Encerrar: Clique no ícone de Check verde (✅) para resolver e arquivar o atendimento."
     ]
   },
   {
     id: "step10",
-    title: "10. API Externa Exclusiva & Webhooks",
+    title: "10. API Externa & Integradores (n8n, Make, Webhooks)",
     icon: <CodeIcon style={{ color: "#607d8b" }} />,
-    summary: "Integração HTTP REST com n8n, Make, CRMs e plataformas externas.",
-    description: "Dispare mensagens automatizadas via código ou sistemas terceiros de forma simples.",
+    summary: "Integração HTTP REST Exclusiva",
+    description: "Dispare mensagens e consulte status via código ou ferramentas de automação externas.",
     steps: [
-      "Acesse o menu API.",
-      "Copie a URL do Endpoint de Envio: 'https://seu-dominio.com/api/messages/send'.",
-      "No cabeçalho HTTP da sua requisição, inclua: 'Authorization: Bearer SEU_TOKEN' (o token cadastrado na Conexão do WhatsApp).",
-      "No corpo (Body JSON), envie: { \"number\": \"5511999999999\", \"body\": \"Sua mensagem\" }.",
-      "Utilize o painel de 'Teste de Envio' na própria aba API para validar suas credenciais."
+      "Acesse no menu lateral a aba API.",
+      "Endpoint de Envio: Use a URL 'https://seu-dominio.com/api/messages/send' via método POST.",
+      "Autenticação: Inclua o cabeçalho 'Authorization: Bearer SEU_TOKEN' (o token cadastrado na Conexão).",
+      "Body JSON: Envie no formato { \"number\": \"5511999999999\", \"body\": \"Sua mensagem\" }.",
+      "Teste Rápido: Utilize o painel de teste integrado na própria aba API para validar suas requisições."
     ]
   }
 ];
@@ -296,6 +323,7 @@ const Helps = () => {
   const [records, setRecords] = useState([]);
   const { list } = useHelps();
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
 
   useEffect(() => {
@@ -362,77 +390,180 @@ const Helps = () => {
   return (
     <MainContainer>
       <MainHeader>
-        <Title>Central de Ajuda & Manual Completo do Sistema</Title>
+        <Title>Central de Ajuda & Guia Completo do Sistema</Title>
         <MainHeaderButtonsWrapper />
       </MainHeader>
 
       <Paper className={classes.mainPaperContainer} variant="outlined">
-        {/* Cabeçalho do Manual */}
+        {/* Banner do Topo */}
         <Box className={classes.headerBox}>
           <Typography variant="h4" style={{ fontWeight: 800, marginBottom: 8 }}>
-            📘 Manual Passo a Passo de Configuração
+            🚀 Guia de Configuração 100% & Conexão dos Canais
           </Typography>
-          <Typography variant="subtitle1" style={{ opacity: 0.95, maxWidth: 780, margin: "0 auto" }}>
-            Aprenda a configurar todas as funções do PJZap, desde os cadastros iniciais de marca e filas até a operação completa de atendimento multicanal e automação visual!
+          <Typography variant="subtitle1" style={{ opacity: 0.95, maxWidth: 840, margin: "0 auto" }}>
+            Aprenda passo a passo a conectar seus canais de atendimento (WhatsApp e Instagram) e deixar todo o ecossistema do PJZap 100% configurado para rodar no piloto automático!
           </Typography>
         </Box>
 
-        {/* Sanfona / Accordions do Manual */}
-        <Box mb={4}>
-          {MANUAL_SECTIONS.map((section) => (
-            <Accordion
-              key={section.id}
-              expanded={expandedSection === section.id}
-              onChange={handleAccordionChange(section.id)}
-              className={classes.accordion}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                className={classes.accordionSummary}
-              >
-                <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" pr={1}>
-                  <Typography className={classes.accordionTitle}>
-                    {section.icon}
-                    {section.title}
-                  </Typography>
-                  <Chip
-                    label={section.summary}
-                    size="small"
-                    className={classes.sectionBadge}
-                  />
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box className={classes.contentBox}>
-                  <Typography variant="body1" style={{ color: "#666", fontWeight: 500, marginBottom: 8 }}>
-                    {section.description}
-                  </Typography>
-                  
-                  <Divider />
+        {/* Abas de Navegação */}
+        <Box className={classes.tabsContainer}>
+          <Tabs
+            value={activeTab}
+            onChange={(e, val) => setActiveTab(val)}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="📋 1. Fluxo Sequencial (100% Configurado)" className={classes.tabButton} />
+            <Tab label="📱 2. Guia de Conexão dos Canais (WhatsApp & Instagram)" className={classes.tabButton} />
+            {records.length > 0 && <Tab label={`🎥 3. Vídeo-Aulas (${records.length})`} className={classes.tabButton} />}
+          </Tabs>
+        </Box>
 
-                  <Box className={classes.stepBlock}>
-                    <Typography variant="subtitle2" className={classes.stepTitle}>
-                      <HelpOutlineIcon fontSize="small" /> Passo a Passo de Configuração:
+        {/* CONTEÚDO DA ABA 1: FLUXO SEQUENCIAL DE SETUP (100%) */}
+        {activeTab === 0 && (
+          <Box mb={4}>
+            <Box mb={3} p={2} style={{ backgroundColor: "rgba(18,140,126,0.08)", borderRadius: 8, border: "1px solid rgba(18,140,126,0.2)" }}>
+              <Typography variant="subtitle1" style={{ fontWeight: 700, color: "#128C7E", display: "flex", alignItems: "center", gap: 8 }}>
+                <CheckCircleOutlineIcon /> Roteiro Recomendado de Implantação do Zero:
+              </Typography>
+              <Typography variant="body2" style={{ color: "#444", marginTop: 4 }}>
+                Siga a ordem dos 10 passos abaixo para configurar o sistema do início ao fim sem pular nenhuma etapa.
+              </Typography>
+            </Box>
+
+            {SETUP_FLUXO_STEPS.map((section) => (
+              <Accordion
+                key={section.id}
+                expanded={expandedSection === section.id}
+                onChange={handleAccordionChange(section.id)}
+                className={classes.accordion}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  className={classes.accordionSummary}
+                >
+                  <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" pr={1}>
+                    <Typography className={classes.accordionTitle}>
+                      {section.icon}
+                      {section.title}
                     </Typography>
-                    <Box component="ol" pl={2.5} style={{ margin: 0 }}>
-                      {section.steps.map((step, idx) => (
-                        <Box component="li" key={idx} mb={1.2}>
-                          <Typography variant="body2" style={{ lineHeight: 1.6 }}>
-                            {step}
-                          </Typography>
-                        </Box>
-                      ))}
+                    <Chip
+                      label={section.summary}
+                      size="small"
+                      className={classes.sectionBadge}
+                    />
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box className={classes.contentBox}>
+                    <Typography variant="body1" style={{ color: "#666", fontWeight: 500, marginBottom: 8 }}>
+                      {section.description}
+                    </Typography>
+                    
+                    <Divider />
+
+                    <Box className={classes.stepBlock}>
+                      <Typography variant="subtitle2" className={classes.stepTitle}>
+                        <HelpOutlineIcon fontSize="small" /> Passo a Passo de Execução:
+                      </Typography>
+                      <Box component="ol" pl={2.5} style={{ margin: 0 }}>
+                        {section.steps.map((step, idx) => (
+                          <Box component="li" key={idx} mb={1.2}>
+                            <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                              {step}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
+        )}
 
-        {/* Vídeos de Treinamento (Se houver no banco) */}
-        {records.length > 0 && (
-          <Box mt={4}>
+        {/* CONTEÚDO DA ABA 2: GUIA COMPLETO DE CONEXÃO DOS CANAIS */}
+        {activeTab === 1 && (
+          <Box mb={4}>
+            {/* CANAL 1: WHATSAPP QR CODE */}
+            <Paper className={classes.channelCard}>
+              <Typography className={classes.channelTitle} style={{ color: "#25D366" }}>
+                <QrCodeIcon fontSize="large" /> 1. Conexão WhatsApp QR Code (Baileys / Multi-Device)
+              </Typography>
+              <Typography variant="body2" color="textSecondary" style={{ marginBottom: 16 }}>
+                Recomendado para conectar qualquer número de WhatsApp pessoal ou WhatsApp Business lendo o código na tela. Permite que seu celular continue funcionando normalmente enquanto múltiplos atendentes operam no PJZap.
+              </Typography>
+              
+              <Box className={classes.stepBlock} style={{ borderLeftColor: "#25D366" }}>
+                <Typography variant="subtitle2" className={classes.stepTitle} style={{ color: "#25D366" }}>
+                  <CheckCircleOutlineIcon fontSize="small" /> Passo a Passo para Conectar via QR Code:
+                </Typography>
+                <Box component="ol" pl={2.5} style={{ margin: 0 }}>
+                  <Box component="li" mb={1}><Typography variant="body2">Acesse no menu lateral: <b>Conexões</b> > clique em <b>Adicionar Conexão</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">No campo <b>Canal / Plataforma</b>, selecione <b>WhatsApp (QR Code / Baileys)</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Digite o <b>Nome da Conexão</b> (ex: 'WhatsApp Comercial') e escolha as <b>Filas</b> associadas.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">No campo <b>Token</b>, crie uma palavra-chave secreta para autorizar Webhooks e clique em <b>Salvar</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Na lista de conexões, clique no botão azul <b>QR CODE</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Abra o aplicativo WhatsApp no seu celular > acesse o <b>Menu (três pontinhos ou Configurações)</b> > <b>Aparelhos conectados</b> > <b>Conectar um aparelho</b> e escaneie o código exibido na tela!</Typography></Box>
+                </Box>
+              </Box>
+            </Paper>
+
+            {/* CANAL 2: WHATSAPP CLOUD API OFICIAL META */}
+            <Paper className={classes.channelCard}>
+              <Typography className={classes.channelTitle} style={{ color: "#128C7E" }}>
+                <CloudDoneIcon fontSize="large" /> 2. Conexão WhatsApp Cloud API Oficial Meta (WABA / Coexistência)
+              </Typography>
+              <Typography variant="body2" color="textSecondary" style={{ marginBottom: 16 }}>
+                Conexão oficial pelos servidores da Meta (sem leitura de QR Code). Permite a <b>Coexistência</b> (usar a API Cloud Oficial sem perder o aplicativo WhatsApp Business no celular).
+              </Typography>
+              
+              <Box className={classes.stepBlock} style={{ borderLeftColor: "#128C7E" }}>
+                <Typography variant="subtitle2" className={classes.stepTitle} style={{ color: "#128C7E" }}>
+                  <CheckCircleOutlineIcon fontSize="small" /> Passo a Passo para Conectar a Cloud API Oficial Meta:
+                </Typography>
+                <Box component="ol" pl={2.5} style={{ margin: 0 }}>
+                  <Box component="li" mb={1}><Typography variant="body2">Acesse <b>developers.facebook.com</b> e crie um Aplicativo do tipo <b>Negócios (Business)</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Adicione o produto <b>WhatsApp</b> > acesse <b>API Setup (Configuração da API)</b> e copie o <b>Phone Number ID</b> e o <b>WhatsApp Business Account ID (WABA ID)</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Acesse <b>business.facebook.com/settings</b> > <b>Usuários do Sistema</b> > crie um Usuário Administrador e gere o <b>Token Permanente</b> com as permissões <code>whatsapp_business_messaging</code> e <code>whatsapp_business_management</code>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">No PJZap, vá em <b>Conexões</b> > <b>Adicionar Conexão</b> > escolha <b>WhatsApp Cloud API Oficial (Meta WABA / Coexistência)</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Cole o <b>Phone Number ID</b>, o <b>WABA ID</b> e o <b>Token Permanente da Meta</b>. Defina um Verify Token no campo Token (ex: <code>pjzap_verify_123</code>) e salve.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">De volta ao portal da Meta (<i>WhatsApp > Configuration</i>), edite o Webhook, insira a URL <code>https://sua-vps.com/api/messages/send</code>, o Verify Token e clique em <b>Subscrever</b> no evento <b>messages</b>.</Typography></Box>
+                </Box>
+              </Box>
+            </Paper>
+
+            {/* CANAL 3: INSTAGRAM DIRECT API META */}
+            <Paper className={classes.channelCard}>
+              <Typography className={classes.channelTitle} style={{ color: "#e1306c" }}>
+                <CameraAltIcon fontSize="large" /> 3. Conexão Instagram Direct (API Meta)
+              </Typography>
+              <Typography variant="body2" color="textSecondary" style={{ marginBottom: 16 }}>
+                Permite receber e responder todas as mensagens diretas (Direct) do seu perfil comercial do Instagram diretamente pela Central de Atendimento do PJZap.
+              </Typography>
+              
+              <Box className={classes.stepBlock} style={{ borderLeftColor: "#e1306c" }}>
+                <Typography variant="subtitle2" className={classes.stepTitle} style={{ color: "#e1306c" }}>
+                  <CheckCircleOutlineIcon fontSize="small" /> Passo a Passo para Conectar o Instagram Direct:
+                </Typography>
+                <Box component="ol" pl={2.5} style={{ margin: 0 }}>
+                  <Box component="li" mb={1}><Typography variant="body2">Certifique-se de que sua conta do Instagram é <b>Profissional/Comercial</b> e está vinculada à sua <b>Página do Facebook</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Em <b>business.facebook.com/settings > Páginas</b>, copie o <b>ID da Página do Facebook</b> (número longo).</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Em <b>Usuários do Sistema</b>, gere o Token Permanente com as permissões: <code>instagram_basic</code>, <code>instagram_manage_messages</code> e <code>pages_messaging</code>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">No PJZap, vá em <b>Conexões</b> > <b>Adicionar Conexão</b> > escolha <b>Instagram Direct (API Meta)</b>.</Typography></Box>
+                  <Box component="li" mb={1}><Typography variant="body2">Cole o <b>ID da Página do Facebook</b> e o <b>Token de Acesso da Meta</b>, vincule às Filas desejadas e clique em <b>Salvar</b>!</Typography></Box>
+                </Box>
+              </Box>
+            </Paper>
+          </Box>
+        )}
+
+        {/* CONTEÚDO DA ABA 3: VÍDEOS */}
+        {activeTab === 2 && records.length > 0 && (
+          <Box mb={4}>
             <Typography variant="h6" style={{ fontWeight: 700, marginBottom: 16 }}>
               🎥 Vídeo-Aulas de Treinamento ({records.length})
             </Typography>
