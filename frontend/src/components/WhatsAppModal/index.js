@@ -284,7 +284,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
                           name="channel"
                           labelId="channel-selection-label"
                         >
-                          <MenuItem value="whatsapp">WhatsApp (QR Code)</MenuItem>
+                          <MenuItem value="whatsapp">WhatsApp (QR Code / Baileys)</MenuItem>
+                          <MenuItem value="whatsapp_cloud">WhatsApp Cloud API Oficial (Meta WABA / Coexistência)</MenuItem>
                           <MenuItem value="instagram">Instagram Direct (API Meta)</MenuItem>
                         </Field>
                       </FormControl>
@@ -312,6 +313,64 @@ const WhatsAppModal = ({ open, onClose, whatsAppId, whatsAppData }) => {
                             fullWidth
                             type="password"
                           />
+                        </Grid>
+                      </>
+                    )}
+                    {values.channel === "whatsapp_cloud" && (
+                      <>
+                        <Grid item xs={12} sm={6}>
+                          <Field
+                            as={TextField}
+                            label="Phone Number ID (ID do Número na Meta)"
+                            name="facebookPageUserId"
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            placeholder="Ex: 109384750293847"
+                            helperText="Encontrado em Meta Developers > WhatsApp > API Setup"
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Field
+                            as={TextField}
+                            label="WhatsApp Business Account ID (WABA ID)"
+                            name="instagramId"
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            placeholder="Ex: 987654321012345"
+                            helperText="ID da Conta do WhatsApp Business no painel Meta"
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Field
+                            as={TextField}
+                            label="Token de Acesso Permanente da Meta (Access Token)"
+                            name="facebookUserToken"
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            type="password"
+                            helperText="Token de Usuário do Sistema gerado no Meta Business Manager"
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Paper style={{ padding: 12, backgroundColor: "rgba(18, 140, 126, 0.08)", border: "1px solid rgba(18, 140, 126, 0.3)", borderRadius: 8 }}>
+                            <Typography variant="subtitle2" style={{ color: "#128C7E", fontWeight: 700 }}>
+                              🌐 Parâmetros para Configuração do Webhook no Meta for Developers
+                            </Typography>
+                            <Box mt={1}>
+                              <Typography variant="body2" style={{ fontSize: 13, color: "#333" }}>
+                                <b>URL de Callback do Webhook:</b> {`${process.env.REACT_APP_BACKEND_URL || 'https://seu-dominio.com'}/api/messages/send`}
+                              </Typography>
+                              <Typography variant="body2" style={{ fontSize: 13, color: "#333", marginTop: 4 }}>
+                                <b>Verify Token (Token de Verificação):</b> {values.token || 'Digite uma senha/chave no campo Token abaixo'}
+                              </Typography>
+                              <Typography variant="caption" style={{ color: "#666", marginTop: 6, display: "block" }}>
+                                👉 No painel <b>Meta for Developers > WhatsApp > Configuração</b>, insira a URL e o Verify Token acima e marque a assinatura do evento <b>'messages'</b>.
+                              </Typography>
+                            </Box>
+                          </Paper>
                         </Grid>
                       </>
                     )}
