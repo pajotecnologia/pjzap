@@ -21,7 +21,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Chip,
   InputAdornment,
 } from "@material-ui/core";
 import {
@@ -46,7 +45,6 @@ import {
   ViewCarousel,
   Code,
   Security,
-  CenterFocusStrong,
   Send,
   Search,
 } from "@material-ui/icons";
@@ -121,7 +119,6 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     overflow: "hidden",
   },
-  // Barra Lateral de Componentes (Estilo FlowSender)
   sidebar: {
     width: 240,
     backgroundColor: "#161626",
@@ -203,7 +200,6 @@ const useStyles = makeStyles((theme) => ({
   canvas: {
     flex: 1,
   },
-  // Painel lateral de edição ("Configurar Node")
   drawerPaper: {
     width: 340,
     padding: 18,
@@ -441,7 +437,7 @@ const CustomNode = ({ data, selected }) => {
         {data.type === "menu" && (
           <div>
             <div style={{ color: "#555", marginBottom: 4 }}>
-              {data.content ? `${data.content.substring(0, 30)}...` : "Menu"}
+              {data.content ? `${data.content.substring(0, 30)}...` : "Menu Numérico"}
             </div>
             {(data.options || []).map((opt) => (
               <div key={opt.id} style={{ fontSize: 10, color: "#444" }}>
@@ -631,6 +627,15 @@ const FlowBuilderInner = () => {
               }))
             );
           }
+        } else {
+          setNodes([
+            {
+              id: "trigger_1",
+              type: "custom",
+              position: { x: 250, y: 100 },
+              data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*" },
+            },
+          ]);
         }
       } catch (err) {
         toast.error("Erro ao carregar o fluxo.");
@@ -717,10 +722,11 @@ const FlowBuilderInner = () => {
         id: newId,
         type,
         title: NodeLabels[type],
-        content: type === "message" ? "Olá! Como posso ajudar?" : "",
+        content: type === "message" ? "Olá! Como posso ajudar?" : (type === "menu" ? "Escolha uma opção:" : ""),
         buttons: type === "buttons" ? [{ id: "btn_1", text: "Opção 1" }] : [],
-        options: type === "list_menu" ? [{ id: "opt_1", optionNumber: "1", text: "Item 1" }] : [],
+        options: type === "list_menu" ? [{ id: "opt_1", optionNumber: "1", text: "Item 1" }] : (type === "menu" ? [{ id: "opt_1", optionNumber: "1", text: "Opção 1" }] : []),
         cards: type === "carousel" ? [{ title: "Card 1", description: "Descrição do card 1", buttonText: "Ver mais" }] : [],
+        conditionKeyword: type === "condition" ? "sim" : "",
       },
     };
 
@@ -748,12 +754,9 @@ const FlowBuilderInner = () => {
     );
   };
 
-  // Excluir nó selecionado
+  // Excluir nó selecionado (Permite excluir QUALQUER nó selecionado)
   const handleDeleteSelectedNode = () => {
-    if (!selectedNode || selectedNode.data.type === "trigger") {
-      toast.warning("O nó inicial Gatilho não pode ser excluído.");
-      return;
-    }
+    if (!selectedNode) return;
     setNodes((nds) => nds.filter((n) => n.id !== selectedNode.id));
     setEdges((eds) => eds.filter((e) => e.source !== selectedNode.id && e.target !== selectedNode.id));
     setSelectedNode(null);
@@ -883,6 +886,7 @@ const FlowBuilderInner = () => {
               onEdgeClick={onEdgeClick}
               onNodeClick={onNodeClick}
               nodeTypes={nodeTypes}
+              deleteKeyCode={["Backspace", "Delete"]}
               fitView
               attributionPosition="bottom-right"
               ref={reactFlowInstance}
@@ -931,7 +935,7 @@ const FlowBuilderInner = () => {
               </div>
             )}
 
-            {/* MENSAGEM */}
+            {/* MENSAGEM DE TEXTO */}
             {selectedNode.data.type === "message" && (
               <div className={classes.drawerField}>
                 <TextField
@@ -944,6 +948,191 @@ const FlowBuilderInner = () => {
                   onChange={(e) => updateNodeData("content", e.target.value)}
                   helperText="Você pode usar as variáveis: {nome}"
                 />
+              </div>
+            )}
+
+            {/* MENU NUMÉRICO */}
+            {selectedNode.data.type === "menu" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Texto de Apresentação do Menu"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.content || ""}
+                    onChange={(e) => updateNodeData("content", e.target.value)}
+                    helperText="Ex: Escolha uma das opções abaixo digitando o número:"
+                  />
+                </div>
+                <Typography variant="subtitle2" style={{ color: "#fff", marginBottom: 8 }}>
+                  Opções Numéricas do Menu:
+                </Typography>
+                {(selectedNode.data.options || []).map((opt, idx) => (
+                  <Paper key={opt.id || idx} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <TextField
+                        size="small"
+                        label="Número"
+                        style={{ width: 80 }}
+                        variant="outlined"
+                        value={opt.optionNumber || `${idx + 1}`}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedNode.data.options || [])];
+                          newOpts[idx].optionNumber = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        className={classes.drawerField}
+                      />
+                      <TextField
+                        size="small"
+                        label="Texto da Opção"
+                        fullWidth
+                        variant="outlined"
+                        value={opt.text}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedNode.data.options || [])];
+                          newOpts[idx].text = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        className={classes.drawerField}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const newOpts = selectedNode.data.options.filter((_, i) => i !== idx);
+                          updateNodeData("options", newOpts);
+                        }}
+                        style={{ color: "#ff5252" }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </div>
+                  </Paper>
+                ))}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  style={{ color: "#128C7E", borderColor: "#128C7E" }}
+                  startIcon={<Add />}
+                  onClick={() => {
+                    const newOpts = [
+                      ...(selectedNode.data.options || []),
+                      { id: `opt_${Date.now()}`, optionNumber: `${(selectedNode.data.options || []).length + 1}`, text: `Opção ${(selectedNode.data.options || []).length + 1}` },
+                    ];
+                    updateNodeData("options", newOpts);
+                  }}
+                >
+                  Adicionar Opção no Menu
+                </Button>
+              </div>
+            )}
+
+            {/* CONDIÇÃO (IF/ELSE) */}
+            {selectedNode.data.type === "condition" && (
+              <div>
+                <div className={classes.drawerField}>
+                  <TextField
+                    label="Palavra-chave a verificar (If/Else)"
+                    fullWidth
+                    variant="outlined"
+                    value={selectedNode.data.conditionKeyword || ""}
+                    onChange={(e) => updateNodeData("conditionKeyword", e.target.value)}
+                    helperText="Se a mensagem do cliente contiver esta palavra, seguirá o caminho VERDADEIRO (True); caso contrário, o FALSO (False)."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* SORTEIO (A/B) */}
+            {selectedNode.data.type === "randomizer" && (
+              <div style={{ color: "#aaa", fontSize: 13, marginBottom: 12 }}>
+                <Typography variant="body2" style={{ color: "#aaa" }}>
+                  🎲 Este nó sorteia aleatoriamente a execução entre os caminhos de saída conectados a ele. Conecte duas ou mais linhas para realizar um teste A/B de ofertas.
+                </Typography>
+              </div>
+            )}
+
+            {/* CARROSSEL DE CARDS */}
+            {selectedNode.data.type === "carousel" && (
+              <div>
+                <Typography variant="subtitle2" style={{ color: "#fff", marginBottom: 8 }}>
+                  Cards do Carrossel:
+                </Typography>
+                {(selectedNode.data.cards || []).map((card, idx) => (
+                  <Paper key={idx} style={{ padding: 10, marginBottom: 10, backgroundColor: "#1e1e32" }}>
+                    <div className={classes.drawerField}>
+                      <TextField
+                        size="small"
+                        label="Título do Card"
+                        fullWidth
+                        variant="outlined"
+                        value={card.title}
+                        onChange={(e) => {
+                          const newCards = [...(selectedNode.data.cards || [])];
+                          newCards[idx].title = e.target.value;
+                          updateNodeData("cards", newCards);
+                        }}
+                      />
+                    </div>
+                    <div className={classes.drawerField}>
+                      <TextField
+                        size="small"
+                        label="Descrição"
+                        multiline
+                        rows={2}
+                        fullWidth
+                        variant="outlined"
+                        value={card.description}
+                        onChange={(e) => {
+                          const newCards = [...(selectedNode.data.cards || [])];
+                          newCards[idx].description = e.target.value;
+                          updateNodeData("cards", newCards);
+                        }}
+                      />
+                    </div>
+                    <div className={classes.drawerField}>
+                      <TextField
+                        size="small"
+                        label="Texto do Botão"
+                        fullWidth
+                        variant="outlined"
+                        value={card.buttonText || ""}
+                        onChange={(e) => {
+                          const newCards = [...(selectedNode.data.cards || [])];
+                          newCards[idx].buttonText = e.target.value;
+                          updateNodeData("cards", newCards);
+                        }}
+                      />
+                    </div>
+                    <Button
+                      size="small"
+                      style={{ color: "#ff5252" }}
+                      onClick={() => {
+                        const newCards = selectedNode.data.cards.filter((_, i) => i !== idx);
+                        updateNodeData("cards", newCards);
+                      }}
+                    >
+                      Excluir Card
+                    </Button>
+                  </Paper>
+                ))}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  style={{ color: "#128C7E", borderColor: "#128C7E" }}
+                  startIcon={<Add />}
+                  onClick={() => {
+                    const newCards = [
+                      ...(selectedNode.data.cards || []),
+                      { title: `Card ${(selectedNode.data.cards || []).length + 1}`, description: "Descrição...", buttonText: "Saiba mais" },
+                    ];
+                    updateNodeData("cards", newCards);
+                  }}
+                >
+                  Adicionar Card
+                </Button>
               </div>
             )}
 
@@ -983,14 +1172,14 @@ const FlowBuilderInner = () => {
                   Botões de Clique:
                 </Typography>
                 {(selectedNode.data.buttons || []).map((btn, idx) => (
-                  <div key={btn.id} style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  <div key={btn.id || idx} style={{ display: "flex", gap: 6, marginBottom: 8 }}>
                     <TextField
                       size="small"
                       fullWidth
                       variant="outlined"
                       value={btn.text}
                       onChange={(e) => {
-                        const newBtns = [...selectedNode.data.buttons];
+                        const newBtns = [...(selectedNode.data.buttons || [])];
                         newBtns[idx].text = e.target.value;
                         updateNodeData("buttons", newBtns);
                       }}
@@ -1053,7 +1242,7 @@ const FlowBuilderInner = () => {
                   Itens da Lista:
                 </Typography>
                 {(selectedNode.data.options || []).map((opt, idx) => (
-                  <Paper key={opt.id} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
+                  <Paper key={opt.id || idx} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
                     <div style={{ display: "flex", gap: 6 }}>
                       <TextField
                         size="small"
@@ -1062,7 +1251,7 @@ const FlowBuilderInner = () => {
                         variant="outlined"
                         value={opt.text}
                         onChange={(e) => {
-                          const newOpts = [...selectedNode.data.options];
+                          const newOpts = [...(selectedNode.data.options || [])];
                           newOpts[idx].text = e.target.value;
                           updateNodeData("options", newOpts);
                         }}
@@ -1248,17 +1437,15 @@ const FlowBuilderInner = () => {
 
             <Divider className={classes.drawerDivider} />
 
-            {selectedNode.data.type !== "trigger" && (
-              <Button
-                fullWidth
-                variant="outlined"
-                style={{ color: "#ff5252", borderColor: "#ff5252" }}
-                startIcon={<Delete />}
-                onClick={handleDeleteSelectedNode}
-              >
-                Excluir Nó
-              </Button>
-            )}
+            <Button
+              fullWidth
+              variant="outlined"
+              style={{ color: "#ff5252", borderColor: "#ff5252" }}
+              startIcon={<Delete />}
+              onClick={handleDeleteSelectedNode}
+            >
+              Excluir Nó
+            </Button>
           </div>
         )}
       </Drawer>
