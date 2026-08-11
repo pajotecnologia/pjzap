@@ -51,7 +51,7 @@ interface FlowNode {
   variableName?: string;
   variablePrompt?: string;
   buttonLabel?: string;
-  buttons?: Array<{ id: string; text: string }>;
+  buttons?: Array<{ id: string; text: string; targetNodeId?: string }>;
   options?: Array<{ id: string; optionNumber: string; text: string; description?: string; targetNodeId: string }>;
   cards?: Array<{ title: string; description: string; imageUrl?: string; buttonText?: string }>;
   targetNodeId?: string;
@@ -234,46 +234,6 @@ const ExecuteFlowService = async ({
             mediaType: "chat"
           };
           await CreateMessageService({ messageData, companyId });
-          return true;
-
-        } else if (currentNode.type === "list_menu") {
-          let listText = "";
-          if (currentNode.title) listText += `📋 *${currentNode.title}*\n\n`;
-          listText += currentNode.content || "Selecione um item da lista:\n\n";
-          
-          if (currentNode.options && Array.isArray(currentNode.options)) {
-            currentNode.options.forEach((opt, idx) => {
-              listText += `🔹 *${opt.optionNumber || idx + 1}. ${opt.text}*\n`;
-              if (opt.description) listText += `   _${opt.description}_\n`;
-            });
-          }
-          if (currentNode.footer) listText += `\n_${currentNode.footer}_`;
-
-          if (ticket.channel === "instagram") {
-            await SendInstagramMessageService({
-              body: listText,
-              recipientId: ticket.contact.instagramId || ticket.contact.number,
-              whatsapp: ticket.whatsapp
-            });
-          } else {
-            await SendWhatsAppMessage({
-              body: listText,
-              ticket
-            });
-          }
-
-          const messageData = {
-            id: `flow_list_${Date.now()}`,
-            ticketId: ticket.id,
-            contactId: ticket.contactId,
-            body: listText,
-            fromMe: true,
-            read: true,
-            mediaType: "chat"
-          };
-          await CreateMessageService({ messageData, companyId });
-          return true;
-
         } else if (currentNode.type === "carousel") {
           if (currentNode.cards && Array.isArray(currentNode.cards)) {
             for (const card of currentNode.cards) {
