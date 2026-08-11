@@ -53,18 +53,29 @@ type Session = WASocket & {
 
 export default function msg() {
   return {
-    get: (key: WAMessageKey) => {
+    get: async (key: WAMessageKey) => {
       const { id } = key;
-      if (!id) return;
+      if (!id) return undefined;
       let data = msgCache.get(id);
       if (data) {
         try {
-          let msg = JSON.parse(data as string);
-          return msg?.message;
+          let parsed = typeof data === "string" ? JSON.parse(data as string) : data;
+          return (parsed as WAMessage)?.message;
         } catch (error) {
           logger.error(error);
         }
       }
+      try {
+        const Message = require("../models/Message").default;
+        const dbMsg = await Message.findOne({ where: { id } });
+        if (dbMsg && dbMsg.dataJson) {
+          const parsed = typeof dbMsg.dataJson === "string" ? JSON.parse(dbMsg.dataJson) : dbMsg.dataJson;
+          return parsed?.message;
+        }
+      } catch (err) {
+        logger.error("Erro ao buscar mensagem no DB para retry no getMessage:", err);
+      }
+      return undefined;
     },
     save: (msg: WAMessage) => {
       const { id } = msg.key;

@@ -61,6 +61,11 @@ const SendWhatsAppMessage = async ({
         ...options
       }
     );
+    try {
+      const msgDB = require("../../libs/wbot").default;
+      msgDB().save(sentMessage);
+    } catch (e) {}
+
     await ticket.update({ lastMessage: formatBody(body, ticket.contact) });
     console.log("Message sent", sentMessage);
     return sentMessage;

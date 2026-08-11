@@ -13,20 +13,27 @@ export const map_msg = new Map<any, any>();
 
 
 export const getContactIdentifier = (contact: any): string => {
-  if (contact.lid) {
+  if (contact?.lid && typeof contact.lid === "string" && contact.lid.includes("@lid")) {
     console.log('Usando LID para envio:', contact.lid);
     return contact.lid;
-  } else {
-    console.log('Usando JID para envio:', contact.number);
-    return contact.number;
   }
+  const num = (contact?.number || "").replace(/\D/g, "");
+  console.log('Usando JID para envio:', num);
+  return num;
 };
 
 // Função helper para construir o endereço de envio
 export const buildContactAddress = (contact: any, isGroup: boolean): string => {
+  if (!contact) return "";
+  if (isGroup) {
+    const num = contact.number || "";
+    return num.includes("@g.us") ? num : `${num}@g.us`;
+  }
   const contactId = getContactIdentifier(contact);
-  const domain = isGroup ? "@g.us" : contactId.includes("@") ? "" : "@s.whatsapp.net";
-  return `${contactId}${domain}`;
+  if (contactId.includes("@")) {
+    return contactId;
+  }
+  return `${contactId}@s.whatsapp.net`;
 };
 
 export const getJidFromMessage = async (message: WAMessage, wbot: Session): Promise<string> => {
