@@ -23,6 +23,10 @@ import Company from "./Company";
 import QuickMessage from "./QuickMessage";
 import Whatsapp from "./Whatsapp";
 
+// Hashes antigos com cost 8 continuam válidos: o bcrypt guarda o cost no próprio
+// hash, então o compare segue funcionando e senhas novas usam o cost atual.
+const BCRYPT_COST = 12;
+
 @Table
 class User extends Model<User> {
   @PrimaryKey
@@ -44,6 +48,9 @@ class User extends Model<User> {
 
   @Column
   passwordHash: string;
+
+  @Column
+  resetPassword: string;
 
   @Default(0)
   @Column
@@ -96,7 +103,7 @@ class User extends Model<User> {
   @BeforeCreate
   static hashPassword = async (instance: User): Promise<void> => {
     if (instance.password) {
-      instance.passwordHash = await hash(instance.password, 8);
+      instance.passwordHash = await hash(instance.password, BCRYPT_COST);
     }
   };
 

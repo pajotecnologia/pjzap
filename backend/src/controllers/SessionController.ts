@@ -3,7 +3,7 @@ import AppError from "../errors/AppError";
 import { getIO } from "../libs/socket";
 
 import AuthUserService from "../services/UserServices/AuthUserService";
-import { SendRefreshToken } from "../helpers/SendRefreshToken";
+import { SendRefreshToken, clearRefreshToken } from "../helpers/SendRefreshToken";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import FindUserFromToken from "../services/AuthServices/FindUserFromToken";
 import User from "../models/User";
@@ -56,12 +56,13 @@ export const update = async (
 
 export const me = async (req: Request, res: Response): Promise<Response> => {
   const token: string = req.cookies.jrt;
-  const user = await FindUserFromToken(token);
-  const { id, profile, super: superAdmin } = user;
 
   if (!token) {
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }
+
+  const user = await FindUserFromToken(token);
+  const { id, profile, super: superAdmin } = user;
 
   return res.json({ id, profile, super: superAdmin });
 };
@@ -72,9 +73,15 @@ export const remove = async (
 ): Promise<Response> => {
   const { id } = req.user;
   const user = await User.findByPk(id);
-  await user.update({ online: false });
 
-  res.clearCookie("jrt");
+  // Incrementar tokenVersion invalida os refresh tokens já emitidos: sem isso um
+  // token copiado continuaria válido por 7 dias após o logout.
+  await user.update({
+    online: false,
+    tokenVersion: (user.tokenVersion || 0) + 1
+  });
+
+  clearRefreshToken(res);
 
   return res.send();
 };

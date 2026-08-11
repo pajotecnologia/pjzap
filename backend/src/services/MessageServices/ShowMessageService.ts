@@ -4,10 +4,14 @@ import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 
 const ShowMessageService = async (messageId: string) => {
-  const message = await sequelize.query(`select * from "Messages" where id = '${messageId}'`, {
-    model: Message,
-    mapToModel: true
-  });
+  const message = await sequelize.query(
+    `select * from "Messages" where id = :messageId`,
+    {
+      replacements: { messageId },
+      model: Message,
+      mapToModel: true
+    }
+  );
   if (message.length > 0) {
     return message[0] as unknown as Message;
   }

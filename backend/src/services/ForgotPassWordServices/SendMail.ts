@@ -1,22 +1,21 @@
 import nodemailer from "nodemailer";
-import sequelize from "sequelize";
-import database from "../../database";
 import Setting from "../../models/Setting";
+import User from "../../models/User";
 import { config } from "dotenv";
 config();
-interface UserData {
-  companyId: number;
-}
 const SendMail = async (email: string, tokenSenha: string) => {
-  const { hasResult, data } = await filterEmail(email);
-  if (!hasResult) {
+  if (!email) {
     return { status: 404, message: "Email não encontrado" };
   }
-  const userData = data[0][0] as UserData;
-  if (!userData || userData.companyId === undefined) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return { status: 404, message: "Email não encontrado" };
+  }
+  if (user.companyId === undefined || user.companyId === null) {
     return { status: 404, message: "Dados do usuário não encontrados" };
   }
-  const companyId = userData.companyId;
+  const hasResult = true;
+  const companyId = user.companyId;
   const urlSmtp = process.env.MAIL_HOST;
   const userSmtp = process.env.MAIL_USER;
   const passwordSmpt = process.env.MAIL_PASS;
@@ -28,7 +27,7 @@ const SendMail = async (email: string, tokenSenha: string) => {
     auth: { user: userSmtp, pass: passwordSmpt }
   });
   if (hasResult === true) {
-    const { hasResults, datas } = await insertToken(email, tokenSenha);
+    const { hasResults, datas } = await insertToken(user, tokenSenha);
     const companyName = process.env.COMPANY_NAME || "Whaticket";
     const logo = `${process.env.BACKEND_URL}/public/logotipos/login.png`;
 
@@ -186,18 +185,8 @@ a[x-apple-data-detectors] {
     sendEmail();
   }
 };
-const filterEmail = async (email: string) => {
-  const sql = `SELECT * FROM "Users" WHERE email ='${email}'`;
-  const result = await database.query(sql, {
-    type: sequelize.QueryTypes.SELECT
-  });
-  return { hasResult: result.length > 0, data: [result] };
-};
-const insertToken = async (email: string, tokenSenha: string) => {
-  const sqls = `UPDATE "Users" SET "resetPassword"= '${tokenSenha}' WHERE email ='${email}'`;
-  const results = await database.query(sqls, {
-    type: sequelize.QueryTypes.UPDATE
-  });
-  return { hasResults: results.length > 0, datas: results };
+const insertToken = async (user: User, tokenSenha: string) => {
+  await user.update({ resetPassword: tokenSenha });
+  return { hasResults: true, datas: [user] };
 };
 export default SendMail;

@@ -8,7 +8,12 @@ backend/dist/
 frontend/build/
 
 # Variáveis de ambiente
+# Ignora .env e qualquer variante (.env.test, .env.local, backups .env.bak-*),
+# liberando apenas os arquivos de exemplo, que não contêm segredos reais.
 .env
+.env.*
+!.env.example
+!.env.example.docker
 backend/.env
 frontend/.env
 
