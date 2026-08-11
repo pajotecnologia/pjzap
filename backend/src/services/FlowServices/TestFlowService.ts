@@ -42,6 +42,17 @@ const TestFlowService = async ({ flowId, number, companyId }: Request): Promise<
     cleanNumber = `55${cleanNumber}`;
   }
 
+  // Validar o número nos servidores do WhatsApp (onWhatsApp) para obter o JID exato (resolvendo o 9º dígito se necessário)
+  try {
+    const CheckContactNumber = require("../WbotServices/CheckNumber").default;
+    const validNumber = await CheckContactNumber(cleanNumber, companyId);
+    if (validNumber && validNumber.exists && validNumber.jid) {
+      cleanNumber = validNumber.jid.split("@")[0].split(":")[0];
+    }
+  } catch (err: any) {
+    console.warn("[TestFlowService] Aviso: Número não validado no WhatsApp server:", err?.message || err);
+  }
+
   let contact = await Contact.findOne({
     where: { number: cleanNumber, companyId }
   });
