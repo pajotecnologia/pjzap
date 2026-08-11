@@ -223,7 +223,7 @@ const EditMessageModal = ({ open, onClose, onSave, message }) => {
                 style={{ padding: "15px 0px 15px 15px", flex: 1 }}
                 multiline
                 maxRows={6}
-                placeholder="Search Google Maps"
+                placeholder="Digite a mensagem para editar"
                 value={editedMessage}
                 onChange={(e) => setEditedMessage(e.target.value)}
                 inputProps={{ "aria-label": "search google maps" }}

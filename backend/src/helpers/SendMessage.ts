@@ -42,12 +42,12 @@ export const SendMessage = async (
       const mimeType = mime.lookup(fullPath);
 
       if (!mimeType) {
-        throw new AppError(`Could not determine mime type for media: ${fileName}`, 400);
+        throw new AppError(`Não foi possível determinar o tipo de mídia para o arquivo: ${fileName}`, 400);
       }
 
       const fileBuffer = await fs.readFile(fullPath);
       if (!fileBuffer || fileBuffer.length === 0) {
-        throw new AppError(`Media file is empty: ${fileName}`, 400);
+        throw new AppError(`O arquivo de mídia está vazio: ${fileName}`, 400);
       }
 
       const fileType = mimeType.split("/")[0];
@@ -93,7 +93,7 @@ export const SendMessage = async (
       }
     } else {
       if (!messageData.body.trim()) {
-        throw new AppError("Cannot send an empty text message.", 400);
+        throw new AppError("Não é possível enviar uma mensagem de texto vazia.", 400);
       }
       messageContent = { text: `\u200e${messageData.body}` } as WAMessageContent;
     }
@@ -102,7 +102,7 @@ export const SendMessage = async (
     const sentMessage = await wbot.sendMessage(chatId, messageContent);
 
     if (!sentMessage) {
-      throw new AppError("Failed to send message: Wbot returned undefined", 500);
+      throw new AppError("Falha ao enviar mensagem: Sessão do WhatsApp não respondeu.", 500);
     }
 
     logger.info(`Message sent successfully to ${chatId} (ID: ${sentMessage.key.id})`);

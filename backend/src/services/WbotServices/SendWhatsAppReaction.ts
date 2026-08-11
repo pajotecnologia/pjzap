@@ -34,11 +34,11 @@ const SendWhatsAppReaction = async ({
     });
 
     if (!messageToReact) {
-      throw new AppError("Message not found");
+      throw new AppError("Mensagem não encontrada.");
     }
 
     if (!reactionType) {
-      throw new AppError("ReactionType not found");
+      throw new AppError("Tipo de reação não encontrado.");
     }
 
     const msgFound = JSON.parse(messageToReact.dataJson);

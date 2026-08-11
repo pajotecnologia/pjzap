@@ -10,6 +10,7 @@ interface Request {
   ticket: Ticket;
   messageBody: string;
   companyId: number;
+  flowId?: number;
 }
 
 interface FlowNode {
@@ -65,11 +66,19 @@ interface FlowConnection {
 const ExecuteFlowService = async ({
   ticket,
   messageBody,
-  companyId
+  companyId,
+  flowId
 }: Request): Promise<boolean> => {
   try {
+    const whereClause: any = { companyId };
+    if (flowId) {
+      whereClause.id = flowId;
+    } else {
+      whereClause.active = true;
+    }
+
     const flows = await Flow.findAll({
-      where: { companyId, active: true }
+      where: whereClause
     });
 
     if (!flows || flows.length === 0) {

@@ -138,7 +138,7 @@ export function ContactForm ({ initialContact, onSave, onCancel }) {
                                 name="email"
                                 error={touched.email && Boolean(errors.email)}
                                 helperText={touched.email && errors.email}
-                                placeholder="Email address"
+                                placeholder="Endereço de e-mail"
                                 fullWidth
                                 margin="dense"
                                 variant="outlined"

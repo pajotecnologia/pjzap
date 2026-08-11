@@ -561,14 +561,14 @@ const TestFlowModal = ({ open, onClose, flowId }) => {
       <DialogTitle>▶️ Testar Fluxo no WhatsApp</DialogTitle>
       <DialogContent>
         <Typography variant="body2" style={{ marginBottom: 16, color: "#666" }}>
-          Informe o seu número de WhatsApp com DDD para disparar a execução deste robô imediatamente:
+          Informe o seu número de WhatsApp com DDD para disparar a execução deste robô imediatamente (Certifique-se de ter um WhatsApp <b>Conectado</b> na aba Conexões):
         </Typography>
         <TextField
           autoFocus
           fullWidth
           label="Número do WhatsApp (DDD + Número)"
           variant="outlined"
-          placeholder="Ex: 5511999999999"
+          placeholder="Ex: (87) 96540-5511 ou 5587965405511"
           value={number}
           onChange={(e) => setNumber(e.target.value)}
         />

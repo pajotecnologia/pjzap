@@ -28,9 +28,18 @@ const TestFlowService = async ({ flowId, number, companyId }: Request): Promise<
     throw new AppError("ERR_NO_DEF_WAPP_FOUND", 400);
   }
 
-  const cleanNumber = number.replace(/\D/g, "");
+  if (defaultWhatsapp.status !== "CONNECTED") {
+    throw new AppError("A conexão do WhatsApp precisa estar CONECTADA na página de Conexões para testar o fluxo.", 400);
+  }
+
+  let cleanNumber = number.replace(/\D/g, "");
   if (!cleanNumber || cleanNumber.length < 8) {
     throw new AppError("ERR_INVALID_NUMBER", 400);
+  }
+
+  // Prepend 55 for Brazilian numbers missing country code (10 or 11 digits: DDD + Number)
+  if ((cleanNumber.length === 10 || cleanNumber.length === 11) && !cleanNumber.startsWith("55")) {
+    cleanNumber = `55${cleanNumber}`;
   }
 
   let contact = await Contact.findOne({
@@ -64,7 +73,8 @@ const TestFlowService = async ({ flowId, number, companyId }: Request): Promise<
   return await ExecuteFlowService({
     ticket,
     messageBody: triggerKeyword,
-    companyId
+    companyId,
+    flowId: flow.id
   });
 };
 

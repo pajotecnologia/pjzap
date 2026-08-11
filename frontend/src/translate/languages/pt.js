@@ -88,7 +88,7 @@ const messages = {
           qrcode: "QR CODE",
           newQr: "Novo QR CODE",
           connecting: "Conectando",
-          restart:"Restart",
+          restart: "Reiniciar",
         },
         toolTips: {
           disconnected: {
@@ -205,9 +205,9 @@ const messages = {
           name: "Nome",
           projectName: "Nome do Projeto",
           language: "Linguagem",
-          jsonContent: "JsonContent",
+          jsonContent: "Conteúdo JSON",
           urlN8N: "URL",
-          typebotSlug: "Typebot - Slug",
+          typebotSlug: "Slug do Typebot",
           typebotExpires: "Tempo em minutos para expirar uma conversa",
           typebotKeywordFinish: "Palavra para finalizar o ticket",
           typebotKeywordRestart: "Palavra para reiniciar o fluxo",
@@ -801,7 +801,7 @@ const messages = {
         },
         table: {
           priority: "Prioridade",
-          title: "Title",
+          title: "Título",
           text: "Texto",
           mediaName: "Arquivo",
           status: "Status",
@@ -814,7 +814,7 @@ const messages = {
           readonly: "Apenas Visualização",
           form: {
             priority: "Prioridade",
-            title: "Title",
+            title: "Título",
             text: "Texto",
             mediaPath: "Arquivo",
             status: "Status",

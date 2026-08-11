@@ -33,7 +33,7 @@ export const createSubscription = async (
   });
 
   if (!(await schema.isValid(req.body))) {
-    throw new AppError("Validation fails", 400);
+    throw new AppError("Falha na validação dos dados.", 400);
   }
 
   const {
@@ -71,7 +71,7 @@ export const createSubscription = async (
     const updateCompany = await Company.findOne();
 
     if (!updateCompany) {
-      throw new AppError("Company not found", 404);
+      throw new AppError("Empresa não encontrada.", 404);
     }
 
 

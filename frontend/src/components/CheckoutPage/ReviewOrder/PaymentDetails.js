@@ -21,7 +21,7 @@ function PaymentDetails(props) {
       <Grid container>
         <React.Fragment>
           <Grid item xs={6}>
-            <Typography gutterBottom>Email:</Typography>
+            <Typography gutterBottom>E-mail:</Typography>
           </Grid>
           <Grid item xs={6}>
             <Typography gutterBottom>{user.company.email}</Typography>

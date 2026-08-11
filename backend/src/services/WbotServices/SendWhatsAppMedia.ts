@@ -65,7 +65,7 @@ export const getMessageOptions = async (
 
   try {
     if (!mimeType) {
-      throw new Error("Invalid mimetype");
+      throw new Error("Tipo de arquivo (mimetype) não suportado.");
     }
     let options: AnyMessageContent;
 
