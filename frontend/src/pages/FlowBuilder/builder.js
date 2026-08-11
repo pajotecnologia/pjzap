@@ -439,17 +439,23 @@ const CustomNode = ({ data, selected }) => {
         {data.type === "buttons" && (
           <div>
             <div style={{ fontWeight: 600 }}>{data.title || "Mensagem c/ Botões"}</div>
-            <div style={{ fontSize: 10, color: "#666" }}>
-              {(data.buttons || []).length} botões configurados
-            </div>
+            {(data.buttons || []).map((btn, idx) => (
+              <div key={btn.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between" }}>
+                <span>🔘 {btn.text}</span>
+                {btn.targetNodeId && <span style={{ fontSize: 9, color: "#9c27b0", fontWeight: 700 }}>➔ Nó #{btn.targetNodeId}</span>}
+              </div>
+            ))}
           </div>
         )}
         {data.type === "list_menu" && (
           <div>
             <div style={{ fontWeight: 600 }}>{data.title || "Lista de Opções"}</div>
-            <div style={{ fontSize: 10, color: "#666" }}>
-              {(data.options || []).length} itens na lista
-            </div>
+            {(data.options || []).map((opt, idx) => (
+              <div key={opt.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between" }}>
+                <span>🔹 {opt.text}</span>
+                {opt.targetNodeId && <span style={{ fontSize: 9, color: "#2196f3", fontWeight: 700 }}>➔ Nó #{opt.targetNodeId}</span>}
+              </div>
+            ))}
           </div>
         )}
         {data.type === "carousel" && (
@@ -470,9 +476,10 @@ const CustomNode = ({ data, selected }) => {
             <div style={{ color: "#555", marginBottom: 4 }}>
               {data.content ? `${data.content.substring(0, 30)}...` : "Menu Numérico"}
             </div>
-            {(data.options || []).map((opt) => (
-              <div key={opt.id} style={{ fontSize: 10, color: "#444" }}>
-                🔹 {opt.optionNumber || "#"}. {opt.text}
+            {(data.options || []).map((opt, idx) => (
+              <div key={opt.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between", gap: 4 }}>
+                <span>🔹 {opt.optionNumber || idx + 1}. {opt.text}</span>
+                {opt.targetNodeId && <span style={{ fontSize: 9, color: "#128C7E", fontWeight: 700 }}>➔ Nó #{opt.targetNodeId}</span>}
               </div>
             ))}
           </div>
@@ -481,8 +488,12 @@ const CustomNode = ({ data, selected }) => {
           <div>
             <div>Palavra: <strong>{data.conditionKeyword || "..."}</strong></div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 10 }}>
-              <span style={{ color: "green", fontWeight: 700 }}>VERDADEIRO</span>
-              <span style={{ color: "red", fontWeight: 700 }}>FALSO</span>
+              <span style={{ color: "green", fontWeight: 700 }}>
+                VERDADEIRO {data.targetNodeIdTrue ? `➔ Nó #${data.targetNodeIdTrue}` : ""}
+              </span>
+              <span style={{ color: "red", fontWeight: 700 }}>
+                FALSO {data.targetNodeIdFalse ? `➔ Nó #${data.targetNodeIdFalse}` : ""}
+              </span>
             </div>
           </div>
         )}
@@ -1001,8 +1012,8 @@ const FlowBuilderInner = () => {
                   Opções Numéricas do Menu:
                 </Typography>
                 {(selectedNode.data.options || []).map((opt, idx) => (
-                  <Paper key={opt.id || idx} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
-                    <div style={{ display: "flex", gap: 6 }}>
+                  <Paper key={opt.id || idx} style={{ padding: 10, marginBottom: 10, backgroundColor: "#1e1e32" }}>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
                       <TextField
                         size="small"
                         label="Número"
@@ -1040,6 +1051,28 @@ const FlowBuilderInner = () => {
                         <Delete />
                       </IconButton>
                     </div>
+                    <FormControl variant="outlined" size="small" fullWidth>
+                      <InputLabel style={{ color: "#aaa" }}>Ir para (Nó de Destino)</InputLabel>
+                      <Select
+                        value={opt.targetNodeId || ""}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedNode.data.options || [])];
+                          newOpts[idx].targetNodeId = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        label="Ir para (Nó de Destino)"
+                        style={{ color: "#fff" }}
+                      >
+                        <MenuItem value="">
+                          <em>Nenhum (Finalizar nesta opção)</em>
+                        </MenuItem>
+                        {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
+                          <MenuItem key={n.id} value={n.id}>
+                            {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Paper>
                 ))}
                 <Button
@@ -1072,6 +1105,46 @@ const FlowBuilderInner = () => {
                     onChange={(e) => updateNodeData("conditionKeyword", e.target.value)}
                     helperText="Se a mensagem do cliente contiver esta palavra, seguirá o caminho VERDADEIRO (True); caso contrário, o FALSO (False)."
                   />
+                </div>
+                <div className={classes.drawerField} style={{ marginTop: 12 }}>
+                  <FormControl variant="outlined" size="small" fullWidth>
+                    <InputLabel style={{ color: "#4caf50" }}>Caminho VERDADEIRO (Se contiver)</InputLabel>
+                    <Select
+                      value={selectedNode.data.targetNodeIdTrue || ""}
+                      onChange={(e) => updateNodeData("targetNodeIdTrue", e.target.value)}
+                      label="Caminho VERDADEIRO (Se contiver)"
+                      style={{ color: "#4caf50" }}
+                    >
+                      <MenuItem value="">
+                        <em>Nenhum (Finalizar)</em>
+                      </MenuItem>
+                      {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
+                        <MenuItem key={n.id} value={n.id}>
+                          {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+                <div className={classes.drawerField} style={{ marginTop: 12 }}>
+                  <FormControl variant="outlined" size="small" fullWidth>
+                    <InputLabel style={{ color: "#f44336" }}>Caminho FALSO (Se NÃO contiver)</InputLabel>
+                    <Select
+                      value={selectedNode.data.targetNodeIdFalse || ""}
+                      onChange={(e) => updateNodeData("targetNodeIdFalse", e.target.value)}
+                      label="Caminho FALSO (Se NÃO contiver)"
+                      style={{ color: "#f44336" }}
+                    >
+                      <MenuItem value="">
+                        <em>Nenhum (Finalizar)</em>
+                      </MenuItem>
+                      {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
+                        <MenuItem key={n.id} value={n.id}>
+                          {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </div>
               </div>
             )}
@@ -1203,30 +1276,54 @@ const FlowBuilderInner = () => {
                   Botões de Clique:
                 </Typography>
                 {(selectedNode.data.buttons || []).map((btn, idx) => (
-                  <div key={btn.id || idx} style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      value={btn.text}
-                      onChange={(e) => {
-                        const newBtns = [...(selectedNode.data.buttons || [])];
-                        newBtns[idx].text = e.target.value;
-                        updateNodeData("buttons", newBtns);
-                      }}
-                      className={classes.drawerField}
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const newBtns = selectedNode.data.buttons.filter((_, i) => i !== idx);
-                        updateNodeData("buttons", newBtns);
-                      }}
-                      style={{ color: "#ff5252" }}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </div>
+                  <Paper key={btn.id || idx} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        value={btn.text}
+                        onChange={(e) => {
+                          const newBtns = [...(selectedNode.data.buttons || [])];
+                          newBtns[idx].text = e.target.value;
+                          updateNodeData("buttons", newBtns);
+                        }}
+                        className={classes.drawerField}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const newBtns = selectedNode.data.buttons.filter((_, i) => i !== idx);
+                          updateNodeData("buttons", newBtns);
+                        }}
+                        style={{ color: "#ff5252" }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </div>
+                    <FormControl variant="outlined" size="small" fullWidth>
+                      <InputLabel style={{ color: "#aaa" }}>Ir para (Nó de Destino)</InputLabel>
+                      <Select
+                        value={btn.targetNodeId || ""}
+                        onChange={(e) => {
+                          const newBtns = [...(selectedNode.data.buttons || [])];
+                          newBtns[idx].targetNodeId = e.target.value;
+                          updateNodeData("buttons", newBtns);
+                        }}
+                        label="Ir para (Nó de Destino)"
+                        style={{ color: "#fff" }}
+                      >
+                        <MenuItem value="">
+                          <em>Nenhum (Parar neste botão)</em>
+                        </MenuItem>
+                        {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
+                          <MenuItem key={n.id} value={n.id}>
+                            {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Paper>
                 ))}
                 <Button
                   size="small"
@@ -1274,7 +1371,7 @@ const FlowBuilderInner = () => {
                 </Typography>
                 {(selectedNode.data.options || []).map((opt, idx) => (
                   <Paper key={opt.id || idx} style={{ padding: 8, marginBottom: 8, backgroundColor: "#1e1e32" }}>
-                    <div style={{ display: "flex", gap: 6 }}>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
                       <TextField
                         size="small"
                         label="Título do Item"
@@ -1299,6 +1396,28 @@ const FlowBuilderInner = () => {
                         <Delete />
                       </IconButton>
                     </div>
+                    <FormControl variant="outlined" size="small" fullWidth>
+                      <InputLabel style={{ color: "#aaa" }}>Ir para (Nó de Destino)</InputLabel>
+                      <Select
+                        value={opt.targetNodeId || ""}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedNode.data.options || [])];
+                          newOpts[idx].targetNodeId = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        label="Ir para (Nó de Destino)"
+                        style={{ color: "#fff" }}
+                      >
+                        <MenuItem value="">
+                          <em>Nenhum (Parar neste item)</em>
+                        </MenuItem>
+                        {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
+                          <MenuItem key={n.id} value={n.id}>
+                            {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Paper>
                 ))}
                 <Button

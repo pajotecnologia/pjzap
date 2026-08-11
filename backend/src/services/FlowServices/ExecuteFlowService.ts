@@ -178,14 +178,33 @@ const ExecuteFlowService = async ({
           currentNode = nodes.find((n) => n.id === targetId);
 
         } else if (currentNode.type === "buttons") {
+          const buttonsList = currentNode.buttons || [];
+          const matchedBtn = buttonsList.find((btn, idx) => {
+            const btnTxt = (btn.text || "").trim().toLowerCase();
+            const num = (idx + 1).toString();
+            return trimmedMsg === num || (btnTxt && trimmedMsg === btnTxt) || (btnTxt && trimmedMsg.includes(btnTxt));
+          });
+
+          if (matchedBtn) {
+            let btnTargetId = matchedBtn.targetNodeId;
+            if (!btnTargetId) {
+              const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id && conn.optionId === matchedBtn.id);
+              btnTargetId = c?.targetNodeId;
+            }
+            if (btnTargetId) {
+              currentNode = nodes.find((n) => n.id === btnTargetId);
+              continue;
+            }
+          }
+
           let textToSend = "";
           if (currentNode.title) textToSend += `*${currentNode.title}*\n\n`;
           textToSend += currentNode.content || "Escolha uma opção:";
           if (currentNode.footer) textToSend += `\n\n_${currentNode.footer}_`;
 
-          if (currentNode.buttons && Array.isArray(currentNode.buttons)) {
+          if (buttonsList && Array.isArray(buttonsList)) {
             textToSend += "\n\n";
-            currentNode.buttons.forEach((btn, idx) => {
+            buttonsList.forEach((btn, idx) => {
               textToSend += `[ ${btn.text || `Opção ${idx + 1}`} ]\n`;
             });
           }
@@ -215,13 +234,7 @@ const ExecuteFlowService = async ({
             mediaType: "chat"
           };
           await CreateMessageService({ messageData, companyId });
-
-          let targetId = currentNode.targetNodeId;
-          if (!targetId) {
-            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-            targetId = c?.targetNodeId;
-          }
-          currentNode = nodes.find((n) => n.id === targetId);
+          return true;
 
         } else if (currentNode.type === "list_menu") {
           let listText = "";
@@ -320,10 +333,30 @@ const ExecuteFlowService = async ({
           }
           currentNode = nodes.find((n) => n.id === targetId);
 
-        } else if (currentNode.type === "menu") {
+        } else if (currentNode.type === "menu" || currentNode.type === "list_menu") {
+          // Verificar se a mensagem do cliente é uma resposta a uma das opções do menu
+          const options = currentNode.options || [];
+          const matchedOpt = options.find((opt, idx) => {
+            const num = (opt.optionNumber || (idx + 1).toString()).trim().toLowerCase();
+            const txt = (opt.text || "").trim().toLowerCase();
+            return trimmedMsg === num || (txt && trimmedMsg === txt) || (txt && trimmedMsg.includes(txt));
+          });
+
+          if (matchedOpt) {
+            let optTargetId = matchedOpt.targetNodeId;
+            if (!optTargetId) {
+              const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id && conn.optionId === matchedOpt.id);
+              optTargetId = c?.targetNodeId;
+            }
+            if (optTargetId) {
+              currentNode = nodes.find((n) => n.id === optTargetId);
+              continue;
+            }
+          }
+
           let menuText = currentNode.content ? `${currentNode.content}\n\n` : "Escolha uma opção:\n\n";
-          if (currentNode.options && Array.isArray(currentNode.options)) {
-            currentNode.options.forEach((opt, idx) => {
+          if (options && Array.isArray(options)) {
+            options.forEach((opt, idx) => {
               menuText += `${opt.optionNumber || idx + 1}. ${opt.text}\n`;
             });
           }
