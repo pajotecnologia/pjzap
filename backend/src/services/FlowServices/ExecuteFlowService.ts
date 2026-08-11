@@ -159,23 +159,16 @@ const ExecuteFlowService = async ({
             });
           }
 
-          const messageData = {
-            id: `flow_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            ticketId: ticket.id,
-            contactId: ticket.contactId,
-            body: textToSend,
-            fromMe: true,
-            read: true,
-            mediaType: "chat"
-          };
-          await CreateMessageService({ messageData, companyId });
-
           let targetId = currentNode.targetNodeId;
           if (!targetId) {
             const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
             targetId = c?.targetNodeId;
           }
           currentNode = nodes.find((n) => n.id === targetId);
+
+          if (currentNode) {
+            await new Promise((resolve) => setTimeout(resolve, 600));
+          }
 
         } else if (currentNode.type === "buttons") {
           const buttonsList = currentNode.buttons || [];
@@ -223,17 +216,6 @@ const ExecuteFlowService = async ({
               ticket
             });
           }
-
-          const messageData = {
-            id: `flow_btn_${Date.now()}`,
-            ticketId: ticket.id,
-            contactId: ticket.contactId,
-            body: textToSend,
-            fromMe: true,
-            read: true,
-            mediaType: "chat"
-          };
-          await CreateMessageService({ messageData, companyId });
         } else if (currentNode.type === "carousel") {
           if (currentNode.cards && Array.isArray(currentNode.cards)) {
             for (const card of currentNode.cards) {
@@ -333,17 +315,6 @@ const ExecuteFlowService = async ({
               ticket
             });
           }
-
-          const messageData = {
-            id: `flow_menu_${Date.now()}`,
-            ticketId: ticket.id,
-            contactId: ticket.contactId,
-            body: menuText,
-            fromMe: true,
-            read: true,
-            mediaType: "chat"
-          };
-          await CreateMessageService({ messageData, companyId });
           return true;
 
         } else if (currentNode.type === "transfer_queue") {
