@@ -318,6 +318,185 @@ const SETUP_FLUXO_STEPS = [
   }
 ];
 
+const FLOWBUILDER_MANUAL_STEPS = [
+  {
+    id: "fb_step1",
+    title: "1. Nó Gatilho Inicial (Trigger / Palavra-Chave)",
+    icon: <FlashOnIcon style={{ color: "#ff9800" }} />,
+    summary: "Ativação do Robô",
+    description: "Determina qual mensagem do cliente aciona a execução deste fluxo automatizado.",
+    steps: [
+      "No tela do FlowBuilder, o primeiro nó do canvas é o Nó Gatilho Inicial (Trigger).",
+      "Clique no nó para abrir a gaveta de edição à direita.",
+      "Palavra-chave específica: Digite o termo exato que aciona o robô (ex: 'vendas', 'suporte', 'orcamento', 'pix').",
+      "Gatilho Coringa (*): Use '*' se quiser que o robô responda a QUALQUER primeira mensagem de um novo atendimento.",
+      "Conecte a bolinha inferior do Nó Gatilho ao próximo nó que deseja executar (ex: Enviar Mensagem)."
+    ]
+  },
+  {
+    id: "fb_step2",
+    title: "2. Nó Enviar Mensagem (Texto, Imagens, Áudios & Arquivos)",
+    icon: <SendIcon style={{ color: "#4caf50" }} />,
+    summary: "Mensagens & Anexos",
+    description: "Envia mensagens de texto formatadas com variáveis personalizadas ou arquivos de mídia.",
+    steps: [
+      "Arraste ou clique no componente 'Conteúdo / Mensagem' no menu lateral de componentes.",
+      "Variáveis dinâmicas: Insira tags como {{name}} (Nome do contato), {{protocol}} (Protocolo), {{date}} (Data atual) ou {{hour}} (Hora atual).",
+      "Envio de Áudio PTT: Ao anexar áudio (.ogg / .mp3), marque a opção 'Enviar como Gravação' para que o WhatsApp exiba o áudio como se tivesse sido gravado na hora!",
+      "Envio de Mídias: Você pode anexar imagens (JPG/PNG), vídeos (MP4) ou documentos PDF de até 50MB."
+    ]
+  },
+  {
+    id: "fb_step3",
+    title: "3. Nó Menu Numerado (Opções de Texto 1, 2, 3)",
+    icon: <DeviceHubIcon style={{ color: "#2196f3" }} />,
+    summary: "Menu de Triagem",
+    description: "Cria um menu de opções numéricas para o cliente escolher o assunto desejado.",
+    steps: [
+      "Adicione o nó 'Menu' ao canvas e abra o painel de edição.",
+      "Escreva o Título da mensagem (ex: 'Olá! Como podemos te ajudar hoje?').",
+      "Clique em 'Adicionar Opção': crie itens como '1 - Falar com Vendas', '2 - Suporte Técnico', '3 - Financeiro'.",
+      "RAMIFICAÇÃO: O nó criará uma saída para cada opção numérica. Conecte cada número ao fluxo correspondente!"
+    ]
+  },
+  {
+    id: "fb_step4",
+    title: "4. Nó Botões Interativos (Buttons)",
+    icon: <AccountTreeIcon style={{ color: "#9c27b0" }} />,
+    summary: "Botões Clicáveis",
+    description: "Envia botões nativos clicáveis na tela do cliente sem necessidade de digitar texto.",
+    steps: [
+      "Adicione o nó 'Botões' no canvas.",
+      "Defina a Mensagem Principal (ex: 'Deseja confirmar seu agendamento para amanhã?').",
+      "Cadastre até 3 Botões clicáveis (ex: [Sim, Confirmar], [Remarcar], [Cancelar]).",
+      "Conecte a saída de cada botão ao nó de destino correspondente à escolha do cliente."
+    ]
+  },
+  {
+    id: "fb_step5",
+    title: "5. Nó Atraso / Delay Humanizado",
+    icon: <PhonelinkSetupIcon style={{ color: "#ff5722" }} />,
+    summary: "Simulação de Digitação",
+    description: "Insere uma pausa calculada em segundos entre o envio de mensagens para simular comportamento humano.",
+    steps: [
+      "Adicione o nó 'Atraso / Delay' entre dois nós de mensagem.",
+      "No painel de edição, informe o tempo em segundos (ex: 3 segundos).",
+      "Durante o delay, o WhatsApp exibirá o status 'digitando...' para o cliente, tornando o robô extremamente humano e natural."
+    ]
+  },
+  {
+    id: "fb_step6",
+    title: "6. Nó Condicional (Se / Senão)",
+    icon: <CodeIcon style={{ color: "#e91e63" }} />,
+    summary: "Tomada de Decisão",
+    description: "Verifica se a resposta do cliente ou o valor de uma variável satisfaz uma condição.",
+    steps: [
+      "Adicione o nó 'Condição' ao fluxo.",
+      "Defina a Palavra ou Padrão a verificar (ex: se o texto contém 'sim', 'comprar' ou se a variável 'estado' == 'SP').",
+      "O nó possui DUAS saídas: 'Verdadeiro' (se atender à condição) e 'Falso' (se não atender).",
+      "Conecte cada saída ao caminho apropriado."
+    ]
+  },
+  {
+    id: "fb_step7",
+    title: "7. Nó Capturar Variável (Input do Usuário)",
+    icon: <HelpOutlineIcon style={{ color: "#00bcd4" }} />,
+    summary: "Coleta de Dados",
+    description: "Faz uma pergunta ao cliente e armazena a resposta em uma variável para ser usada no restante do fluxo.",
+    steps: [
+      "Adicione o nó 'Capturar Variável' (ou Set Variable).",
+      "Escolha ou digite o Nome da Variável (ex: 'cpf', 'email', 'cidade', 'tamanho_empresa').",
+      "Digite a Pergunta feita ao cliente (ex: 'Por favor, digite seu E-mail para cadastro:').",
+      "Nas mensagens seguintes, você pode exibir o dado capturado usando '{{email}}' ou enviar via Webhook!"
+    ]
+  },
+  {
+    id: "fb_step8",
+    title: "8. Nó Cobrança Pix Automática",
+    icon: <CheckCircleOutlineIcon style={{ color: "#4caf50" }} />,
+    summary: "Vendas & Pagamentos",
+    description: "Gera automaticamente o QR Code Pix e o código Copia e Cola no chat do cliente.",
+    steps: [
+      "Adicione o nó 'Cobrança Pix'.",
+      "Defina o Valor da cobrança (ex: R$ 49,90) ou vincule a uma variável de valor.",
+      "Insira a Chave Pix da empresa e o texto de instrução.",
+      "Ao passar por este nó, o robô enviará a chave 'Copia e Cola' pronta para o cliente pagar no aplicativo do banco."
+    ]
+  },
+  {
+    id: "fb_step9",
+    title: "9. Nó Webhook / Integração HTTP (n8n / Make / APIs)",
+    icon: <CodeIcon style={{ color: "#3f51b5" }} />,
+    summary: "Integração Externa",
+    description: "Envia os dados do ticket/cliente para um sistema externo ou consulta informações em tempo real.",
+    steps: [
+      "Adicione o nó 'Webhook'.",
+      "Cole a URL do seu Webhook (ex: n8n, Make, Typebot, CRM externo).",
+      "Selecione o Método HTTP (POST ou GET).",
+      "O robô enviará todos os dados do contato (nome, telefone, variáveis capturadas) no Body JSON da requisição!"
+    ]
+  },
+  {
+    id: "fb_step10",
+    title: "10. Nó Transferir para Fila / Setor (Queue Transfer)",
+    icon: <HeadsetMicIcon style={{ color: "#009688" }} />,
+    summary: "Encaminhamento Humano",
+    description: "Direciona a conversa para uma fila específica de atendentes da empresa.",
+    steps: [
+      "Adicione o nó 'Transferir Fila'.",
+      "Selecione a Fila de destino no menu suspenso (ex: 'Vendas', 'Suporte Técnico', 'Financeiro').",
+      "Assim que o robô executa este nó, o ticket é movido para a aba 'Aguardando' da fila correspondente."
+    ]
+  },
+  {
+    id: "fb_step11",
+    title: "11. Nó Alterar Kanban / Estágio CRM",
+    icon: <ViewColumnIcon style={{ color: "#673ab7" }} />,
+    summary: "Automação do CRM Visual",
+    description: "Move a conversa automaticamente para uma coluna do Quadro Kanban.",
+    steps: [
+      "Adicione o nó 'Definir Kanban / Tag'.",
+      "Selecione a Tag/Coluna de destino (ex: '1. Lead Qualificado', '2. Proposta Enviada', '3. Cliente Fechado').",
+      "O card do cliente no quadro Kanban será atualizado instantaneamente sem intervenção manual!"
+    ]
+  },
+  {
+    id: "fb_step12",
+    title: "12. Nó Encerrar Atendimento (Close Ticket)",
+    icon: <CheckCircleOutlineIcon style={{ color: "#f44336" }} />,
+    summary: "Finalização Automática",
+    description: "Resolve e encerra o ticket automaticamente ao concluir a jornada do robô.",
+    steps: [
+      "Adicione o nó 'Encerrar Ticket'.",
+      "Digite uma mensagem final de despedida ou pesquisa de satisfação (opcional).",
+      "O ticket será movido para o status 'Resolvido' liberando espaço na lista de atendimentos."
+    ]
+  },
+  {
+    id: "fb_step13",
+    title: "13. Nó Randomizador (Teste A/B)",
+    icon: <PaletteIcon style={{ color: "#ffc107" }} />,
+    summary: "Distribuição Percentual",
+    description: "Divide os clientes aleatoriamente entre 2 caminhos para testar abordagens de vendas.",
+    steps: [
+      "Adicione o nó 'Randomizador'.",
+      "Defina a porcentagem de divisão (ex: 50% para Saída A, 50% para Saída B).",
+      "Conecte a Saída A a uma mensagem de oferta 1 e a Saída B a uma mensagem de oferta 2 para medir qual converte mais!"
+    ]
+  },
+  {
+    id: "fb_step14",
+    title: "14. Nó Anti-Ban & Intervalos de Segurança",
+    icon: <PhonelinkSetupIcon style={{ color: "#795548" }} />,
+    summary: "Proteção de Número",
+    description: "Aplica intervalos dinâmicos de segurança para evitar bloqueios em fluxos de alto volume.",
+    steps: [
+      "Configure intervalos variados (ex: entre 3 e 8 segundos).",
+      "Utilize variações de texto (Spintax ex: '{Olá|Oi|Tudo bem}') para que o WhatsApp não identifique padrão repetitivo."
+    ]
+  }
+];
+
 const Helps = () => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
@@ -417,7 +596,8 @@ const Helps = () => {
           >
             <Tab label="📋 1. Fluxo Sequencial (100% Configurado)" className={classes.tabButton} />
             <Tab label="📱 2. Guia de Conexão dos Canais (WhatsApp & Instagram)" className={classes.tabButton} />
-            {records.length > 0 && <Tab label={`🎥 3. Vídeo-Aulas (${records.length})`} className={classes.tabButton} />}
+            <Tab label="🤖 3. Manual Completo do FlowBuilder (Todas as Funções)" className={classes.tabButton} />
+            {records.length > 0 && <Tab label={`🎥 4. Vídeo-Aulas (${records.length})`} className={classes.tabButton} />}
           </Tabs>
         </Box>
 
@@ -561,8 +741,73 @@ const Helps = () => {
           </Box>
         )}
 
-        {/* CONTEÚDO DA ABA 3: VÍDEOS */}
-        {activeTab === 2 && records.length > 0 && (
+        {/* CONTEÚDO DA ABA 3: MANUAL COMPLETO DO FLOWBUILDER */}
+        {activeTab === 2 && (
+          <Box mb={4}>
+            <Box mb={3} p={2} style={{ backgroundColor: "rgba(0,188,212,0.08)", borderRadius: 8, border: "1px solid rgba(0,188,212,0.2)" }}>
+              <Typography variant="subtitle1" style={{ fontWeight: 700, color: "#00bcd4", display: "flex", alignItems: "center", gap: 8 }}>
+                <AccountTreeIcon /> Manual Passo a Passo de Todas as Funções & Nós do FlowBuilder:
+              </Typography>
+              <Typography variant="body2" style={{ color: "#444", marginTop: 4 }}>
+                Aprenda a utilizar cada um dos 14 componentes visuais do Construtor de Automação para criar robôs inteligentes de atendimento e vendas.
+              </Typography>
+            </Box>
+
+            {FLOWBUILDER_MANUAL_STEPS.map((section) => (
+              <Accordion
+                key={section.id}
+                expanded={expandedSection === section.id}
+                onChange={handleAccordionChange(section.id)}
+                className={classes.accordion}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  className={classes.accordionSummary}
+                >
+                  <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" pr={1}>
+                    <Typography className={classes.accordionTitle}>
+                      {section.icon}
+                      {section.title}
+                    </Typography>
+                    <Chip
+                      label={section.summary}
+                      size="small"
+                      className={classes.sectionBadge}
+                      style={{ backgroundColor: "#00bcd4" }}
+                    />
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box className={classes.contentBox}>
+                    <Typography variant="body1" style={{ color: "#666", fontWeight: 500, marginBottom: 8 }}>
+                      {section.description}
+                    </Typography>
+                    
+                    <Divider />
+
+                    <Box className={classes.stepBlock} style={{ borderLeftColor: "#00bcd4" }}>
+                      <Typography variant="subtitle2" className={classes.stepTitle} style={{ color: "#00bcd4" }}>
+                        <HelpOutlineIcon fontSize="small" /> Como Configurar e Utilizar Passo a Passo:
+                      </Typography>
+                      <Box component="ol" pl={2.5} style={{ margin: 0 }}>
+                        {section.steps.map((step, idx) => (
+                          <Box component="li" key={idx} mb={1.2}>
+                            <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                              {step}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
+        )}
+
+        {/* CONTEÚDO DA ABA 4: VÍDEOS */}
+        {activeTab === 3 && records.length > 0 && (
           <Box mb={4}>
             <Typography variant="h6" style={{ fontWeight: 700, marginBottom: 16 }}>
               🎥 Vídeo-Aulas de Treinamento ({records.length})
