@@ -572,13 +572,13 @@ const CustomInput = (props) => {
   };
 
   const onPaste = (e) => {
-    if (ticketStatus === "open") {
+    if (ticketStatus !== "closed") {
       handleInputPaste(e);
     }
   };
 
   const renderPlaceholder = () => {
-    if (ticketStatus === "open") {
+    if (ticketStatus !== "closed") {
       return i18n.t("messagesInput.placeholderOpen");
     }
     return i18n.t("messagesInput.placeholderClosed");
@@ -1165,7 +1165,7 @@ const MessageInputCustom = (props) => {
   };
 
   const disableOption = () => {
-    return loading || recording || ticketStatus !== "open";
+    return loading || recording || ticketStatus === "closed";
   };
 
   const renderReplyingMessage = (message) => {
