@@ -796,6 +796,27 @@ const FlowBuilderInner = () => {
     );
   };
 
+  // Sincronizar linhas de conexão visuais ao vincular nós de destino
+  const syncOptionEdge = (sourceId, targetId) => {
+    if (!targetId) return;
+    setEdges((eds) => {
+      const exists = eds.some((e) => e.source === sourceId && e.target === targetId);
+      if (exists) return eds;
+      return [
+        ...eds,
+        {
+          id: `e_${sourceId}_${targetId}_${Date.now()}`,
+          source: sourceId,
+          target: targetId,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#128C7E", strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: "#128C7E" },
+        },
+      ];
+    });
+  };
+
   // Excluir nó selecionado (Permite excluir QUALQUER nó selecionado)
   const handleDeleteSelectedNode = () => {
     if (!selectedNode) return;
@@ -1056,9 +1077,11 @@ const FlowBuilderInner = () => {
                       <Select
                         value={opt.targetNodeId || ""}
                         onChange={(e) => {
+                          const targetId = e.target.value;
                           const newOpts = [...(selectedNode.data.options || [])];
-                          newOpts[idx].targetNodeId = e.target.value;
+                          newOpts[idx].targetNodeId = targetId;
                           updateNodeData("options", newOpts);
+                          if (targetId) syncOptionEdge(selectedNode.id, targetId);
                         }}
                         label="Ir para (Nó de Destino)"
                         style={{ color: "#fff" }}
@@ -1111,7 +1134,11 @@ const FlowBuilderInner = () => {
                     <InputLabel style={{ color: "#4caf50" }}>Caminho VERDADEIRO (Se contiver)</InputLabel>
                     <Select
                       value={selectedNode.data.targetNodeIdTrue || ""}
-                      onChange={(e) => updateNodeData("targetNodeIdTrue", e.target.value)}
+                      onChange={(e) => {
+                        const targetId = e.target.value;
+                        updateNodeData("targetNodeIdTrue", targetId);
+                        if (targetId) syncOptionEdge(selectedNode.id, targetId);
+                      }}
                       label="Caminho VERDADEIRO (Se contiver)"
                       style={{ color: "#4caf50" }}
                     >
@@ -1131,7 +1158,11 @@ const FlowBuilderInner = () => {
                     <InputLabel style={{ color: "#f44336" }}>Caminho FALSO (Se NÃO contiver)</InputLabel>
                     <Select
                       value={selectedNode.data.targetNodeIdFalse || ""}
-                      onChange={(e) => updateNodeData("targetNodeIdFalse", e.target.value)}
+                      onChange={(e) => {
+                        const targetId = e.target.value;
+                        updateNodeData("targetNodeIdFalse", targetId);
+                        if (targetId) syncOptionEdge(selectedNode.id, targetId);
+                      }}
                       label="Caminho FALSO (Se NÃO contiver)"
                       style={{ color: "#f44336" }}
                     >
@@ -1306,9 +1337,11 @@ const FlowBuilderInner = () => {
                       <Select
                         value={btn.targetNodeId || ""}
                         onChange={(e) => {
+                          const targetId = e.target.value;
                           const newBtns = [...(selectedNode.data.buttons || [])];
-                          newBtns[idx].targetNodeId = e.target.value;
+                          newBtns[idx].targetNodeId = targetId;
                           updateNodeData("buttons", newBtns);
+                          if (targetId) syncOptionEdge(selectedNode.id, targetId);
                         }}
                         label="Ir para (Nó de Destino)"
                         style={{ color: "#fff" }}
@@ -1401,9 +1434,11 @@ const FlowBuilderInner = () => {
                       <Select
                         value={opt.targetNodeId || ""}
                         onChange={(e) => {
+                          const targetId = e.target.value;
                           const newOpts = [...(selectedNode.data.options || [])];
-                          newOpts[idx].targetNodeId = e.target.value;
+                          newOpts[idx].targetNodeId = targetId;
                           updateNodeData("options", newOpts);
+                          if (targetId) syncOptionEdge(selectedNode.id, targetId);
                         }}
                         label="Ir para (Nó de Destino)"
                         style={{ color: "#fff" }}
