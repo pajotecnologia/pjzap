@@ -22,16 +22,42 @@ export interface Params {
   userId: string;
 }
 
+// Listas de ids são coagidas a inteiros para nunca virarem SQL.
+const toIntList = (value: unknown): number[] => {
+  const raw = Array.isArray(value) ? value : String(value ?? "").split(",");
+  return raw
+    .map(item => String(item).trim())
+    // Sem o descarte de vazios, Number("") viraria 0 e criaria um filtro falso.
+    .filter(item => item.length > 0)
+    .map(Number)
+    .filter(item => Number.isInteger(item));
+};
+
+const VALID_STATUS = ["open", "closed", "pending", "group"];
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 export default async function ListTicketsServiceReport(
   companyId: string | number,
   params: Params,
   page: number = 1,
   pageSize: number = 20
 ): Promise<DashboardData> {
-  const offset = (page - 1) * pageSize;
+  const safePageSize = Number.isInteger(Number(pageSize))
+    ? Math.min(Math.max(Number(pageSize), 1), 200)
+    : 20;
+  const safePage = Number.isInteger(Number(page))
+    ? Math.max(Number(page), 1)
+    : 1;
+  const offset = (safePage - 1) * safePageSize;
+
+  const replacements: Record<string, unknown> = {
+    companyId: Number(companyId),
+    limit: safePageSize,
+    offset
+  };
 
   const query = `
-  select 
+  select
 	  t.id,
 	  w."name" as "whatsappName",
     c."name" as "contactName",
@@ -51,46 +77,61 @@ export default async function ListTicketsServiceReport(
    LEFT JOIN (
         SELECT DISTINCT ON ("ticketId") *
         FROM "TicketTraking"
-        WHERE "companyId" = ${companyId}
+        WHERE "companyId" = :companyId
         ORDER BY "ticketId", "id" DESC
     ) tt ON t.id = tt."ticketId"
-    inner join "Contacts" c on 
-      t."contactId" = c.id 
-    left join "Whatsapps" w on 
-      t."whatsappId" = w.id 
+    inner join "Contacts" c on
+      t."contactId" = c.id
+    left join "Whatsapps" w on
+      t."whatsappId" = w.id
     left join "Users" u on
-      t."userId" = u.id 
+      t."userId" = u.id
     left join "Queues" q on
-      t."queueId" = q.id 
+      t."queueId" = q.id
   -- filterPeriod`;
 
-  let where = `where t."companyId" = ${companyId}`;
+  let where = `where t."companyId" = :companyId`;
 
-  if (_.has(params, "dateFrom")) {
-    where += ` and t."createdAt" >= '${params.dateFrom} 00:00:00'`;
+  if (_.has(params, "dateFrom") && DATE_PATTERN.test(params.dateFrom ?? "")) {
+    where += ` and t."createdAt" >= :dateFrom`;
+    replacements.dateFrom = `${params.dateFrom} 00:00:00`;
   }
 
-  if (_.has(params, "dateTo")) {
-    where += ` and t."createdAt" <= '${params.dateTo} 23:59:59'`;
+  if (_.has(params, "dateTo") && DATE_PATTERN.test(params.dateTo ?? "")) {
+    where += ` and t."createdAt" <= :dateTo`;
+    replacements.dateTo = `${params.dateTo} 23:59:59`;
   }
 
-  if (params.whatsappId !== undefined && params.whatsappId.length > 0) {
-    where += ` and t."whatsappId" in (${params.whatsappId})`;
-  }
-  if (params.users.length > 0) {
-    where += ` and t."userId" in (${params.users})`;
-  }
-
-  if (params.queueIds.length > 0) {
-    where += ` and COALESCE(t."queueId",0) in (${params.queueIds})`;
+  const whatsappIds = toIntList(params.whatsappId);
+  if (whatsappIds.length > 0) {
+    where += ` and t."whatsappId" in (:whatsappIds)`;
+    replacements.whatsappIds = whatsappIds;
   }
 
-  if (params.status.length > 0) {
-    where += ` and t."status" in ('${params.status.join("','")}')`;
+  const userIds = toIntList(params.users);
+  if (userIds.length > 0) {
+    where += ` and t."userId" in (:userIds)`;
+    replacements.userIds = userIds;
   }
 
-  if (params.contactId !== undefined && params.contactId !== "") {
-    where += ` and t."contactId" in (${params.contactId})`;
+  const queueIds = toIntList(params.queueIds);
+  if (queueIds.length > 0) {
+    where += ` and COALESCE(t."queueId",0) in (:queueIds)`;
+    replacements.queueIds = queueIds;
+  }
+
+  const status = (params.status ?? []).filter(item =>
+    VALID_STATUS.includes(item)
+  );
+  if (status.length > 0) {
+    where += ` and t."status" in (:status)`;
+    replacements.status = status;
+  }
+
+  const contactIds = toIntList(params.contactId);
+  if (contactIds.length > 0) {
+    where += ` and t."contactId" in (:contactIds)`;
+    replacements.contactIds = contactIds;
   }
 
   const finalQuery = query.replace("-- filterPeriod", where);
@@ -100,13 +141,15 @@ export default async function ListTicketsServiceReport(
     ${where}  `;
 
   const totalTicketsResult = await sequelize.query(totalTicketsQuery, {
+    replacements,
     type: QueryTypes.SELECT
   });
   const totalTickets = totalTicketsResult[0];
 
-  const paginatedQuery = `${finalQuery} ORDER BY t."createdAt" DESC LIMIT ${pageSize} OFFSET ${offset}`;
+  const paginatedQuery = `${finalQuery} ORDER BY t."createdAt" DESC LIMIT :limit OFFSET :offset`;
 
   const responseData: any[] = await sequelize.query(paginatedQuery, {
+    replacements,
     type: QueryTypes.SELECT
   });
 

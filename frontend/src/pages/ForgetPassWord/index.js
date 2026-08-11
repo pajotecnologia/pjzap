@@ -179,13 +179,11 @@ const ForgetPassword = () => {
 	const handleSendEmail = async (values) => {
 		setLoading(true);
 		try {
-			const response = await api.post(`${process.env.REACT_APP_BACKEND_URL}/forgetpassword/${values.email}`);
-			if (response.data.status === 404) {
-				toast.error("Email não encontrado");
-			} else {
-				toast.success(i18n.t("Email enviado com sucesso!"));
-				setShowAdditionalFields(true);
-			}
+			// O backend responde sempre 200 com mensagem genérica, de propósito:
+			// não revela se o e-mail existe na base.
+			await api.post("/forgetpassword", { email: values.email });
+			toast.success(i18n.t("Se o e-mail existir, você receberá as instruções."));
+			setShowAdditionalFields(true);
 		} catch (err) {
 			toastError(err);
 		}
@@ -195,9 +193,11 @@ const ForgetPassword = () => {
 	const handleResetPassword = async (values) => {
 		setLoading(true);
 		try {
-			await api.post(
-				`${process.env.REACT_APP_BACKEND_URL}/resetpasswords/${values.email}/${values.token}/${values.newPassword}`
-			);
+			await api.post("/resetpasswords", {
+				email: values.email,
+				token: values.token,
+				password: values.newPassword,
+			});
 			toast.success(i18n.t("Senha redefinida com sucesso."));
 			history.push("/login");
 		} catch (err) {
