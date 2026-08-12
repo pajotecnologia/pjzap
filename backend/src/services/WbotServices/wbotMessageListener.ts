@@ -2601,13 +2601,15 @@ const verifyCampaignMessageAndCloseTicket = async (
 
 
 const filterMessages = (msg: WAMessage): boolean => {
-  // receiving edited message
+  // Ignore messages sent by the bot itself
+  if (msg.key?.fromMe) return false;
+  // Allow edited messages and deletion notifications
   if (msg.message?.protocolMessage?.editedMessage) return true;
-  // receiving message deletion info
   if (msg.message?.protocolMessage?.type === 0) return true;
-  // ignore other protocolMessages
+  // Ignore other protocol messages
   if (msg.message?.protocolMessage) return false;
 
+  // Ignore certain stub types
   if (
     [
       WAMessageStubType.REVOKE,
