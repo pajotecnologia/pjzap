@@ -11,7 +11,7 @@ import mime from "mime-types";
 
 import ffmpegPath from "ffmpeg-static";
 import formatBody from "../../helpers/Mustache";
-import { buildContactAddress } from "../../utils/global";
+import { buildContactAddress, resolveWbotJid } from "../../utils/global";
 
 interface Request {
   media: Express.Multer.File;
@@ -210,16 +210,7 @@ const SendWhatsAppMedia = async ({
       };
     }
 
-    let destinationJid = buildContactAddress(ticket.contact, ticket.isGroup);
-    if (!ticket.isGroup && ticket.contact?.number) {
-      try {
-        const cleanNum = ticket.contact.number.replace(/\D/g, "");
-        const [onWapp] = await wbot.onWhatsApp(`${cleanNum}@s.whatsapp.net`);
-        if (onWapp && onWapp.exists && onWapp.jid) {
-          destinationJid = onWapp.jid;
-        }
-      } catch (e) {}
-    }
+    const destinationJid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
 
     const sentMessage = await wbot.sendMessage(
       destinationJid,

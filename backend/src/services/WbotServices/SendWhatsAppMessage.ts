@@ -7,7 +7,7 @@ import Ticket from "../../models/Ticket";
 import { logger } from "../../utils/logger";
 import formatBody from "../../helpers/Mustache";
 
-import { map_msg, buildContactAddress } from "../../utils/global";
+import { map_msg, resolveWbotJid } from "../../utils/global";
 
 interface Request {
   body: string;
@@ -24,20 +24,9 @@ const SendWhatsAppMessage = async ({
 }: Request): Promise<WAMessage> => {
   let options = {};
   const wbot = await GetTicketWbot(ticket);
-  let number = buildContactAddress(ticket.contact, ticket.isGroup);
-  if (!ticket.isGroup && ticket.contact?.number) {
-    try {
-      const cleanNum = ticket.contact.number.replace(/\D/g, "");
-      const [onWapp] = await wbot.onWhatsApp(`${cleanNum}@s.whatsapp.net`);
-      if (onWapp && onWapp.exists && onWapp.jid) {
-        number = onWapp.jid;
-        console.log("JID resolvido dinamicamente via onWhatsApp:", number);
-      }
-    } catch (e: any) {
-      console.warn("Aviso ao consultar onWhatsApp em SendWhatsAppMessage:", e?.message || e);
-    }
-  }
-  console.log("number final para envio:", number);
+  const number = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
+  console.log("number final para envio em SendWhatsAppMessage:", number);
+
   if (quotedMsg) {
     const chatMessages = await Message.findOne({
       where: {
@@ -57,16 +46,14 @@ const SendWhatsAppMessage = async ({
         }
       };
     }
-
   }
 
   try {
-    console.log('body:::::::::::::::::::::::::::', body)
-    map_msg.set(ticket.contact.number, { lastSystemMsg: body })
-    console.log('lastSystemMsg:::::::::::::::::::::::::::', ticket.contact.number)
+    console.log('body:::::::::::::::::::::::::::', body);
+    map_msg.set(ticket.contact.number, { lastSystemMsg: body });
     const sentMessage = await wbot.sendMessage(number, {
       text: formatBody(body, ticket.contact),
-	  contextInfo: { forwardingScore: isForwarded ? 2 : 0, isForwarded: isForwarded ? true : false }
+      contextInfo: { forwardingScore: isForwarded ? 2 : 0, isForwarded: isForwarded ? true : false }
     },
       {
         ...options

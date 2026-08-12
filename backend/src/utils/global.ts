@@ -32,6 +32,64 @@ export const buildContactAddress = (contact: any, isGroup: boolean): string => {
   return `${contactId}@s.whatsapp.net`;
 };
 
+export const resolveWbotJid = async (wbot: Session, contact: any, isGroup: boolean): Promise<string> => {
+  if (!contact) return "";
+  if (isGroup) {
+    const num = (contact.number || "").split(":")[0];
+    return num.includes("@g.us") ? num : `${num}@g.us`;
+  }
+
+  // Se o contato tem LID salvo
+  if (contact.lid && typeof contact.lid === "string" && contact.lid.includes("@lid")) {
+    const cleanLid = contact.lid.split(":")[0];
+    return cleanLid;
+  }
+
+  const rawNum = (contact.number || "").replace(/\D/g, "");
+  if (!rawNum) return buildContactAddress(contact, isGroup);
+
+  // 1. Tentar o número original
+  try {
+    const [onWapp] = await wbot.onWhatsApp(`${rawNum}@s.whatsapp.net`);
+    if (onWapp && onWapp.exists && onWapp.jid) {
+      console.log("JID resolvido via onWhatsApp (direto):", onWapp.jid);
+      return onWapp.jid;
+    }
+  } catch (e) {}
+
+  // 2. Tratar 9º dígito do Brasil (números com código 55)
+  if (rawNum.startsWith("55")) {
+    const ddd = rawNum.slice(2, 4);
+    const body = rawNum.slice(4);
+
+    // Se tem 13 dígitos (55 + DDD + 9 dígitos), tentar sem o 9 (12 dígitos)
+    if (rawNum.length === 13 && body.startsWith("9")) {
+      const numWithout9 = `55${ddd}${body.slice(1)}`;
+      try {
+        const [onWapp] = await wbot.onWhatsApp(`${numWithout9}@s.whatsapp.net`);
+        if (onWapp && onWapp.exists && onWapp.jid) {
+          console.log("JID resolvido via onWhatsApp (removido o 9º dígito):", onWapp.jid);
+          return onWapp.jid;
+        }
+      } catch (e) {}
+    }
+
+    // Se tem 12 dígitos (55 + DDD + 8 dígitos), tentar com o 9 (13 dígitos)
+    if (rawNum.length === 12) {
+      const numWith9 = `55${ddd}9${body}`;
+      try {
+        const [onWapp] = await wbot.onWhatsApp(`${numWith9}@s.whatsapp.net`);
+        if (onWapp && onWapp.exists && onWapp.jid) {
+          console.log("JID resolvido via onWhatsApp (adicionado o 9º dígito):", onWapp.jid);
+          return onWapp.jid;
+        }
+      } catch (e) {}
+    }
+  }
+
+  return `${rawNum}@s.whatsapp.net`;
+};
+
 export const getJidFromMessage = async (message: WAMessage, wbot: Session): Promise<string> => {
   const { key } = (message || {}) as any;
   const { remoteJid, remoteJidAlt, participantAlt, participant, senderPn, participantPn } = key || {};
