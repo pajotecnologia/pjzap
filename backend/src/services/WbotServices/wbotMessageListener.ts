@@ -202,8 +202,27 @@ const contactsArrayMessageGet = (msg: any,) => {
   return finalContacts
 }
 
+export const getMessageContent = (msg: proto.IWebMessageInfo): proto.IMessage | undefined => {
+  let m = msg?.message;
+  if (!m) return undefined;
+  if (m.ephemeralMessage?.message) {
+    m = m.ephemeralMessage.message;
+  }
+  if ((m as any)?.viewOnceMessage?.message) {
+    m = (m as any).viewOnceMessage.message;
+  }
+  if ((m as any)?.viewOnceMessageV2?.message) {
+    m = (m as any).viewOnceMessageV2.message;
+  }
+  if ((m as any)?.documentWithCaptionMessage?.message) {
+    m = (m as any).documentWithCaptionMessage.message;
+  }
+  return m;
+};
+
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
-  return getContentType(msg.message);
+  const message = getMessageContent(msg);
+  return getContentType(message as any) || "conversation";
 };
 
 export function validaCpfCnpj(val) {
@@ -433,54 +452,45 @@ const msgLocation = (image, latitude, longitude) => {
 };
 
 export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
-
   try {
-    let type = getTypeMessage(msg);
+    const message = getMessageContent(msg);
+    if (!message) return null;
+    let type = getContentType(message as any);
 
-    const types = {
-      conversation: msg?.message?.conversation,
-      editedMessage: msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage?.conversation,
-      imageMessage: msg.message?.imageMessage?.caption,
-      videoMessage: msg.message?.videoMessage?.caption,
-      extendedTextMessage: msg.message?.extendedTextMessage?.text,
-      buttonsResponseMessage: msg.message?.buttonsResponseMessage?.selectedButtonId,
-      templateButtonReplyMessage: msg.message?.templateButtonReplyMessage?.selectedId,
-      messageContextInfo: msg.message?.buttonsResponseMessage?.selectedButtonId || msg.message?.listResponseMessage?.title,
-      buttonsMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      viewOnceMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      stickerMessage: "sticker",
+    const types: any = {
+      conversation: message.conversation,
+      editedMessage: message.editedMessage?.message?.protocolMessage?.editedMessage?.conversation,
+      imageMessage: message.imageMessage?.caption || "Foto",
+      videoMessage: message.videoMessage?.caption || "Vídeo",
+      extendedTextMessage: message.extendedTextMessage?.text,
+      buttonsResponseMessage: message.buttonsResponseMessage?.selectedButtonId || message.buttonsResponseMessage?.selectedDisplayText,
+      templateButtonReplyMessage: message.templateButtonReplyMessage?.selectedId,
+      messageContextInfo: message.buttonsResponseMessage?.selectedButtonId || message.listResponseMessage?.title,
+      buttonsMessage: getBodyButton(msg) || message.listResponseMessage?.singleSelectReply?.selectedRowId,
+      viewOnceMessage: getBodyButton(msg) || message.listResponseMessage?.singleSelectReply?.selectedRowId,
+      stickerMessage: "Figurinha",
       reactionMessage: MessageUtils.getReactionMessage(msg) || "reaction",
-      contactMessage: msg.message?.contactMessage?.vcard,
-      contactsArrayMessage: (msg.message?.contactsArrayMessage?.contacts) && contactsArrayMessageGet(msg),
-      //locationMessage: `Latitude: ${msg.message.locationMessage?.degreesLatitude} - Longitude: ${msg.message.locationMessage?.degreesLongitude}`,
+      contactMessage: message.contactMessage?.vcard,
+      contactsArrayMessage: (message.contactsArrayMessage?.contacts) && contactsArrayMessageGet(msg),
       locationMessage: msgLocation(
-        msg.message?.locationMessage?.jpegThumbnail,
-        msg.message?.locationMessage?.degreesLatitude,
-        msg.message?.locationMessage?.degreesLongitude
+        message.locationMessage?.jpegThumbnail,
+        message.locationMessage?.degreesLatitude,
+        message.locationMessage?.degreesLongitude
       ),
-      liveLocationMessage: `Latitude: ${msg.message?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message?.liveLocationMessage?.degreesLongitude}`,
-      documentMessage: msg.message?.documentMessage?.title,
-      documentWithCaptionMessage: msg.message?.documentWithCaptionMessage?.message?.documentMessage?.caption,
+      liveLocationMessage: `Latitude: ${message.liveLocationMessage?.degreesLatitude} - Longitude: ${message.liveLocationMessage?.degreesLongitude}`,
+      documentMessage: message.documentMessage?.title || message.documentMessage?.fileName || "Documento",
       audioMessage: "Áudio",
-      listMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.title,
-      listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
+      listMessage: getBodyButton(msg) || message.listResponseMessage?.title,
+      listResponseMessage: message.listResponseMessage?.singleSelectReply?.selectedRowId || message.listResponseMessage?.title,
     };
 
-    const objKey = Object.keys(types).find(key => key === type);
-
-    if (!objKey) {
-      logger.warn(`#### Nao achou o type 152: ${type}
-${JSON.stringify(msg)}`);
-      Sentry.setExtra("Mensagem", { BodyMsg: msg.message, msg, type });
-      Sentry.captureException(
-        new Error("Novo Tipo de Mensagem em getTypeMessage")
-      );
-    }
-    return types[type];
+    const extracted = types[type || "conversation"];
+    return extracted || message.conversation || message.extendedTextMessage?.text || "Mensagem enviada";
   } catch (error) {
     Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
     Sentry.captureException(error);
     console.log(error);
+    return null;
   }
 };
 
