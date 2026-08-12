@@ -1141,15 +1141,17 @@ export const verifyMessage = async (
         ticket,
         ticketId: ticket.id
       });
-
-    io.to(`company-${ticket.companyId}-${ticket.status}`)
-      .to(`queue-${ticket.queueId}-${ticket.status}`)
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "update",
-        ticket,
-        ticketId: ticket.id
-      });
   }
+
+  // Notificar o socket do frontend para atualizar a lista de atendimentos em tempo real (pendentes/abertos)
+  io.to(`company-${ticket.companyId}-${ticket.status}`)
+    .to(`company-${ticket.companyId}-notification`)
+    .to(`queue-${ticket.queueId}-${ticket.status}`)
+    .emit(`company-${ticket.companyId}-ticket`, {
+      action: "update",
+      ticket,
+      ticketId: ticket.id
+    });
 };
 
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
