@@ -24,9 +24,20 @@ const SendWhatsAppMessage = async ({
 }: Request): Promise<WAMessage> => {
   let options = {};
   const wbot = await GetTicketWbot(ticket);
-  console.log('ticket.contact', ticket.contact);
-  const number = buildContactAddress(ticket.contact, ticket.isGroup);
-  console.log("number", number);
+  let number = buildContactAddress(ticket.contact, ticket.isGroup);
+  if (!ticket.isGroup && ticket.contact?.number) {
+    try {
+      const cleanNum = ticket.contact.number.replace(/\D/g, "");
+      const [onWapp] = await wbot.onWhatsApp(`${cleanNum}@s.whatsapp.net`);
+      if (onWapp && onWapp.exists && onWapp.jid) {
+        number = onWapp.jid;
+        console.log("JID resolvido dinamicamente via onWhatsApp:", number);
+      }
+    } catch (e: any) {
+      console.warn("Aviso ao consultar onWhatsApp em SendWhatsAppMessage:", e?.message || e);
+    }
+  }
+  console.log("number final para envio:", number);
   if (quotedMsg) {
     const chatMessages = await Message.findOne({
       where: {

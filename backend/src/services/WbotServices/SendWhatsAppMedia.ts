@@ -210,8 +210,19 @@ const SendWhatsAppMedia = async ({
       };
     }
 
+    let destinationJid = buildContactAddress(ticket.contact, ticket.isGroup);
+    if (!ticket.isGroup && ticket.contact?.number) {
+      try {
+        const cleanNum = ticket.contact.number.replace(/\D/g, "");
+        const [onWapp] = await wbot.onWhatsApp(`${cleanNum}@s.whatsapp.net`);
+        if (onWapp && onWapp.exists && onWapp.jid) {
+          destinationJid = onWapp.jid;
+        }
+      } catch (e) {}
+    }
+
     const sentMessage = await wbot.sendMessage(
-      buildContactAddress(ticket.contact, ticket.isGroup),
+      destinationJid,
       {
         ...options
       }
