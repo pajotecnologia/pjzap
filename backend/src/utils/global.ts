@@ -11,7 +11,6 @@ type Session = WASocket & {
 
 export const map_msg = new Map<any, any>();
 
-
 export const getContactIdentifier = (contact: any): string => {
   const num = (contact?.number || "").replace(/\D/g, "");
   console.log('Usando JID para envio:', num);
@@ -23,11 +22,12 @@ export const buildContactAddress = (contact: any, isGroup: boolean): string => {
   if (!contact) return "";
   if (isGroup) {
     const num = contact.number || "";
-    return num.includes("@g.us") ? num : `${num}@g.us`;
+    const cleanGroupNum = num.split(":")[0];
+    return cleanGroupNum.includes("@g.us") ? cleanGroupNum : `${cleanGroupNum}@g.us`;
   }
   const contactId = getContactIdentifier(contact);
   if (contactId.includes("@")) {
-    return contactId;
+    return contactId.split(":")[0];
   }
   return `${contactId}@s.whatsapp.net`;
 };
@@ -44,7 +44,8 @@ export const getJidFromMessage = async (message: WAMessage, wbot: Session): Prom
     const lidMappingStore = getLIDMappingStore(wbot);
     if (lidMappingStore) {
       try {
-        const jidForPN = await lidMappingStore.getPNForLID(remoteJid);
+        const cleanRemote = remoteJid.split(":")[0];
+        const jidForPN = await lidMappingStore.getPNForLID(cleanRemote);
         if (jidForPN && jidForPN.includes('@s.whatsapp.net')) {
           jid = jidForPN;
         }
@@ -57,10 +58,10 @@ export const getJidFromMessage = async (message: WAMessage, wbot: Session): Prom
   }
 
   const cleanJid = jid.split(":")[0];
-  const domain = jid.includes("@") ? jid.split("@")[1] : "s.whatsapp.net";
+  const domain = cleanJid.includes("@") ? cleanJid.split("@")[1] : "s.whatsapp.net";
   const userNum = cleanJid.split("@")[0].replace(/\D/g, "");
 
-  const finalJid = userNum ? `${userNum}@${domain}` : remoteJid || "";
+  const finalJid = userNum ? `${userNum}@${domain}` : (remoteJid || "").split(":")[0];
   console.log('JID final resolvido da mensagem:', finalJid);
   return finalJid;
 };
@@ -68,7 +69,6 @@ export const getJidFromMessage = async (message: WAMessage, wbot: Session): Prom
 // Função para acessar LIDMappingStore de forma segura
 const getLIDMappingStore = (wbot: Session): any => {
   try {
-    // Tentar acessar o LIDMappingStore de diferentes formas
     return wbot.lidMappingStore ||
       (wbot as any).lidMappingStore ||
       null;
@@ -77,9 +77,10 @@ const getLIDMappingStore = (wbot: Session): any => {
     return null;
   }
 };
+
 export const getLidFromMessage = async (message: WAMessage, wbot: Session): Promise<string> => {
-  const { key } = message;
-  const { remoteJid, remoteJidAlt, participantAlt, participant } = key;
+  const { key } = message || {};
+  const { remoteJid, remoteJidAlt, participantAlt, participant } = key || {};
 
   let lid = '';
 
@@ -93,22 +94,9 @@ export const getLidFromMessage = async (message: WAMessage, wbot: Session): Prom
   if (participant && participant.includes('@lid')) {
     lid = participant;
   }
-
   if (participantAlt && participantAlt.includes('@lid')) {
     lid = participantAlt;
   }
 
-  const lidMappingStore = getLIDMappingStore(wbot);
-  if (lidMappingStore && lid) {
-    const lidForPN = await lidMappingStore.getLIDForPN(remoteJid);
-    if (lidForPN && lidForPN.includes('@lid')) {
-      lid = lidForPN;
-      console.log('LID encontrado via LIDMappingStore:', lid);
-    } else {
-      console.log('LID não encontrado na LIDMappingStore para o PN:', remoteJid);
-    }
-  } else {
-    logger.error(`LIDMappingStore nao disponivel ou LID nao encontrado na mensagem, lid: ${!!lid}, lidMappingStore: ${!!lidMappingStore}`);
-  }
-  return lid;
+  return lid ? lid.split(":")[0] : "";
 };
