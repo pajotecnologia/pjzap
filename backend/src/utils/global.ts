@@ -33,42 +33,36 @@ export const buildContactAddress = (contact: any, isGroup: boolean): string => {
 };
 
 export const getJidFromMessage = async (message: WAMessage, wbot: Session): Promise<string> => {
-  const { key } = message;
-  const { remoteJid, remoteJidAlt, participantAlt, participant } = key;
-  let jid = '';
+  const { key } = (message || {}) as any;
+  const { remoteJid, remoteJidAlt, participantAlt, participant, senderPn, participantPn } = key || {};
 
-  // Prioridade: JID > LID > PN
-  if (remoteJid && remoteJid.includes('@s.whatsapp.net')) {
-    jid = remoteJid;
-  }
-  if (remoteJidAlt && remoteJidAlt.includes('@s.whatsapp.net')) {
-    jid = remoteJidAlt;
-  }
-  if (participant && participant.includes('@s.whatsapp.net')) {
-    jid = participant;
-  }
+  let jid = [senderPn, participantPn, remoteJid, remoteJidAlt, participant, participantAlt].find(
+    (j: any) => typeof j === "string" && j.includes("@s.whatsapp.net")
+  ) || "";
 
-  if (participantAlt && participantAlt.includes('@s.whatsapp.net')) {
-    jid = participantAlt;
-  }
-
-  const lidMappingStore = getLIDMappingStore(wbot);
-  if (lidMappingStore) {
-    const jidForPN = await lidMappingStore.getPNForLID(remoteJid);
-    if (jidForPN && jidForPN.includes('@s.whatsapp.net')) {
-      jid = jidForPN;
-      console.log('JID encontrado via LIDMappingStore:', jid);
-    } else {
-      console.log('JID não encontrado na LIDMappingStore para o PN:', remoteJid);
+  if (!jid && remoteJid) {
+    const lidMappingStore = getLIDMappingStore(wbot);
+    if (lidMappingStore) {
+      try {
+        const jidForPN = await lidMappingStore.getPNForLID(remoteJid);
+        if (jidForPN && jidForPN.includes('@s.whatsapp.net')) {
+          jid = jidForPN;
+        }
+      } catch (e) {}
     }
-  } else {
-    logger.error(`LIDMappingStore nao disponivel ou JID nao encontrado na mensagem, jid: ${!!jid}, lidMappingStore: ${!!lidMappingStore}`);
   }
-  const jidSplitedPontos = jid.split(':')[0];
-  const jidSplitedArroba = jid.split('@')[1];
-  jid = jidSplitedPontos.includes('@') ? jid : `${jidSplitedPontos}@${jidSplitedArroba}`;
-  console.log('JID final para envio:', jid);
-  return jid;
+
+  if (!jid) {
+    jid = remoteJid || "";
+  }
+
+  const cleanJid = jid.split(":")[0];
+  const domain = jid.includes("@") ? jid.split("@")[1] : "s.whatsapp.net";
+  const userNum = cleanJid.split("@")[0].replace(/\D/g, "");
+
+  const finalJid = userNum ? `${userNum}@${domain}` : remoteJid || "";
+  console.log('JID final resolvido da mensagem:', finalJid);
+  return finalJid;
 };
 
 // Função para acessar LIDMappingStore de forma segura
