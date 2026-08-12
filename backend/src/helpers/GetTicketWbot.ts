@@ -16,7 +16,8 @@ const GetTicketWbot = async (ticket: Ticket): Promise<Session> => {
       ticket.userId
     );
 
-    await ticket.$set("whatsapp", defaultWhatsapp);
+    await ticket.update({ whatsappId: defaultWhatsapp.id });
+    ticket.whatsappId = defaultWhatsapp.id;
   }
 
   const wbot = getWbot(ticket.whatsappId);
