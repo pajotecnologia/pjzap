@@ -13,10 +13,6 @@ export const map_msg = new Map<any, any>();
 
 
 export const getContactIdentifier = (contact: any): string => {
-  if (contact?.lid && typeof contact.lid === "string" && contact.lid.includes("@lid")) {
-    console.log('Usando LID para envio:', contact.lid);
-    return contact.lid;
-  }
   const num = (contact?.number || "").replace(/\D/g, "");
   console.log('Usando JID para envio:', num);
   return num;
