@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:30 - v7.0.6",
+    date: "17/08/2026",
+    title: "Suporte a Instalação Nginx Direta (sem o serviço whaticket-frontend no PM2)",
+    changes: [
+      "Identificação do padrão de arquitetura da VPS onde o Nginx serve diretamente a pasta `frontend/build` sem depender do PM2 no frontend.",
+      "Comandos ajustados para recarregar o Nginx (`sudo systemctl reload nginx`) e atualizar estáticos."
+    ]
+  },
+  {
     version: "19:15 - v7.0.5",
     date: "17/08/2026",
     title: "Guia Avançado de Diagnóstico VPS Ubuntu & Verificação de Caminhos PM2/Nginx",
@@ -557,7 +566,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:15 - v7.0.5");
+  const [systemVersion, setSystemVersion] = useState("19:30 - v7.0.6");
 
   useEffect(() => {
     async function fetchVersion() {
