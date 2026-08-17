@@ -348,7 +348,7 @@ const MainListItems = (props) => {
   const [chats, dispatch] = useReducer(reducer, []);
   const { getPlanCompany } = usePlans();
   
-  const [version, setVersion] = useState("20:49 - v7.0.10");
+  const [version, setVersion] = useState("20:57 - v7.0.11");
   const { getVersion } = useVersion();
 
   const socketManager = useContext(SocketContext);
@@ -366,7 +366,7 @@ const MainListItems = (props) => {
           setVersion(_version.version);
         }
       } catch (e) {
-        setVersion("20:49 - v7.0.10");
+        setVersion("20:57 - v7.0.11");
       }
     }
     fetchVersion();

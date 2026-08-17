@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:57 - v7.0.11",
+    date: "17/08/2026",
+    title: "Sincronização Definitiva de Versão & Horário em Todos os Menus e APIs",
+    changes: [
+      "Unificação do estado padrão e tratamento de fallback para `20:57 - v7.0.11` no menu lateral (`MainListItems.js`), na Central de Ajuda (`Helps/index.js`), no LogLauncher e na API (`VersionController.ts`).",
+      "Garantia de exibição do horário e versão mesmo se o backend estiver em reinicialização."
+    ]
+  },
+  {
     version: "20:05 - v7.0.9",
     date: "17/08/2026",
     title: "Correção de Permissões chown/chmod e Verificação de Usuário PM2 (root vs deploy)",
@@ -593,7 +602,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:05 - v7.0.9");
+  const [systemVersion, setSystemVersion] = useState("20:57 - v7.0.11");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -602,7 +611,9 @@ const Helps = () => {
         if (data && data.version) {
           setSystemVersion(data.version);
         }
-      } catch (e) {}
+      } catch (e) {
+        setSystemVersion("20:57 - v7.0.11");
+      }
     }
     fetchVersion();
   }, []);

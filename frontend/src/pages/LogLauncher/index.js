@@ -97,6 +97,14 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:57 - v7.0.11 - Sincronização Geral de Versão & Horário em Tempo Real",
+    changes: [
+      "⚡ <strong>Visualização de Versão e Horário em Tempo Real</strong>: Exibição no menu lateral abaixo de Atualizações e na Central de Ajuda.",
+      "🤖 <strong>Execução Resiliente do FlowBuilder</strong>: Resolução unificada de nós por Tag visual (#1, #2, VENDAS).",
+      "🛠️ <strong>Configuração Completa VPS Ubuntu</strong>: Permissões de arquivos, invalidação de cache e gerenciamento de processos PM2."
+    ]
+  },
+  {
     version: "20:49 - v7.0.10 - Roteamento de Nós & Invalidação de Cache VPS",
     changes: [
       "⚡ <strong>Visualização de Versão e Horário em Tempo Real</strong>: Exibição abaixo do menu Atualizações e no menu Ajuda.",
