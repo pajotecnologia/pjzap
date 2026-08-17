@@ -392,11 +392,23 @@ const PALETTE_CATEGORIES = [
 ];
 
 // ─────────────────────────────────────────────
-//  COMPONENTE DE NÓ CUSTOMIZADO
+//  CONTEXTO E COMPONENTE DE NÓ CUSTOMIZADO
 // ─────────────────────────────────────────────
-const CustomNode = ({ data, selected }) => {
+const NodesContext = React.createContext({ nodes: [] });
+
+const CustomNode = ({ id, data, selected }) => {
+  const { nodes } = React.useContext(NodesContext);
   const color = nodeColors[data.type] || nodeColors.message;
   const isFirst = data.type === "trigger";
+
+  const currentNodeTag = data.nodeIdTag || id;
+
+  const getTargetBadge = (targetId) => {
+    if (!targetId) return "";
+    const targetNode = (nodes || []).find((n) => n.id === targetId);
+    if (!targetNode) return targetId;
+    return targetNode.data?.nodeIdTag ? `#${targetNode.data.nodeIdTag}` : `#${targetId}`;
+  };
 
   return (
     <div
@@ -421,8 +433,29 @@ const CustomNode = ({ data, selected }) => {
       )}
 
       <div style={{ ...headerStyle, background: color.header }}>
+        <span
+          style={{
+            background: "rgba(0, 0, 0, 0.35)",
+            color: "#FFD700",
+            fontWeight: 900,
+            padding: "2px 7px",
+            borderRadius: 4,
+            fontSize: 11,
+            border: "1px solid rgba(255, 215, 0, 0.6)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+            marginRight: 4,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minWidth: 20,
+          }}
+        >
+          #{currentNodeTag}
+        </span>
         {NodeIcons[data.type]}
-        <span>{data.title || NodeLabels[data.type]}</span>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+          {data.title || NodeLabels[data.type]}
+        </span>
       </div>
 
       <div style={bodyStyle}>
@@ -440,9 +473,13 @@ const CustomNode = ({ data, selected }) => {
           <div>
             <div style={{ fontWeight: 600 }}>{data.title || "Mensagem c/ Botões"}</div>
             {(data.buttons || []).map((btn, idx) => (
-              <div key={btn.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between" }}>
+              <div key={btn.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between", gap: 4 }}>
                 <span>🔘 {btn.text}</span>
-                {btn.targetNodeId && <span style={{ fontSize: 9, color: "#9c27b0", fontWeight: 700 }}>➔ Nó #{btn.targetNodeId}</span>}
+                {btn.targetNodeId && (
+                  <span style={{ fontSize: 9, color: "#9c27b0", fontWeight: 700 }}>
+                    ➔ Nó {getTargetBadge(btn.targetNodeId)}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -451,9 +488,13 @@ const CustomNode = ({ data, selected }) => {
           <div>
             <div style={{ fontWeight: 600 }}>{data.title || "Lista de Opções"}</div>
             {(data.options || []).map((opt, idx) => (
-              <div key={opt.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between" }}>
+              <div key={opt.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between", gap: 4 }}>
                 <span>🔹 {opt.text}</span>
-                {opt.targetNodeId && <span style={{ fontSize: 9, color: "#2196f3", fontWeight: 700 }}>➔ Nó #{opt.targetNodeId}</span>}
+                {opt.targetNodeId && (
+                  <span style={{ fontSize: 9, color: "#2196f3", fontWeight: 700 }}>
+                    ➔ Nó {getTargetBadge(opt.targetNodeId)}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -479,7 +520,11 @@ const CustomNode = ({ data, selected }) => {
             {(data.options || []).map((opt, idx) => (
               <div key={opt.id || idx} style={{ fontSize: 10, color: "#444", display: "flex", justifyContent: "space-between", gap: 4 }}>
                 <span>🔹 {opt.optionNumber || idx + 1}. {opt.text}</span>
-                {opt.targetNodeId && <span style={{ fontSize: 9, color: "#128C7E", fontWeight: 700 }}>➔ Nó #{opt.targetNodeId}</span>}
+                {opt.targetNodeId && (
+                  <span style={{ fontSize: 9, color: "#128C7E", fontWeight: 700 }}>
+                    ➔ Nó {getTargetBadge(opt.targetNodeId)}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -489,10 +534,10 @@ const CustomNode = ({ data, selected }) => {
             <div>Palavra: <strong>{data.conditionKeyword || "..."}</strong></div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 10 }}>
               <span style={{ color: "green", fontWeight: 700 }}>
-                VERDADEIRO {data.targetNodeIdTrue ? `➔ Nó #${data.targetNodeIdTrue}` : ""}
+                VERDADEIRO {data.targetNodeIdTrue ? `➔ ${getTargetBadge(data.targetNodeIdTrue)}` : ""}
               </span>
               <span style={{ color: "red", fontWeight: 700 }}>
-                FALSO {data.targetNodeIdFalse ? `➔ Nó #${data.targetNodeIdFalse}` : ""}
+                FALSO {data.targetNodeIdFalse ? `➔ ${getTargetBadge(data.targetNodeIdFalse)}` : ""}
               </span>
             </div>
           </div>
@@ -638,11 +683,14 @@ const FlowBuilderInner = () => {
 
           if (Array.isArray(parsedNodes) && parsedNodes.length > 0) {
             setNodes(
-              parsedNodes.map((n) => ({
+              parsedNodes.map((n, idx) => ({
                 id: n.id,
                 type: "custom",
                 position: n.position || { x: 250, y: 100 },
-                data: { ...n },
+                data: {
+                  nodeIdTag: `${idx + 1}`,
+                  ...n,
+                },
               }))
             );
           } else {
@@ -651,7 +699,7 @@ const FlowBuilderInner = () => {
                 id: "trigger_1",
                 type: "custom",
                 position: { x: 250, y: 100 },
-                data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*" },
+                data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*", nodeIdTag: "1" },
               },
             ]);
           }
@@ -675,7 +723,7 @@ const FlowBuilderInner = () => {
               id: "trigger_1",
               type: "custom",
               position: { x: 250, y: 100 },
-              data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*" },
+              data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*", nodeIdTag: "1" },
             },
           ]);
         }
@@ -753,6 +801,7 @@ const FlowBuilderInner = () => {
   // Adiciona novo nó
   const handleAddNode = (type) => {
     const newId = `${type}_${Date.now()}`;
+    const count = nodes.length + 1;
     const newNode = {
       id: newId,
       type: "custom",
@@ -763,6 +812,7 @@ const FlowBuilderInner = () => {
       data: {
         id: newId,
         type,
+        nodeIdTag: `${count}`,
         title: NodeLabels[type],
         content: type === "message" ? "Olá! Como posso ajudar?" : (type === "menu" ? "Escolha uma opção:" : ""),
         buttons: type === "buttons" ? [{ id: "btn_1", text: "Opção 1" }] : [],
@@ -824,6 +874,46 @@ const FlowBuilderInner = () => {
     setEdges((eds) => eds.filter((e) => e.source !== selectedNode.id && e.target !== selectedNode.id));
     setSelectedNode(null);
     toast.info("Nó excluído com sucesso.");
+  };
+
+  const renderTargetNodeOptions = (allNodes, currentSelectedNodeId) => {
+    return allNodes
+      .filter((n) => n.id !== currentSelectedNodeId)
+      .map((n) => {
+        const tag = n.data?.nodeIdTag ? `#${n.data.nodeIdTag}` : `#${n.id}`;
+        const typeLabel = n.data?.title || NodeLabels[n.data?.type] || n.id;
+        const snippet = n.data?.content
+          ? ` - "${n.data.content.length > 20 ? n.data.content.substring(0, 20) + "..." : n.data.content}"`
+          : n.data?.keyword
+          ? ` - Gatilho "${n.data.keyword}"`
+          : "";
+
+        return (
+          <MenuItem key={n.id} value={n.id}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, width: "100%" }}>
+              <span
+                style={{
+                  background: "#FFD700",
+                  color: "#000",
+                  fontWeight: 800,
+                  fontSize: 10,
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                }}
+              >
+                {tag}
+              </span>
+              {NodeIcons[n.data?.type]}
+              <span style={{ fontWeight: 600, fontSize: 12 }}>{typeLabel}</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {snippet}
+              </span>
+            </div>
+          </MenuItem>
+        );
+      });
   };
 
   if (loading) {
@@ -939,26 +1029,28 @@ const FlowBuilderInner = () => {
 
         {/* CANVAS REACTFLOW */}
         <div className={classes.canvas}>
-          <ReactFlowProvider>
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onEdgeClick={onEdgeClick}
-              onNodeClick={onNodeClick}
-              nodeTypes={nodeTypes}
-              deleteKeyCode={["Backspace", "Delete"]}
-              fitView
-              attributionPosition="bottom-right"
-              ref={reactFlowInstance}
-            >
-              <Background color="#252538" gap={20} size={1} />
-              <Controls style={{ backgroundColor: "#161626", fill: "#fff", borderColor: "#252538" }} />
-              <MiniMap style={{ backgroundColor: "#161626" }} nodeColor={(n) => nodeColors[n.data?.type]?.bg || "#128C7E"} />
-            </ReactFlow>
-          </ReactFlowProvider>
+          <NodesContext.Provider value={{ nodes }}>
+            <ReactFlowProvider>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onEdgeClick={onEdgeClick}
+                onNodeClick={onNodeClick}
+                nodeTypes={nodeTypes}
+                deleteKeyCode={["Backspace", "Delete"]}
+                fitView
+                attributionPosition="bottom-right"
+                ref={reactFlowInstance}
+              >
+                <Background color="#252538" gap={20} size={1} />
+                <Controls style={{ backgroundColor: "#161626", fill: "#fff", borderColor: "#252538" }} />
+                <MiniMap style={{ backgroundColor: "#161626" }} nodeColor={(n) => nodeColors[n.data?.type]?.bg || "#128C7E"} />
+              </ReactFlow>
+            </ReactFlowProvider>
+          </NodesContext.Provider>
         </div>
       </div>
 
@@ -981,6 +1073,35 @@ const FlowBuilderInner = () => {
                 <Close />
               </IconButton>
             </Box>
+
+            <div
+              style={{
+                backgroundColor: "#1e1e32",
+                padding: "10px 12px",
+                borderRadius: 8,
+                border: "1px solid rgba(255, 215, 0, 0.3)",
+                marginBottom: 14,
+              }}
+            >
+              <TextField
+                label="ID / Tag de Identificação do Nó"
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={selectedNode.data.nodeIdTag || ""}
+                onChange={(e) => updateNodeData("nodeIdTag", e.target.value)}
+                placeholder="Ex: 1, 2, MENU_VENDAS, ATENDIMENTO"
+                helperText="Identificação visual única exibida no canvas e nas opções de destino."
+                className={classes.drawerField}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <span style={{ color: "#FFD700", fontWeight: 800, fontSize: 14 }}>#</span>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </div>
 
             <Divider className={classes.drawerDivider} />
 
@@ -1089,11 +1210,7 @@ const FlowBuilderInner = () => {
                         <MenuItem value="">
                           <em>Nenhum (Finalizar nesta opção)</em>
                         </MenuItem>
-                        {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
-                          <MenuItem key={n.id} value={n.id}>
-                            {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
-                          </MenuItem>
-                        ))}
+                        {renderTargetNodeOptions(nodes, selectedNode.id)}
                       </Select>
                     </FormControl>
                   </Paper>
@@ -1145,11 +1262,7 @@ const FlowBuilderInner = () => {
                       <MenuItem value="">
                         <em>Nenhum (Finalizar)</em>
                       </MenuItem>
-                      {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
-                        <MenuItem key={n.id} value={n.id}>
-                          {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
-                        </MenuItem>
-                      ))}
+                      {renderTargetNodeOptions(nodes, selectedNode.id)}
                     </Select>
                   </FormControl>
                 </div>
@@ -1169,11 +1282,7 @@ const FlowBuilderInner = () => {
                       <MenuItem value="">
                         <em>Nenhum (Finalizar)</em>
                       </MenuItem>
-                      {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
-                        <MenuItem key={n.id} value={n.id}>
-                          {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
-                        </MenuItem>
-                      ))}
+                      {renderTargetNodeOptions(nodes, selectedNode.id)}
                     </Select>
                   </FormControl>
                 </div>
@@ -1349,11 +1458,7 @@ const FlowBuilderInner = () => {
                         <MenuItem value="">
                           <em>Nenhum (Parar neste botão)</em>
                         </MenuItem>
-                        {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
-                          <MenuItem key={n.id} value={n.id}>
-                            {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
-                          </MenuItem>
-                        ))}
+                        {renderTargetNodeOptions(nodes, selectedNode.id)}
                       </Select>
                     </FormControl>
                   </Paper>
@@ -1446,11 +1551,7 @@ const FlowBuilderInner = () => {
                         <MenuItem value="">
                           <em>Nenhum (Parar neste item)</em>
                         </MenuItem>
-                        {nodes.filter(n => n.id !== selectedNode.id).map((n) => (
-                          <MenuItem key={n.id} value={n.id}>
-                            {NodeIcons[n.data.type]} {n.data.title || NodeLabels[n.data.type] || n.id} (ID: {n.id})
-                          </MenuItem>
-                        ))}
+                        {renderTargetNodeOptions(nodes, selectedNode.id)}
                       </Select>
                     </FormControl>
                   </Paper>
