@@ -56,6 +56,7 @@ interface FlowNode {
   options?: Array<{ id: string; optionNumber: string; text: string; description?: string; targetNodeId: string; targetNodeIdOption?: string; }>;
   cards?: Array<{ title: string; description: string; imageUrl?: string; buttonText?: string }>;
   targetNodeId?: string;
+  nodeIdTag?: string;
 }
 
 interface FlowConnection {
@@ -72,7 +73,7 @@ const findNodeById = (allNodes: FlowNode[], targetId?: string): FlowNode | undef
   return allNodes.find((n) => {
     const nid = (n.id || "").toString().trim().toLowerCase();
     const tag = (
-      n.nodeIdTag ||
+      (n as any).nodeIdTag ||
       (n as any).customId ||
       (n as any).data?.nodeIdTag ||
       ""
