@@ -396,18 +396,37 @@ const PALETTE_CATEGORIES = [
 // ─────────────────────────────────────────────
 const NodesContext = React.createContext({ nodes: [] });
 
+// Helper para obter a badge visual do nó (Dinâmica por posição ou Tag customizada)
+const getNodeBadge = (node, allNodes = []) => {
+  if (!node) return "";
+
+  // Se o nó tiver uma tag customizada definida manualmente (isCustomTag: true)
+  if (node.data?.isCustomTag && node.data?.nodeIdTag) {
+    return `#${node.data.nodeIdTag}`;
+  }
+
+  // Caso contrário, calcula o índice de posição atual (1-based index) na lista de nós
+  const idx = allNodes.findIndex((n) => n.id === node.id);
+  if (idx !== -1) {
+    return `#${idx + 1}`;
+  }
+
+  // Fallback caso a busca do índice falhe
+  return node.data?.nodeIdTag ? `#${node.data.nodeIdTag}` : `#${node.id}`;
+};
+
 const CustomNode = ({ id, data, selected }) => {
   const { nodes } = React.useContext(NodesContext);
   const color = nodeColors[data.type] || nodeColors.message;
   const isFirst = data.type === "trigger";
 
-  const currentNodeTag = data.nodeIdTag || id;
+  const currentBadge = getNodeBadge({ id, data }, nodes);
 
   const getTargetBadge = (targetId) => {
     if (!targetId) return "";
     const targetNode = (nodes || []).find((n) => n.id === targetId);
     if (!targetNode) return targetId;
-    return targetNode.data?.nodeIdTag ? `#${targetNode.data.nodeIdTag}` : `#${targetId}`;
+    return getNodeBadge(targetNode, nodes);
   };
 
   return (
@@ -450,7 +469,7 @@ const CustomNode = ({ id, data, selected }) => {
             minWidth: 20,
           }}
         >
-          #{currentNodeTag}
+          {currentBadge}
         </span>
         {NodeIcons[data.type]}
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
@@ -683,12 +702,11 @@ const FlowBuilderInner = () => {
 
           if (Array.isArray(parsedNodes) && parsedNodes.length > 0) {
             setNodes(
-              parsedNodes.map((n, idx) => ({
+              parsedNodes.map((n) => ({
                 id: n.id,
                 type: "custom",
                 position: n.position || { x: 250, y: 100 },
                 data: {
-                  nodeIdTag: `${idx + 1}`,
                   ...n,
                 },
               }))
@@ -699,7 +717,7 @@ const FlowBuilderInner = () => {
                 id: "trigger_1",
                 type: "custom",
                 position: { x: 250, y: 100 },
-                data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*", nodeIdTag: "1" },
+                data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*" },
               },
             ]);
           }
@@ -723,7 +741,7 @@ const FlowBuilderInner = () => {
               id: "trigger_1",
               type: "custom",
               position: { x: 250, y: 100 },
-              data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*", nodeIdTag: "1" },
+              data: { id: "trigger_1", type: "trigger", title: "Gatilho Inicial", keyword: "*" },
             },
           ]);
         }
@@ -801,7 +819,6 @@ const FlowBuilderInner = () => {
   // Adiciona novo nó
   const handleAddNode = (type) => {
     const newId = `${type}_${Date.now()}`;
-    const count = nodes.length + 1;
     const newNode = {
       id: newId,
       type: "custom",
@@ -812,7 +829,6 @@ const FlowBuilderInner = () => {
       data: {
         id: newId,
         type,
-        nodeIdTag: `${count}`,
         title: NodeLabels[type],
         content: type === "message" ? "Olá! Como posso ajudar?" : (type === "menu" ? "Escolha uma opção:" : ""),
         buttons: type === "buttons" ? [{ id: "btn_1", text: "Opção 1" }] : [],
@@ -880,7 +896,7 @@ const FlowBuilderInner = () => {
     return allNodes
       .filter((n) => n.id !== currentSelectedNodeId)
       .map((n) => {
-        const tag = n.data?.nodeIdTag ? `#${n.data.nodeIdTag}` : `#${n.id}`;
+        const tag = getNodeBadge(n, allNodes);
         const typeLabel = n.data?.title || NodeLabels[n.data?.type] || n.id;
         const snippet = n.data?.content
           ? ` - "${n.data.content.length > 20 ? n.data.content.substring(0, 20) + "..." : n.data.content}"`
@@ -1084,14 +1100,39 @@ const FlowBuilderInner = () => {
               }}
             >
               <TextField
-                label="ID / Tag de Identificação do Nó"
+                label="Tag / ID de Identificação do Nó"
                 fullWidth
                 variant="outlined"
                 size="small"
-                value={selectedNode.data.nodeIdTag || ""}
-                onChange={(e) => updateNodeData("nodeIdTag", e.target.value)}
-                placeholder="Ex: 1, 2, MENU_VENDAS, ATENDIMENTO"
-                helperText="Identificação visual única exibida no canvas e nas opções de destino."
+                value={selectedNode.data?.isCustomTag ? (selectedNode.data?.nodeIdTag || "") : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val && val.trim() !== "") {
+                    setNodes((nds) =>
+                      nds.map((n) => {
+                        if (n.id === selectedNode.id) {
+                          const updatedData = { ...n.data, nodeIdTag: val, isCustomTag: true };
+                          setSelectedNode({ ...n, data: updatedData });
+                          return { ...n, data: updatedData };
+                        }
+                        return n;
+                      })
+                    );
+                  } else {
+                    setNodes((nds) =>
+                      nds.map((n) => {
+                        if (n.id === selectedNode.id) {
+                          const updatedData = { ...n.data, nodeIdTag: "", isCustomTag: false };
+                          setSelectedNode({ ...n, data: updatedData });
+                          return { ...n, data: updatedData };
+                        }
+                        return n;
+                      })
+                    );
+                  }
+                }}
+                placeholder={`Seq. Automática: ${getNodeBadge(selectedNode, nodes)} (ou digite ex: VENDAS)`}
+                helperText="Deixe em branco para o número sequencial reorganizar automaticamente, ou digite um nome personalizado."
                 className={classes.drawerField}
                 InputProps={{
                   startAdornment: (
