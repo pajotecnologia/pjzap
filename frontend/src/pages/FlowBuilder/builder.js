@@ -396,23 +396,46 @@ const PALETTE_CATEGORIES = [
 // ─────────────────────────────────────────────
 const NodesContext = React.createContext({ nodes: [] });
 
-// Helper para obter a badge visual do nó (Dinâmica por posição ou Tag customizada)
+// Helper para obter a badge visual do nó (Dinâmica por posição visual Y/X ou Tag customizada)
 const getNodeBadge = (node, allNodes = []) => {
   if (!node) return "";
 
-  // Se o nó tiver uma tag customizada definida manualmente (isCustomTag: true)
-  if (node.data?.isCustomTag && node.data?.nodeIdTag) {
-    return `#${node.data.nodeIdTag}`;
+  const targetId = node.id || node.data?.id;
+  const fullNode = (allNodes || []).find((n) => n.id === targetId) || node;
+  const nodeData = fullNode.data || fullNode;
+
+  // Uma tag só é considerada customizada se tiver a flag isCustomTag === true OU se for um texto não-numérico (ex: "VENDAS")
+  const hasExplicitCustomFlag = Boolean(nodeData.isCustomTag);
+  const tagVal = String(nodeData.nodeIdTag || "").trim();
+  const isNonNumericTag = tagVal !== "" && isNaN(Number(tagVal));
+
+  if ((hasExplicitCustomFlag || isNonNumericTag) && tagVal !== "") {
+    return `#${tagVal}`;
   }
 
-  // Caso contrário, calcula o índice de posição atual (1-based index) na lista de nós
-  const idx = allNodes.findIndex((n) => n.id === node.id);
+  // Ordena os nós por posição vertical (Y) e horizontal (X) no canvas
+  // O nó gatilho ("trigger") fica sempre em 1º lugar (#1)
+  const sortedNodes = [...allNodes].sort((a, b) => {
+    if (a.data?.type === "trigger") return -1;
+    if (b.data?.type === "trigger") return 1;
+
+    const posYA = a.position?.y ?? a.data?.position?.y ?? 0;
+    const posYB = b.position?.y ?? b.data?.position?.y ?? 0;
+    if (Math.abs(posYA - posYB) > 20) {
+      return posYA - posYB;
+    }
+    const posXA = a.position?.x ?? a.data?.position?.x ?? 0;
+    const posXB = b.position?.x ?? b.data?.position?.x ?? 0;
+    return posXA - posXB;
+  });
+
+  const idx = sortedNodes.findIndex((n) => n.id === targetId || n.data?.id === targetId);
+
   if (idx !== -1) {
     return `#${idx + 1}`;
   }
 
-  // Fallback caso a busca do índice falhe
-  return node.data?.nodeIdTag ? `#${node.data.nodeIdTag}` : `#${node.id}`;
+  return `#1`;
 };
 
 const CustomNode = ({ id, data, selected }) => {
@@ -757,11 +780,16 @@ const FlowBuilderInner = () => {
   // Salva o fluxo
   const handleSave = async () => {
     try {
-      const formattedNodes = nodes.map((n) => ({
-        ...n.data,
-        id: n.id,
-        position: n.position,
-      }));
+      const formattedNodes = nodes.map((n) => {
+        const badge = getNodeBadge(n, nodes);
+        const cleanTag = badge.replace(/^#/, "");
+        return {
+          ...n.data,
+          id: n.id,
+          position: n.position,
+          nodeIdTag: n.data?.isCustomTag ? n.data.nodeIdTag : cleanTag,
+        };
+      });
 
       const formattedConnections = edges.map((e) => ({
         sourceNodeId: e.source,
