@@ -64,6 +64,57 @@ interface FlowConnection {
   optionId?: string;
 }
 
+// Helper para encontrar um nó pelo ID primário ou pela Tag/ID de identificação visual
+const findNodeById = (allNodes: FlowNode[], targetId?: string): FlowNode | undefined => {
+  if (!targetId || !Array.isArray(allNodes)) return undefined;
+  const cleanTarget = targetId.toString().trim().replace(/^#/, "").toLowerCase();
+
+  return allNodes.find((n) => {
+    const nid = (n.id || "").toString().trim().toLowerCase();
+    const tag = (
+      n.nodeIdTag ||
+      (n as any).customId ||
+      (n as any).data?.nodeIdTag ||
+      ""
+    )
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    return nid === cleanTarget || (tag && tag === cleanTarget);
+  });
+};
+
+// Helper para encontrar conexão de destino alternativa
+const findTargetFromConnections = (
+  connections: FlowConnection[],
+  sourceId: string,
+  handleOrOptionId?: string
+): string | undefined => {
+  if (!connections || !Array.isArray(connections)) return undefined;
+
+  if (handleOrOptionId) {
+    const matchedConn = connections.find(
+      (c) =>
+        c.sourceNodeId === sourceId &&
+        (c.optionId === handleOrOptionId ||
+          (c as any).optionId === handleOrOptionId ||
+          (c as any).sourceHandle === handleOrOptionId ||
+          (c as any).sourceHandle === `option-${handleOrOptionId}` ||
+          (c as any).sourceHandle === `handle-${handleOrOptionId}` ||
+          (c as any).sourceHandle === `opt-${handleOrOptionId}`)
+    );
+    if (matchedConn) return matchedConn.targetNodeId;
+  }
+
+  const sourceConns = connections.filter((c) => c.sourceNodeId === sourceId);
+  if (sourceConns.length === 1) {
+    return sourceConns[0].targetNodeId;
+  }
+
+  return undefined;
+};
+
 const ExecuteFlowService = async ({
   ticket,
   messageBody,
@@ -95,7 +146,7 @@ const ExecuteFlowService = async ({
         try {
           nodes = typeof flow.nodes === "string" ? JSON.parse(flow.nodes) : flow.nodes;
           connections = typeof flow.connections === "string" ? JSON.parse(flow.connections) : flow.connections;
-          currentNode = nodes.find((n) => n.id === activeState!.currentNodeId);
+          currentNode = findNodeById(nodes, activeState!.currentNodeId);
         } catch (e) {}
       }
     }
@@ -137,7 +188,7 @@ const ExecuteFlowService = async ({
             if (conn) nextNodeId = conn.targetNodeId;
           }
           if (nextNodeId) {
-            currentNode = nodes.find((n) => n.id === nextNodeId);
+            currentNode = findNodeById(nodes, nextNodeId);
             break;
           }
         }
@@ -164,6 +215,7 @@ const ExecuteFlowService = async ({
     }
 
     const visitedNodes = new Set<string>();
+    let isOptionTransition = false;
 
     while (currentNode) {
       if (visitedNodes.has(currentNode.id)) {
@@ -195,7 +247,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -205,21 +257,24 @@ const ExecuteFlowService = async ({
 
       } else if (currentNode.type === "buttons") {
         const buttonsList = currentNode.buttons || [];
-        const matchedBtn = buttonsList.find((btn, idx) => {
-          const btnTxt = (btn.text || "").trim().toLowerCase();
-          const num = (idx + 1).toString();
-          return trimmedMsg === num || (btnTxt && trimmedMsg === btnTxt) || (btnTxt && trimmedMsg.includes(btnTxt));
-        });
+        let matchedBtn: any = null;
+        if (!isOptionTransition) {
+          matchedBtn = buttonsList.find((btn, idx) => {
+            const btnTxt = (btn.text || "").trim().toLowerCase();
+            const num = (idx + 1).toString();
+            return trimmedMsg === num || (btnTxt && trimmedMsg === btnTxt) || (btnTxt && trimmedMsg.includes(btnTxt));
+          });
+        }
 
         if (matchedBtn) {
           let btnTargetId = matchedBtn.targetNodeId;
           if (!btnTargetId) {
-            const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id && (conn.optionId === matchedBtn.id || (conn as any).sourceHandle === matchedBtn.id));
-            btnTargetId = c?.targetNodeId;
+            btnTargetId = findTargetFromConnections(connections, currentNode.id, matchedBtn.id);
           }
           if (btnTargetId) {
             await cacheLayer.del(cacheKey);
-            currentNode = nodes.find((n) => n.id === btnTargetId);
+            currentNode = findNodeById(nodes, btnTargetId);
+            isOptionTransition = true;
             continue;
           }
         }
@@ -280,7 +335,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -294,7 +349,7 @@ const ExecuteFlowService = async ({
             const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
             targetId = c?.targetNodeId;
           }
-          currentNode = nodes.find((n) => n.id === targetId);
+          currentNode = findNodeById(nodes, targetId);
           continue;
         }
 
@@ -328,7 +383,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -336,29 +391,25 @@ const ExecuteFlowService = async ({
 
       } else if (currentNode.type === "menu" || currentNode.type === "list_menu") {
         const options = currentNode.options || [];
-        const matchedOpt = options.find((opt, idx) => {
-          const num = (opt.optionNumber || (idx + 1).toString()).trim().toLowerCase();
-          const txt = (opt.text || "").trim().toLowerCase();
-          return trimmedMsg === num || (txt && trimmedMsg === txt) || (txt && trimmedMsg.includes(txt));
-        });
+        let matchedOpt: any = null;
+
+        if (!isOptionTransition) {
+          matchedOpt = options.find((opt, idx) => {
+            const num = (opt.optionNumber || (idx + 1).toString()).trim().toLowerCase();
+            const txt = (opt.text || "").trim().toLowerCase();
+            return trimmedMsg === num || (txt && trimmedMsg === txt) || (txt && trimmedMsg.includes(txt));
+          });
+        }
 
         if (matchedOpt) {
           let optTargetId = matchedOpt.targetNodeId || (matchedOpt as any).targetNodeIdOption;
           if (!optTargetId) {
-            const c = connections.find(
-              (conn) =>
-                conn.sourceNodeId === currentNode?.id &&
-                (conn.optionId === matchedOpt.id ||
-                  (conn as any).sourceHandle === matchedOpt.id ||
-                  (conn as any).sourceHandle === `option-${matchedOpt.id}` ||
-                  (conn as any).sourceHandle === `handle-${matchedOpt.id}` ||
-                  (conn as any).sourceHandle === `opt-${matchedOpt.id}`)
-            );
-            optTargetId = c?.targetNodeId;
+            optTargetId = findTargetFromConnections(connections, currentNode.id, matchedOpt.id);
           }
           if (optTargetId) {
             await cacheLayer.del(cacheKey);
-            currentNode = nodes.find((n) => n.id === optTargetId);
+            currentNode = findNodeById(nodes, optTargetId);
+            isOptionTransition = true;
             continue;
           }
         }
@@ -408,7 +459,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -437,7 +488,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -451,7 +502,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -484,7 +535,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -499,7 +550,7 @@ const ExecuteFlowService = async ({
           const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
           targetId = c?.targetNodeId;
         }
-        currentNode = nodes.find((n) => n.id === targetId);
+        currentNode = findNodeById(nodes, targetId);
 
         if (!currentNode) {
           await cacheLayer.del(cacheKey);
@@ -509,7 +560,7 @@ const ExecuteFlowService = async ({
         const outConnections = connections.filter((conn) => conn.sourceNodeId === currentNode?.id);
         if (outConnections.length > 0) {
           const randomConn = outConnections[Math.floor(Math.random() * outConnections.length)];
-          currentNode = nodes.find((n) => n.id === randomConn.targetNodeId);
+          currentNode = findNodeById(nodes, randomConn.targetNodeId);
         } else {
           await cacheLayer.del(cacheKey);
           break;
