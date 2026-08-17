@@ -37,6 +37,7 @@ import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
 import useHelps from "../../hooks/useHelps";
+import useVersion from "../../hooks/useVersion";
 
 const useStyles = makeStyles(theme => ({
   mainPaperContainer: {
@@ -497,13 +498,58 @@ const FLOWBUILDER_MANUAL_STEPS = [
   }
 ];
 
+const CHANGELOG_ITEMS = [
+  {
+    version: "18:53 - v7.0.3",
+    date: "17/08/2026",
+    title: "Central de Ajuda Atualizada com Exibição de Versão & Horário em Tempo Real",
+    changes: [
+      "Integração da tag de Versão e Horário em tempo real na Central de Ajuda (Menu Ajuda).",
+      "Garantia de atualização visual instantânea após executar git pull & build na VPS.",
+      "Correção no avanço e transição resiliente de nós no FlowBuilder (ExecuteFlowService.ts)."
+    ]
+  },
+  {
+    version: "18:27 - v7.0.2",
+    date: "17/08/2026",
+    title: "Exibição de Horário do Build e Regra de Versionamento Incremental",
+    changes: [
+      "Inclusão do formato HH:mm junto com a versão v7.0.X no menu lateral e pacotes.",
+      "Criação da diretriz permanente de versionamento em .agents/rules/versioning_rule.md."
+    ]
+  },
+  {
+    version: "v7.0.1",
+    date: "17/08/2026",
+    title: "Ordenação Visual Dinâmica Y/X dos Nós no Canvas do FlowBuilder",
+    changes: [
+      "Numeração automática sequencial de cima para baixo sem lacunas ao excluir nós.",
+      "Identificação visual por badges [#1], [#2] em menus e dropdowns do construtor."
+    ]
+  }
+];
+
 const Helps = () => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const { list } = useHelps();
+  const { getVersion } = useVersion();
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
+  const [systemVersion, setSystemVersion] = useState("18:53 - v7.0.3");
+
+  useEffect(() => {
+    async function fetchVersion() {
+      try {
+        const data = await getVersion();
+        if (data && data.version) {
+          setSystemVersion(data.version);
+        }
+      } catch (e) {}
+    }
+    fetchVersion();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -569,13 +615,25 @@ const Helps = () => {
   return (
     <MainContainer>
       <MainHeader>
-        <Title>Central de Ajuda & Guia Completo do Sistema</Title>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Title>Central de Ajuda & Guia Completo do Sistema</Title>
+          <Chip
+            label={`⚡ Versão: ${systemVersion}`}
+            style={{ backgroundColor: "#128C7E", color: "#fff", fontWeight: 800 }}
+          />
+        </Box>
         <MainHeaderButtonsWrapper />
       </MainHeader>
 
       <Paper className={classes.mainPaperContainer} variant="outlined">
         {/* Banner do Topo */}
         <Box className={classes.headerBox}>
+          <Box display="flex" justifyContent="center" alignItems="center" mb={1.5}>
+            <Chip
+              label={`⚡ SISTEMA ATUALIZADO EM TEMPO REAL: ${systemVersion}`}
+              style={{ backgroundColor: "#FFD700", color: "#000", fontWeight: 800, fontSize: "0.85rem", padding: "4px 8px" }}
+            />
+          </Box>
           <Typography variant="h4" style={{ fontWeight: 800, marginBottom: 8 }}>
             🚀 Guia de Configuração 100% & Conexão dos Canais
           </Typography>
@@ -597,7 +655,8 @@ const Helps = () => {
             <Tab label="📋 1. Fluxo Sequencial (100% Configurado)" className={classes.tabButton} />
             <Tab label="📱 2. Guia de Conexão dos Canais (WhatsApp & Instagram)" className={classes.tabButton} />
             <Tab label="🤖 3. Manual Completo do FlowBuilder (Todas as Funções)" className={classes.tabButton} />
-            {records.length > 0 && <Tab label={`🎥 4. Vídeo-Aulas (${records.length})`} className={classes.tabButton} />}
+            <Tab label={`📜 4. Logs de Atualizações (${systemVersion})`} className={classes.tabButton} />
+            {records.length > 0 && <Tab label={`🎥 5. Vídeo-Aulas (${records.length})`} className={classes.tabButton} />}
           </Tabs>
         </Box>
 
@@ -806,8 +865,49 @@ const Helps = () => {
           </Box>
         )}
 
-        {/* CONTEÚDO DA ABA 4: VÍDEOS */}
-        {activeTab === 3 && records.length > 0 && (
+        {/* CONTEÚDO DA ABA 4: LOGS DE ATUALIZAÇÕES DO SISTEMA */}
+        {activeTab === 3 && (
+          <Box mb={4}>
+            <Box mb={3} p={2} style={{ backgroundColor: "rgba(255,215,0,0.1)", borderRadius: 8, border: "1px solid rgba(255,215,0,0.3)" }}>
+              <Typography variant="subtitle1" style={{ fontWeight: 700, color: "#128C7E", display: "flex", alignItems: "center", gap: 8 }}>
+                <CloudDoneIcon /> Histórico de Atualizações do Sistema em Tempo Real
+              </Typography>
+              <Typography variant="body2" style={{ color: "#444", marginTop: 4 }}>
+                Versão ativa no servidor: <strong>{systemVersion}</strong>. Confira abaixo o registro de todas as melhorias e alterações efetuadas.
+              </Typography>
+            </Box>
+
+            {CHANGELOG_ITEMS.map((item, idx) => (
+              <Accordion key={idx} defaultExpanded={idx === 0} className={classes.accordion}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />} className={classes.accordionSummary}>
+                  <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" pr={1}>
+                    <Typography className={classes.accordionTitle}>
+                      <CodeIcon style={{ color: "#128C7E" }} />
+                      {item.version} - {item.title}
+                    </Typography>
+                    <Chip label={item.date} size="small" className={classes.sectionBadge} style={{ backgroundColor: "#128C7E" }} />
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box className={classes.contentBox}>
+                    <Box component="ul" pl={2.5} style={{ margin: 0 }}>
+                      {item.changes.map((change, cIdx) => (
+                        <Box component="li" key={cIdx} mb={1}>
+                          <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                            {change}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
+        )}
+
+        {/* CONTEÚDO DA ABA 5: VÍDEOS */}
+        {activeTab === 4 && records.length > 0 && (
           <Box mb={4}>
             <Typography variant="h6" style={{ fontWeight: 700, marginBottom: 16 }}>
               🎥 Vídeo-Aulas de Treinamento ({records.length})
