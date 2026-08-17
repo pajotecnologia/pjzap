@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:35 - v7.0.7",
+    date: "17/08/2026",
+    title: "Gravada a Regra Permanente de Deploy VPS Ubuntu em .agents/rules/vps_deployment_rule.md",
+    changes: [
+      "Persistência permanente da regra de deploy da VPS Ubuntu no ecossistema do assistente AI.",
+      "Instruções fixadas para reset do git, build com alocação estendida de memória, restart de `whaticket-backend` no PM2 e `reload` do Nginx para estáticos do frontend."
+    ]
+  },
+  {
     version: "19:30 - v7.0.6",
     date: "17/08/2026",
     title: "Suporte a Instalação Nginx Direta (sem o serviço whaticket-frontend no PM2)",
@@ -566,7 +575,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:30 - v7.0.6");
+  const [systemVersion, setSystemVersion] = useState("19:35 - v7.0.7");
 
   useEffect(() => {
     async function fetchVersion() {
