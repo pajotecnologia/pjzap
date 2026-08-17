@@ -97,6 +97,14 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:49 - v7.0.10 - Roteamento de Nós & Invalidação de Cache VPS",
+    changes: [
+      "⚡ <strong>Visualização de Versão e Horário em Tempo Real</strong>: Exibição abaixo do menu Atualizações e no menu Ajuda.",
+      "🤖 <strong>Execução do FlowBuilder Resiliente</strong>: Resolução de nós por Tag visual (#1, #2, VENDAS) e prevenção de reset para o início.",
+      "🛠️ <strong>Deploy Seguro VPS Ubuntu</strong>: Invalidação de cache no Express (`no-cache`) e suporte a `max-old-space-size=4096` no build."
+    ]
+  },
+  {
     version: "Versão 7.0.0 - Lançamento Especial PJZap PRO",
     changes: [
       "🤖 <strong>FlowBuilder Avançado</strong>: Adicionados nós de Webhook (HTTP POST), Atraso (Delay), Sorteio (Randomizador A/B), Cobrança Pix e Transição Automática de Kanban.",
