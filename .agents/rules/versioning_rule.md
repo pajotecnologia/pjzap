@@ -1,8 +1,9 @@
-# Regra de Versionamento Incremental (v7.0.X)
+# Regra de Versionamento Incremental com Horário (HH:mm - v7.0.X)
 
 Sempre que realizar qualquer alteração, correção, refatoração ou melhoria no código deste projeto:
 
-1. Incremente a versão `v7.0.X` (onde X é o incremento sequencial numérico, ex: v7.0.1, v7.0.2, v7.0.3...).
+1. Registre o horário atual e incremente a versão no formato `HH:mm - v7.0.X` (ex: `18:27 - v7.0.2`).
 2. Atualize o campo `"versionSystem"` no arquivo `frontend/package.json`.
-3. Inclua a tag de versão `[v7.0.X]` no título do commit do Git.
-4. Registre a nova versão no relatório / walkthrough entregue ao usuário.
+3. Atualize a resposta do endpoint `/version` no backend (`backend/src/controllers/VersionController.ts`).
+4. Inclua a tag de versão `[HH:mm - v7.0.X]` no título do commit do Git.
+5. Exiba o horário e a versão no menu/layout do frontend para confirmação visual do usuário após atualização na VPS.

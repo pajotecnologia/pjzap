@@ -797,7 +797,7 @@ const MainListItems = (props) => {
               <React.Fragment>
                 <Divider />
                 <div className={classes.versionContainer}>
-                  {`v${version}`}
+                  {version && (version.startsWith("v") || version.includes("-") ? version : `v${version}`)}
                   <span className={classes.versionBadge}>
                     latest
                   </span>
