@@ -500,6 +500,16 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:15 - v7.0.5",
+    date: "17/08/2026",
+    title: "Guia Avançado de Diagnóstico VPS Ubuntu & Verificação de Caminhos PM2/Nginx",
+    changes: [
+      "Inclusão de roteiro profissional de diagnósticos de atualização para servidores Ubuntu VPS.",
+      "Instruções para verificação de diretórios ativos do PM2 (`pm2 info`), Nginx (`root` vs `proxy_pass`) e reset forçado do repositório Git.",
+      "Verificação de compilação explícita dos arquivos `dist/` do backend e `build/` do frontend."
+    ]
+  },
+  {
     version: "19:07 - v7.0.4",
     date: "17/08/2026",
     title: "Invalidação de Cache de Build no Express/Nginx & Alocação de Memória no Build",
@@ -547,7 +557,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:07 - v7.0.4");
+  const [systemVersion, setSystemVersion] = useState("19:15 - v7.0.5");
 
   useEffect(() => {
     async function fetchVersion() {
