@@ -500,6 +500,16 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:07 - v7.0.4",
+    date: "17/08/2026",
+    title: "Invalidação de Cache de Build no Express/Nginx & Alocação de Memória no Build",
+    changes: [
+      "Adicionado suporte a `NODE_OPTIONS=--max-old-space-size=4096` no script de build do frontend para evitar falhas silenciosas de memória no servidor VPS.",
+      "Configurados cabeçalhos de resposta `Cache-Control: no-cache, no-store, must-revalidate` no `server.js` do Express para impedir o cache do arquivo index.html no navegador.",
+      "Atualização do indicador visual de versão e horário em tempo real na Central de Ajuda."
+    ]
+  },
+  {
     version: "18:53 - v7.0.3",
     date: "17/08/2026",
     title: "Central de Ajuda Atualizada com Exibição de Versão & Horário em Tempo Real",
@@ -537,7 +547,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("18:53 - v7.0.3");
+  const [systemVersion, setSystemVersion] = useState("19:07 - v7.0.4");
 
   useEffect(() => {
     async function fetchVersion() {

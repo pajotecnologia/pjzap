@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "versionSystem": "18:53 - v7.0.3",
+  "versionSystem": "19:07 - v7.0.4",
   "nomeEmpresa": "Whaticket",
   "private": true,
   "dependencies": {
@@ -86,7 +86,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false react-scripts build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false react-scripts build",
     "build:analyze": "source-map-explorer 'build/static/js/*.js'",
     "build:prod": "npm run build && npm run build:analyze",
     "builddev": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts build",
