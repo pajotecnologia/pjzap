@@ -2,6 +2,6 @@ import { Request, Response } from "express";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
     return res.status(200).json({
-        version: "19:35 - v7.0.7"
+        version: "19:37 - v7.0.8"
     });
 };

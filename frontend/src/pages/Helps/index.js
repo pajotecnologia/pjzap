@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:37 - v7.0.8",
+    date: "17/08/2026",
+    title: "Validação Final de Deploy VPS & PM2 Backend Online",
+    changes: [
+      "Confirmação da compilação e recarregamento Nginx com 100% de sucesso na VPS.",
+      "Processo `whaticket-backend` reiniciado e rodando em estado ONLINE no PM2."
+    ]
+  },
+  {
     version: "19:35 - v7.0.7",
     date: "17/08/2026",
     title: "Gravada a Regra Permanente de Deploy VPS Ubuntu em .agents/rules/vps_deployment_rule.md",
@@ -575,7 +584,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:35 - v7.0.7");
+  const [systemVersion, setSystemVersion] = useState("19:37 - v7.0.8");
 
   useEffect(() => {
     async function fetchVersion() {
