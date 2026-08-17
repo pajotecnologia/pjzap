@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:05 - v7.0.9",
+    date: "17/08/2026",
+    title: "Correção de Permissões chown/chmod e Verificação de Usuário PM2 (root vs deploy)",
+    changes: [
+      "Inclusão de rotina de ajuste de propriedade e permissões de arquivos (`chown -R deploy:deploy` / `chmod -R 755`) para garantir leitura pelo Nginx.",
+      "Instruções para reinicialização cruzada de daemons PM2 em ambiente multiusuário Linux (`root` e `deploy`)."
+    ]
+  },
+  {
     version: "19:37 - v7.0.8",
     date: "17/08/2026",
     title: "Validação Final de Deploy VPS & PM2 Backend Online",
@@ -584,7 +593,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:37 - v7.0.8");
+  const [systemVersion, setSystemVersion] = useState("20:05 - v7.0.9");
 
   useEffect(() => {
     async function fetchVersion() {
