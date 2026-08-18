@@ -82,7 +82,12 @@ const findNodeById = (allNodes: FlowNode[], targetId?: string): FlowNode | undef
       .trim()
       .toLowerCase();
 
-    return nid === cleanTarget || (tag && tag === cleanTarget);
+    return (
+      nid === cleanTarget ||
+      nid === `node_${cleanTarget}` ||
+      cleanTarget === `node_${nid}` ||
+      (tag && tag === cleanTarget)
+    );
   });
 };
 
@@ -90,27 +95,63 @@ const findNodeById = (allNodes: FlowNode[], targetId?: string): FlowNode | undef
 const findTargetFromConnections = (
   connections: FlowConnection[],
   sourceId: string,
-  handleOrOptionId?: string
+  handleOrOptionId?: string,
+  optionIndex?: number
 ): string | undefined => {
   if (!connections || !Array.isArray(connections)) return undefined;
 
-  if (handleOrOptionId) {
-    const matchedConn = connections.find(
-      (c) =>
-        c.sourceNodeId === sourceId &&
-        (c.optionId === handleOrOptionId ||
-          (c as any).optionId === handleOrOptionId ||
-          (c as any).sourceHandle === handleOrOptionId ||
-          (c as any).sourceHandle === `option-${handleOrOptionId}` ||
-          (c as any).sourceHandle === `handle-${handleOrOptionId}` ||
-          (c as any).sourceHandle === `opt-${handleOrOptionId}`)
+  const cleanSource = sourceId.toString().trim().toLowerCase();
+
+  const isSourceMatch = (c: any) => {
+    const src = (c.sourceNodeId || c.source || "").toString().trim().toLowerCase();
+    return (
+      src === cleanSource ||
+      src === `node_${cleanSource}` ||
+      cleanSource === `node_${src}`
     );
-    if (matchedConn) return matchedConn.targetNodeId;
+  };
+
+  if (handleOrOptionId !== undefined || optionIndex !== undefined) {
+    const handleStr = (handleOrOptionId || "").toString().trim().toLowerCase();
+    const idxStr = optionIndex !== undefined ? optionIndex.toString() : "";
+
+    const matchedConn = connections.find((c: any) => {
+      if (!isSourceMatch(c)) return false;
+
+      const optId = (c.optionId || "").toString().trim().toLowerCase();
+      const srcHandle = (c.sourceHandle || c.handle || "").toString().trim().toLowerCase();
+
+      return (
+        (handleStr && (optId === handleStr || srcHandle === handleStr)) ||
+        (handleStr &&
+          (srcHandle === `option-${handleStr}` ||
+            srcHandle === `opt-${handleStr}` ||
+            srcHandle === `handle-${handleStr}`)) ||
+        (idxStr &&
+          (srcHandle === `option-${idxStr}` ||
+            srcHandle === `opt-${idxStr}` ||
+            srcHandle === `handle-${idxStr}` ||
+            srcHandle === idxStr)) ||
+        (handleStr && srcHandle.includes(handleStr))
+      );
+    });
+
+    if (matchedConn) {
+      return (
+        matchedConn.targetNodeId ||
+        (matchedConn as any).target ||
+        ""
+      ).toString().trim();
+    }
   }
 
-  const sourceConns = connections.filter((c) => c.sourceNodeId === sourceId);
-  if (sourceConns.length === 1) {
-    return sourceConns[0].targetNodeId;
+  const sourceConns = connections.filter((c: any) => isSourceMatch(c));
+  if (sourceConns.length > 0) {
+    return (
+      sourceConns[0].targetNodeId ||
+      (sourceConns[0] as any).target ||
+      ""
+    ).toString().trim();
   }
 
   return undefined;
@@ -393,25 +434,40 @@ const ExecuteFlowService = async ({
       } else if (currentNode.type === "menu" || currentNode.type === "list_menu") {
         const options = currentNode.options || [];
         let matchedOpt: any = null;
+        let matchedOptIdx: number = -1;
 
         if (!isOptionTransition) {
-          matchedOpt = options.find((opt, idx) => {
+          options.forEach((opt, idx) => {
+            if (matchedOpt) return;
             const num = (opt.optionNumber || (idx + 1).toString()).trim().toLowerCase();
             const txt = (opt.text || "").trim().toLowerCase();
-            return trimmedMsg === num || (txt && trimmedMsg === txt) || (txt && trimmedMsg.includes(txt));
+            const cleanIdx = (idx + 1).toString();
+
+            if (
+              trimmedMsg === num ||
+              trimmedMsg === cleanIdx ||
+              (txt && trimmedMsg === txt) ||
+              (txt && trimmedMsg.includes(txt))
+            ) {
+              matchedOpt = opt;
+              matchedOptIdx = idx;
+            }
           });
         }
 
         if (matchedOpt) {
           let optTargetId = matchedOpt.targetNodeId || (matchedOpt as any).targetNodeIdOption;
           if (!optTargetId) {
-            optTargetId = findTargetFromConnections(connections, currentNode.id, matchedOpt.id);
+            optTargetId = findTargetFromConnections(connections, currentNode.id, matchedOpt.id, matchedOptIdx);
           }
           if (optTargetId) {
             await cacheLayer.del(cacheKey);
-            currentNode = findNodeById(nodes, optTargetId);
-            isOptionTransition = true;
-            continue;
+            const nextNode = findNodeById(nodes, optTargetId);
+            if (nextNode) {
+              currentNode = nextNode;
+              isOptionTransition = true;
+              continue;
+            }
           }
         }
 

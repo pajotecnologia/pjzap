@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "10:50 - v7.0.13 - Solução Definitiva para Opções do Menu Numérico no FlowBuilder",
+    changes: [
+      "🤖 <strong>Navegação de Nós Resiliente</strong>: Suporte completo para transição do Nó #5 (Menu Numérico) para os nós #6 (Lista Interativa), #7 (Botões), #8 e #10.",
+      "🔗 <strong>Ajuste de Handles de Conexão ReactFlow</strong>: Resolução de conexões pelos handles `sourceHandle`, `option-1`, `opt-0` e `handle-0`."
+    ]
+  },
+  {
     version: "21:04 - v7.0.12 - Desregistro de ServiceWorker PWA & Purga de CacheStorage",
     changes: [
       "⚡ <strong>Visualização Obrigatória de Horário</strong>: Exibição da versão com horário no menu lateral junto ao selo `latest`.",

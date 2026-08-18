@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "10:50 - v7.0.13",
+    date: "18/08/2026",
+    title: "Melhoria de Roteamento de Opções no Menu Numérico & Resolução de Conexões ReactFlow",
+    changes: [
+      "Refatoração de `findTargetFromConnections` no backend `ExecuteFlowService.ts` com suporte unificado a handles de conexão (`sourceHandle`, `option-1`, `opt-0`, `handle-0`).",
+      "Garantia de transição sequencial imediata entre o Nó #5 (Menu Numérico) e os nós #6, #7, #8 e #10 sem travamento de opções."
+    ]
+  },
+  {
     version: "21:04 - v7.0.12",
     date: "17/08/2026",
     title: "Remoção de Cache PWA Service Worker & Exibição de Horário no Menu Lateral",
@@ -611,7 +620,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("21:04 - v7.0.12");
+  const [systemVersion, setSystemVersion] = useState("10:50 - v7.0.13");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -621,7 +630,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("21:04 - v7.0.12");
+        setSystemVersion("10:50 - v7.0.13");
       }
     }
     fetchVersion();
