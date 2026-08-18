@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:48 - v7.0.26 - Links / URLs Clicáveis em Botões, Menus e Listas do FlowBuilder",
+    changes: [
+      "🔗 <strong>Campo de URL no Editor</strong>: Adicionados campos dedicados `Link / URL (Opcional)` para cada item nos nós de Botões, Menu Numérico, Listas Interativas e Carrossel em `builder.js`.",
+      "📱 <strong>Links Clicáveis no WhatsApp</strong>: `ExecuteFlowService.ts` formata automaticamente qualquer URL cadastrada como link clicável `🔗 https://...` ao enviar para o cliente."
+    ]
+  },
+  {
     version: "20:42 - v7.0.25 - Desvinculação Automática ao Excluir Integrações de Filas",
     changes: [
       "🗑️ <strong>Exclusão Direta de Integrações</strong>: `DeleteQueueIntegrationService.ts` desvincula automaticamente Filas e Tickets antes de deletar, eliminando travamentos de Foreign Key Constraint.",

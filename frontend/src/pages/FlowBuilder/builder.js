@@ -1339,6 +1339,22 @@ const FlowBuilderInner = () => {
                         <Delete />
                       </IconButton>
                     </div>
+                    <div style={{ marginBottom: 8 }}>
+                      <TextField
+                        size="small"
+                        label="Link / URL do Botão/Opção (Opcional)"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="https://seusite.com"
+                        value={opt.url || ""}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedNode.data.options || [])];
+                          newOpts[idx].url = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        className={classes.drawerField}
+                      />
+                    </div>
                     <FormControl variant="outlined" size="small" fullWidth>
                       <InputLabel style={{ color: "#aaa" }}>Ir para (Nó de Destino)</InputLabel>
                       <Select
@@ -1566,6 +1582,7 @@ const FlowBuilderInner = () => {
                     <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
                       <TextField
                         size="small"
+                        label="Texto do Botão"
                         fullWidth
                         variant="outlined"
                         value={btn.text}
@@ -1586,6 +1603,22 @@ const FlowBuilderInner = () => {
                       >
                         <Delete />
                       </IconButton>
+                    </div>
+                    <div style={{ marginBottom: 8 }}>
+                      <TextField
+                        size="small"
+                        label="Link / URL do Botão (Opcional)"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="https://seusite.com"
+                        value={btn.url || ""}
+                        onChange={(e) => {
+                          const newBtns = [...(selectedNode.data.buttons || [])];
+                          newBtns[idx].url = e.target.value;
+                          updateNodeData("buttons", newBtns);
+                        }}
+                        className={classes.drawerField}
+                      />
                     </div>
                     <FormControl variant="outlined" size="small" fullWidth>
                       <InputLabel style={{ color: "#aaa" }}>Ir para (Nó de Destino)</InputLabel>
@@ -1679,6 +1712,22 @@ const FlowBuilderInner = () => {
                       >
                         <Delete />
                       </IconButton>
+                    </div>
+                    <div style={{ marginBottom: 8 }}>
+                      <TextField
+                        size="small"
+                        label="Link / URL do Item (Opcional)"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="https://seusite.com"
+                        value={opt.url || ""}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedNode.data.options || [])];
+                          newOpts[idx].url = e.target.value;
+                          updateNodeData("options", newOpts);
+                        }}
+                        className={classes.drawerField}
+                      />
                     </div>
                     <FormControl variant="outlined" size="small" fullWidth>
                       <InputLabel style={{ color: "#aaa" }}>Ir para (Nó de Destino)</InputLabel>

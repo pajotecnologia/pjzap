@@ -384,7 +384,9 @@ const ExecuteFlowService = async ({
         if (buttonsList && Array.isArray(buttonsList)) {
           textToSend += "\n\n";
           buttonsList.forEach((btn, idx) => {
-            textToSend += `[ ${btn.text || `Opção ${idx + 1}`} ]\n`;
+            const rawUrl = (btn as any).url || (btn as any).link || "";
+            const urlStr = rawUrl ? `\n🔗 ${rawUrl}` : "";
+            textToSend += `[ ${btn.text || `Opção ${idx + 1}`} ]${urlStr}\n`;
           });
         }
 
@@ -409,8 +411,11 @@ const ExecuteFlowService = async ({
       } else if (currentNode.type === "carousel") {
         if (currentNode.cards && Array.isArray(currentNode.cards)) {
           for (const card of currentNode.cards) {
+            const rawUrl = (card as any).url || (card as any).link || "";
+            const urlStr = rawUrl ? `\n🔗 ${rawUrl}` : "";
             let cardMsg = `🎠 *${card.title}*\n${card.description}`;
-            if (card.buttonText) cardMsg += `\n\n👉 [ ${card.buttonText} ]`;
+            if (card.buttonText) cardMsg += `\n\n👉 [ ${card.buttonText} ]${urlStr}`;
+            else if (urlStr) cardMsg += `\n\n👉 ${urlStr}`;
 
             if (ticket.channel === "instagram") {
               await SendInstagramMessageService({
@@ -552,7 +557,9 @@ const ExecuteFlowService = async ({
         let menuText = currentNode.content ? `${currentNode.content}\n\n` : "Escolha uma opção:\n\n";
         if (options && Array.isArray(options)) {
           options.forEach((opt, idx) => {
-            menuText += `${opt.optionNumber || idx + 1}. ${opt.text}\n`;
+            const rawUrl = (opt as any).url || (opt as any).link || "";
+            const urlStr = rawUrl ? ` - 🔗 ${rawUrl}` : "";
+            menuText += `${opt.optionNumber || idx + 1}. ${opt.text}${urlStr}\n`;
           });
         }
 

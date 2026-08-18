@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:48 - v7.0.26",
+    date: "18/08/2026",
+    title: "Campos de Link/URL Clicáveis em Botões e Listas Interativas do FlowBuilder",
+    changes: [
+      "Inclusão do campo 'Link / URL (Opcional)' nas opções de Menu, Botões Interativos, Listas Interativas e Carrossel em `builder.js`.",
+      "Formatação automática de URLs preenchidas como links clicáveis `🔗 https://...` na mensagem enviada pelo WhatsApp em `ExecuteFlowService.ts`."
+    ]
+  },
+  {
     version: "20:42 - v7.0.25",
     date: "18/08/2026",
     title: "Desvinculação Automática de Filas/Tickets ao Excluir Integrações (`DeleteQueueIntegrationService.ts`)",
@@ -730,7 +739,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:42 - v7.0.25");
+  const [systemVersion, setSystemVersion] = useState("20:48 - v7.0.26");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -740,7 +749,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("20:42 - v7.0.25");
+        setSystemVersion("20:48 - v7.0.26");
       }
     }
     fetchVersion();
