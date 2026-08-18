@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:13 - v7.0.24 - Tratamento de Iterabilidade em Respostas do Typebot em Filas",
+    changes: [
+      "🛡️ <strong>Prevenção de Exceção em `typebotListener.ts`</strong>: Verificação `!Array.isArray(messages)` na linha 147 impedindo a exceção `TypeError: messages is not iterable`.",
+      "⚡ <strong>Estabilidade de Fila</strong>: Garantia de que respostas nulas ou malformadas do Typebot na Fila 2 não interrompam a entrega das mensagens do WhatsApp."
+    ]
+  },
+  {
     version: "20:04 - v7.0.23 - Diagnóstico Detalhado de Opções de Menu & Normalização por Dígitos",
     changes: [
       "🔍 <strong>Logs de Rastreamento de Opções</strong>: Inseridos logs de diagnóstico `[FlowBuilder Debug]` para rastrear em tempo real a correspondência da opção digitada e o nó de destino resolvido.",

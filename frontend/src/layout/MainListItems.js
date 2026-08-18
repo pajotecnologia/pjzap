@@ -348,7 +348,7 @@ const MainListItems = (props) => {
   const [chats, dispatch] = useReducer(reducer, []);
   const { getPlanCompany } = usePlans();
   
-  const [version, setVersion] = useState("20:04 - v7.0.23");
+  const [version, setVersion] = useState("20:13 - v7.0.24");
   const { getVersion } = useVersion();
 
   const socketManager = useContext(SocketContext);
@@ -366,7 +366,7 @@ const MainListItems = (props) => {
           setVersion(_version.version);
         }
       } catch (e) {
-        setVersion("20:04 - v7.0.23");
+        setVersion("20:13 - v7.0.24");
       }
     }
     fetchVersion();
@@ -803,7 +803,7 @@ const MainListItems = (props) => {
               <React.Fragment>
                 <Divider />
                 <div className={classes.versionContainer}>
-                  {version && version !== "7.0.0" && version.includes("-") ? version : "20:04 - v7.0.23"}
+                  {version && version !== "7.0.0" && version.includes("-") ? version : "20:13 - v7.0.24"}
                   <span className={classes.versionBadge}>
                     latest
                   </span>

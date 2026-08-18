@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:13 - v7.0.24",
+    date: "18/08/2026",
+    title: "Tratamento de Iterabilidade em Respostas do Typebot (`typebotListener.ts`)",
+    changes: [
+      "Substituição de `messages?.length === 0` por `!Array.isArray(messages)` em `typebotListener.ts` linha 147.",
+      "Eliminação definitiva da exceção `TypeError: messages is not iterable`, garantindo que respostas nulas do Typebot não travem o listener do WhatsApp."
+    ]
+  },
+  {
     version: "20:04 - v7.0.23",
     date: "18/08/2026",
     title: "Normalização Flexível de Números de Opções no Menu & Logs de Rastreamento Extensivos",
@@ -712,7 +721,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:04 - v7.0.23");
+  const [systemVersion, setSystemVersion] = useState("20:13 - v7.0.24");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -722,7 +731,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("20:04 - v7.0.23");
+        setSystemVersion("20:13 - v7.0.24");
       }
     }
     fetchVersion();

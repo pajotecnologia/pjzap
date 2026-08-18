@@ -144,8 +144,10 @@ const typebotListener = async ({
                 input = dataStart?.input;
             }
 
-            if (messages?.length === 0) {
-                await wbot.sendMessage(`${number}@c.us`, { text: typebotUnknownMessage });
+            if (!Array.isArray(messages) || messages.length === 0) {
+                if (typebotUnknownMessage) {
+                    await wbot.sendMessage(`${number}@c.us`, { text: typebotUnknownMessage });
+                }
             } else {
                 for (const message of messages) {
                     if (message.type === 'text') {
