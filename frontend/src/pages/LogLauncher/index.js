@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "19:18 - v7.0.21 - Logs de Diagnóstico em Tempo Real & Liberação de Gatilhos",
+    changes: [
+      "🔍 <strong>Logs de Diagnóstico do FlowBuilder</strong>: Logs detalhados `[FlowBuilder Debug]` inseridos em `ExecuteFlowService.ts` mostrando a busca e execução de nós em tempo real.",
+      "🔓 <strong>Execução Desbloqueada sem Atendente</strong>: Atendimento automatizado do bot liberado para rodar mesmo quando a conversa estiver com status aberto sem usuário humano atribuído."
+    ]
+  },
+  {
     version: "18:50 - v7.0.20 - Blindagem Contra Crashes de Integração Typebot na Fila",
     changes: [
       "🛡️ <strong>Prevenção de Crash em `typebotListener.ts`</strong>: Adicionado Optional Chaining em `dataStart?.messages?.length` prevenindo exceções do tipo `TypeError: Cannot read properties of undefined (reading 'length')`.",

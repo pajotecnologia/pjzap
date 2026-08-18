@@ -207,6 +207,8 @@ const ExecuteFlowService = async ({
       }
     }
 
+    console.log(`[FlowBuilder Debug] Ticket ID: ${ticket.id}, Status: ${ticket.status}, UserId: ${ticket.userId}, Msg: "${trimmedMsg}", ActiveState:`, activeState);
+
     if (!currentNode) {
       const whereClause: any = { companyId };
       if (flowId) {
@@ -216,7 +218,12 @@ const ExecuteFlowService = async ({
       }
 
       const flows = await Flow.findAll({ where: whereClause, order: [["id", "DESC"]] });
-      if (!flows || flows.length === 0) return false;
+      console.log(`[FlowBuilder Debug] Fluxos ativos encontrados no banco: ${flows ? flows.length : 0}`);
+
+      if (!flows || flows.length === 0) {
+        console.log(`[FlowBuilder Debug] Nenhum fluxo ativo para a empresa ${companyId}`);
+        return false;
+      }
 
       let matchedFlow: Flow | null = null;
       let matchedTriggerNode: FlowNode | null = null;
@@ -239,12 +246,13 @@ const ExecuteFlowService = async ({
         if (explicitTrigger) {
           matchedFlow = f;
           matchedTriggerNode = explicitTrigger;
+          console.log(`[FlowBuilder Debug] Gatilho explícito correspondido no Fluxo ID ${f.id} ("${f.name}") - Keyword: "${explicitTrigger.keyword}"`);
           break;
         }
       }
 
-      // 2ª Passada: Se nenhum gatilho explícito correspondeu e NÃO há estado no Redis nem atendente humano ativo, buscar gatilho curinga (*)
-      if (!matchedFlow && !activeState && !(ticket.status === "open" || ticket.userId)) {
+      // 2ª Passada: Se nenhum gatilho explícito correspondeu e NÃO há atendente humano atribuído, buscar gatilho curinga (*)
+      if (!matchedFlow && !activeState && !ticket.userId) {
         for (const f of flows) {
           let fNodes: FlowNode[] = [];
           try {
@@ -262,6 +270,7 @@ const ExecuteFlowService = async ({
           if (wildcardTrigger) {
             matchedFlow = f;
             matchedTriggerNode = wildcardTrigger;
+            console.log(`[FlowBuilder Debug] Gatilho curinga (*) correspondido no Fluxo ID ${f.id} ("${f.name}")`);
             break;
           }
         }
@@ -278,11 +287,13 @@ const ExecuteFlowService = async ({
         }
         if (nextNodeId) {
           currentNode = findNodeById(nodes, nextNodeId);
+          console.log(`[FlowBuilder Debug] Primeiro nó a executar: ID ${currentNode?.id} (${currentNode?.type})`);
         }
       }
     }
 
     if (!currentNode || !flow) {
+      console.log(`[FlowBuilder Debug] Nenhum nó inicial resolvido para a mensagem "${trimmedMsg}". Abortando.`);
       return false;
     }
 

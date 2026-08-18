@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:18 - v7.0.21",
+    date: "18/08/2026",
+    title: "Logs de Diagnóstico do FlowBuilder & Liberação de Gatilhos Sem Atendente Atribuído",
+    changes: [
+      "Inclusão de logs `[FlowBuilder Debug]` no `ExecuteFlowService.ts` exibindo a contagem de fluxos no banco e o nó correspondido.",
+      "Remoção da trava rígida `status === open` quando a conversa não possui atendente humano (`userId === null`), permitindo a execução imediata de fluxos de bot."
+    ]
+  },
+  {
     version: "18:50 - v7.0.20",
     date: "18/08/2026",
     title: "Correção de Crash de Leitura Indefinida no Typebot (`typebotListener.ts`)",
@@ -685,7 +694,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("18:50 - v7.0.20");
+  const [systemVersion, setSystemVersion] = useState("19:18 - v7.0.21");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -695,7 +704,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("18:50 - v7.0.20");
+        setSystemVersion("19:18 - v7.0.21");
       }
     }
     fetchVersion();
