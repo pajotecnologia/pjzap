@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "21:04 - v7.0.12",
+    date: "17/08/2026",
+    title: "Remoção de Cache PWA Service Worker & Exibição de Horário no Menu Lateral",
+    changes: [
+      "Desregistramento automático do PWA Service Worker (`unregister()`) e limpeza de CacheStorage do navegador para evitar congelamento de telas antigas (`v7.0.0`).",
+      "Formatação forçada de horário no selo visual do menu lateral ao lado da tag `latest`."
+    ]
+  },
+  {
     version: "20:57 - v7.0.11",
     date: "17/08/2026",
     title: "Sincronização Definitiva de Versão & Horário em Todos os Menus e APIs",
@@ -602,7 +611,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:57 - v7.0.11");
+  const [systemVersion, setSystemVersion] = useState("21:04 - v7.0.12");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -612,7 +621,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("20:57 - v7.0.11");
+        setSystemVersion("21:04 - v7.0.12");
       }
     }
     fetchVersion();

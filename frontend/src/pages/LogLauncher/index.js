@@ -97,6 +97,14 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "21:04 - v7.0.12 - Desregistro de ServiceWorker PWA & Purga de CacheStorage",
+    changes: [
+      "⚡ <strong>Visualização Obrigatória de Horário</strong>: Exibição da versão com horário no menu lateral junto ao selo `latest`.",
+      "🧹 <strong>Limpeza Automática de Cache PWA</strong>: Desativação do Service Worker para forçar o navegador a carregar o novo build.",
+      "🛠️ <strong>Arquitetura VPS Blindada</strong>: Invalidação de cache no Nginx e Express."
+    ]
+  },
+  {
     version: "20:57 - v7.0.11 - Sincronização Geral de Versão & Horário em Tempo Real",
     changes: [
       "⚡ <strong>Visualização de Versão e Horário em Tempo Real</strong>: Exibição no menu lateral abaixo de Atualizações e na Central de Ajuda.",

@@ -1,28 +1,23 @@
 export function register() {
-  console.log("Registrando service worker", navigator)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
-
-      navigator.serviceWorker.register(swUrl)
-        .then((registration) => {
-          console.log('Service worker registrado com sucesso!', registration);
-        })
-        .catch((error) => {
-          console.error('Erro durante o registro do service worker:', error);
-        });
-    });
-  }
+  // Service worker registration disabled to prevent stale asset caching
 }
 
 export function unregister() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready
-      .then((registration) => {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
         registration.unregister();
-      })
-      .catch((error) => {
-        console.error('Erro durante o desregistro do service worker:', error);
+      }
+    }).catch((error) => {
+      console.error('Erro ao desregistrar service worker:', error);
+    });
+
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        for (let name of names) {
+          caches.delete(name);
+        }
       });
+    }
   }
 }
