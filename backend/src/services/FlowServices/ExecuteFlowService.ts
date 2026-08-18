@@ -96,7 +96,8 @@ const findTargetFromConnections = (
   connections: FlowConnection[],
   sourceId: string,
   handleOrOptionId?: string,
-  optionIndex?: number
+  optionIndex?: number,
+  optionNumber?: string
 ): string | undefined => {
   if (!connections || !Array.isArray(connections)) return undefined;
 
@@ -111,9 +112,10 @@ const findTargetFromConnections = (
     );
   };
 
-  if (handleOrOptionId !== undefined || optionIndex !== undefined) {
+  if (handleOrOptionId !== undefined || optionIndex !== undefined || optionNumber !== undefined) {
     const handleStr = (handleOrOptionId || "").toString().trim().toLowerCase();
     const idxStr = optionIndex !== undefined ? optionIndex.toString() : "";
+    const numStr = (optionNumber || "").toString().trim().toLowerCase();
 
     const matchedConn = connections.find((c: any) => {
       if (!isSourceMatch(c)) return false;
@@ -132,6 +134,13 @@ const findTargetFromConnections = (
             srcHandle === `opt-${idxStr}` ||
             srcHandle === `handle-${idxStr}` ||
             srcHandle === idxStr)) ||
+        (numStr &&
+          (srcHandle === `option-${numStr}` ||
+            srcHandle === `opt-${numStr}` ||
+            srcHandle === `handle-${numStr}` ||
+            srcHandle === numStr ||
+            srcHandle === `option-${Number(numStr) - 1}` ||
+            srcHandle === `opt-${Number(numStr) - 1}`)) ||
         (handleStr && srcHandle.includes(handleStr))
       );
     });
@@ -244,7 +253,7 @@ const ExecuteFlowService = async ({
 
         const triggerNode = fNodes.find(
           (n) => n.type === "trigger" && n.keyword && n.keyword !== "*" && trimmedMsg.includes(n.keyword.toLowerCase())
-        ) || fNodes.find((n) => n.type === "trigger" && (!n.keyword || n.keyword === "*"));
+        ) || (!activeState ? fNodes.find((n) => n.type === "trigger" && (!n.keyword || n.keyword === "*")) : undefined);
 
         if (triggerNode) {
           flow = f;
@@ -482,14 +491,20 @@ const ExecuteFlowService = async ({
         }
 
         if (matchedOpt) {
-          let optTargetId = matchedOpt.targetNodeId || (matchedOpt as any).targetNodeIdOption;
+          let optTargetId = matchedOpt.targetNodeId || (matchedOpt as any).targetNodeIdOption || (matchedOpt as any).targetNodeIdTag;
           if (!optTargetId) {
-            optTargetId = findTargetFromConnections(connections, currentNode.id, matchedOpt.id, matchedOptIdx);
+            optTargetId = findTargetFromConnections(
+              connections,
+              currentNode.id,
+              matchedOpt.id,
+              matchedOptIdx,
+              matchedOpt.optionNumber || (matchedOptIdx + 1).toString()
+            );
           }
           if (optTargetId) {
-            await cacheLayer.del(cacheKey);
             const nextNode = findNodeById(nodes, optTargetId);
             if (nextNode) {
+              await cacheLayer.del(cacheKey);
               currentNode = nextNode;
               isOptionTransition = true;
               continue;

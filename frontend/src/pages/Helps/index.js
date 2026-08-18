@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "17:36 - v7.0.17",
+    date: "18/08/2026",
+    title: "Proteção Contra Loop Infinito de Gatilho Curinga (*) & Mapeamento por Número de Opção",
+    changes: [
+      "Proteção em `ExecuteFlowService.ts` para que o gatilho curinga `*` NUNCA reinicie um fluxo em andamento quando o usuário digita no menu.",
+      "Suporte a mapeamento pelo número da opção (`optionNumber`) garantindo que nós com opções pontuais (ex: '2. Vai pra lista 2') avancem para o nó correto."
+    ]
+  },
+  {
     version: "17:17 - v7.0.16",
     date: "18/08/2026",
     title: "Atualização da Tabela Flow para LONGTEXT & Limpeza de Cache de Nós Inexistentes",
@@ -649,7 +658,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("17:17 - v7.0.16");
+  const [systemVersion, setSystemVersion] = useState("17:36 - v7.0.17");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -659,7 +668,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("17:17 - v7.0.16");
+        setSystemVersion("17:36 - v7.0.17");
       }
     }
     fetchVersion();

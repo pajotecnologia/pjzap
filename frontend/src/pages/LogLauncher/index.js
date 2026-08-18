@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "17:36 - v7.0.17 - Bloqueio de Loop Infinito do Gatilho Curinga (*) & Mapeamento por Número de Opção",
+    changes: [
+      "🛡️ <strong>Bloqueio de Reinício Indevido</strong>: O gatilho curinga `*` foi blindado para NUNCA reiniciar o fluxo do zero quando o usuário digita uma opção no menu.",
+      "🔢 <strong>Mapeamento por Número da Opção</strong>: `findTargetFromConnections` agora busca tanto pelo ID do conector quanto pelo número da opção (`optionNumber`), permitindo avançar perfeitamente para 'Lista 2'."
+    ]
+  },
+  {
     version: "17:17 - v7.0.16 - Suporte a LONGTEXT no Banco & Autolimpeza de Cache Desatualizado",
     changes: [
       "🛢️ <strong>Capacidade de Fluxos Complexos (LONGTEXT)</strong>: Colunas `nodes` e `connections` atualizadas para `LONGTEXT` evitando truncamento de JSON no MySQL.",
