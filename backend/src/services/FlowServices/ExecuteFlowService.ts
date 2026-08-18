@@ -251,8 +251,8 @@ const ExecuteFlowService = async ({
         }
       }
 
-      // 2ª Passada: Se nenhum gatilho explícito correspondeu e NÃO há atendente humano atribuído, buscar gatilho curinga (*)
-      if (!matchedFlow && !activeState && !ticket.userId) {
+      // 2ª Passada: Se nenhum gatilho explícito correspondeu e não há estado no Redis, buscar gatilho curinga (*)
+      if (!matchedFlow && !activeState) {
         for (const f of flows) {
           let fNodes: FlowNode[] = [];
           try {

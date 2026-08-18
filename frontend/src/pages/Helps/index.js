@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "19:25 - v7.0.22",
+    date: "18/08/2026",
+    title: "Execução 100% Automática do Bot Mesmo com Atendente Humano Atribuído",
+    changes: [
+      "Remoção da restrição de `ticket.userId` em `ExecuteFlowService.ts`, permitindo que o bot responda automaticamente 100% das mensagens, mesmo quando o ticket está atribuído ao Admin na aba 'Atendendo'.",
+      "Garantia de que o cliente receba respostas instantâneas independentemente do status de atribuição."
+    ]
+  },
+  {
     version: "19:18 - v7.0.21",
     date: "18/08/2026",
     title: "Logs de Diagnóstico do FlowBuilder & Liberação de Gatilhos Sem Atendente Atribuído",
@@ -694,7 +703,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:18 - v7.0.21");
+  const [systemVersion, setSystemVersion] = useState("19:25 - v7.0.22");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -704,7 +713,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("19:18 - v7.0.21");
+        setSystemVersion("19:25 - v7.0.22");
       }
     }
     fetchVersion();

@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "19:25 - v7.0.22 - Atendimento Automático do Bot Desbloqueado com Atendente Humano",
+    changes: [
+      "🤖 <strong>Automação Total Desbloqueada</strong>: Removida a trava de `ticket.userId` em `ExecuteFlowService.ts`, permitindo que o robô responda automaticamente mesmo que a conversa esteja atribuída ao Admin na aba 'Atendendo'.",
+      "⚡ <strong>Resposta Instantânea</strong>: Garantia de resposta imediata no WhatsApp independentemente de atribuição manual."
+    ]
+  },
+  {
     version: "19:18 - v7.0.21 - Logs de Diagnóstico em Tempo Real & Liberação de Gatilhos",
     changes: [
       "🔍 <strong>Logs de Diagnóstico do FlowBuilder</strong>: Logs detalhados `[FlowBuilder Debug]` inseridos em `ExecuteFlowService.ts` mostrando a busca e execução de nós em tempo real.",
