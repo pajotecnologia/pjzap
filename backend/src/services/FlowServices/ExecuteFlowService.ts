@@ -490,16 +490,24 @@ const ExecuteFlowService = async ({
         let matchedOpt: any = null;
         let matchedOptIdx: number = -1;
 
+        console.log(`[FlowBuilder Debug] Processando nó Menu/Lista (${currentNode.id}). Msg: "${trimmedMsg}", Total Opções: ${options.length}, isOptionTransition: ${isOptionTransition}`);
+
         if (!isOptionTransition) {
           options.forEach((opt, idx) => {
             if (matchedOpt) return;
             const num = (opt.optionNumber || (idx + 1).toString()).trim().toLowerCase();
             const txt = (opt.text || "").trim().toLowerCase();
             const cleanIdx = (idx + 1).toString();
+            const cleanMsg = trimmedMsg.replace(/[^\w\s]/gi, "").trim();
+            const digitsOnly = trimmedMsg.replace(/\D/g, "");
 
             if (
               trimmedMsg === num ||
               trimmedMsg === cleanIdx ||
+              cleanMsg === num ||
+              cleanMsg === cleanIdx ||
+              digitsOnly === num ||
+              digitsOnly === cleanIdx ||
               (txt && trimmedMsg === txt) ||
               (txt && trimmedMsg.includes(txt))
             ) {
@@ -510,6 +518,7 @@ const ExecuteFlowService = async ({
         }
 
         if (matchedOpt) {
+          console.log(`[FlowBuilder Debug] Opção correspondida: ID ${matchedOpt.id}, optionNumber: "${matchedOpt.optionNumber}", text: "${matchedOpt.text}"`);
           let optTargetId = matchedOpt.targetNodeId || (matchedOpt as any).targetNodeIdOption || (matchedOpt as any).targetNodeIdTag;
           if (!optTargetId) {
             optTargetId = findTargetFromConnections(
@@ -520,15 +529,24 @@ const ExecuteFlowService = async ({
               matchedOpt.optionNumber || (matchedOptIdx + 1).toString()
             );
           }
+          console.log(`[FlowBuilder Debug] Target ID resolvido da opção: "${optTargetId}"`);
+
           if (optTargetId) {
             const nextNode = findNodeById(nodes, optTargetId);
             if (nextNode) {
+              console.log(`[FlowBuilder Debug] Próximo nó encontrado: ID ${nextNode.id} (${nextNode.type}) - Conteúdo: "${nextNode.content || nextNode.title}"`);
               await cacheLayer.del(cacheKey);
               currentNode = nextNode;
               isOptionTransition = true;
               continue;
+            } else {
+              console.log(`[FlowBuilder Debug] ALERTA: Nó de destino ID "${optTargetId}" não foi encontrado no fluxo!`);
             }
+          } else {
+            console.log(`[FlowBuilder Debug] ALERTA: Nenhuma conexão encontrada para a opção do nó ${currentNode.id}!`);
           }
+        } else if (!isOptionTransition) {
+          console.log(`[FlowBuilder Debug] Nenhuma opção correspondeu à mensagem "${trimmedMsg}". Re-apresentando menu.`);
         }
 
         let menuText = currentNode.content ? `${currentNode.content}\n\n` : "Escolha uma opção:\n\n";

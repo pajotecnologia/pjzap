@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:04 - v7.0.23",
+    date: "18/08/2026",
+    title: "Normalização Flexível de Números de Opções no Menu & Logs de Rastreamento Extensivos",
+    changes: [
+      "Suporte a correspondência por dígitos extraídos (`digitsOnly === num`) em `ExecuteFlowService.ts`, permitindo que respostas como '2.', '2 ' ou 'opção 2' sejam aceitas com 100% de sucesso.",
+      "Logs detalhados de transição de nós em tempo real facilitando o rastreamento no PM2."
+    ]
+  },
+  {
     version: "19:25 - v7.0.22",
     date: "18/08/2026",
     title: "Execução 100% Automática do Bot Mesmo com Atendente Humano Atribuído",
@@ -703,7 +712,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("19:25 - v7.0.22");
+  const [systemVersion, setSystemVersion] = useState("20:04 - v7.0.23");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -713,7 +722,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("19:25 - v7.0.22");
+        setSystemVersion("20:04 - v7.0.23");
       }
     }
     fetchVersion();

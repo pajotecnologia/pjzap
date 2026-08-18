@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:04 - v7.0.23 - Diagnóstico Detalhado de Opções de Menu & Normalização por Dígitos",
+    changes: [
+      "🔍 <strong>Logs de Rastreamento de Opções</strong>: Inseridos logs de diagnóstico `[FlowBuilder Debug]` para rastrear em tempo real a correspondência da opção digitada e o nó de destino resolvido.",
+      "🔢 <strong>Flexibilização da Opção Digitada</strong>: Suporte a correspondência por dígitos extraídos (`digitsOnly === num`) garantindo que entradas com pontuação ou espaço sejam capturadas."
+    ]
+  },
+  {
     version: "19:25 - v7.0.22 - Atendimento Automático do Bot Desbloqueado com Atendente Humano",
     changes: [
       "🤖 <strong>Automação Total Desbloqueada</strong>: Removida a trava de `ticket.userId` em `ExecuteFlowService.ts`, permitindo que o robô responda automaticamente mesmo que a conversa esteja atribuída ao Admin na aba 'Atendendo'.",
