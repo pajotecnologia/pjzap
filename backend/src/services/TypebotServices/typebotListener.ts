@@ -121,7 +121,7 @@ const typebotListener = async ({
             let requestContinue
             let messages
             let input
-            if (dataStart?.messages.length === 0 || dataStart === undefined) {
+            if (!dataStart?.messages || dataStart.messages.length === 0) {
                 const reqData = JSON.stringify({
                     "message": body
                 });

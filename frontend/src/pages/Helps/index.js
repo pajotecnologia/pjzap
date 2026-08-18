@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "18:50 - v7.0.20",
+    date: "18/08/2026",
+    title: "Correção de Crash de Leitura Indefinida no Typebot (`typebotListener.ts`)",
+    changes: [
+      "Tratamento de segurança em `typebotListener.ts` linha 124 para evitar exceção `TypeError: Cannot read properties of undefined (reading 'length')` em respostas de Typebot nulas.",
+      "Garantia de estabilidade do listener principal do WhatsApp sem interrupções em integrações de filas."
+    ]
+  },
+  {
     version: "18:08 - v7.0.19",
     date: "18/08/2026",
     title: "Prioridade de Gatilhos Explícitos em 2 Passadas & Invalidação Global ao Salvar Fluxos",
@@ -676,7 +685,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("18:08 - v7.0.19");
+  const [systemVersion, setSystemVersion] = useState("18:50 - v7.0.20");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -686,7 +695,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("18:08 - v7.0.19");
+        setSystemVersion("18:50 - v7.0.20");
       }
     }
     fetchVersion();
