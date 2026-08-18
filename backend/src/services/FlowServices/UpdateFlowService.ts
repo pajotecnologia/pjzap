@@ -1,5 +1,6 @@
 import Flow from "../../models/Flow";
 import AppError from "../../errors/AppError";
+import { cacheLayer } from "../../libs/cache";
 
 interface RequestData {
   name?: string;
@@ -35,6 +36,11 @@ const UpdateFlowService = async ({
     connections: connections !== undefined ? (typeof connections === "string" ? connections : JSON.stringify(connections)) : flow.connections,
     active: active !== undefined ? active : flow.active
   });
+
+  // Limpar cache de sessões ativas no Redis para que o novo fluxo publicado vigore imediatamente
+  try {
+    await cacheLayer.delFromPattern("ticket:*:flowState");
+  } catch (e) {}
 
   return flow;
 };

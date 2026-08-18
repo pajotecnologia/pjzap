@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "18:08 - v7.0.19",
+    date: "18/08/2026",
+    title: "Prioridade de Gatilhos Explícitos em 2 Passadas & Invalidação Global ao Salvar Fluxos",
+    changes: [
+      "Seleção em 2 passadas no `ExecuteFlowService.ts`: prioridade absoluta para gatilhos explícitos (ex: 'suporte') sobre gatilhos curingas (`*`).",
+      "Purga automática de cache do Redis ao salvar ou atualizar qualquer fluxo via `UpdateFlowService.ts` garantindo que o novo fluxo seja publicado sem resíduos."
+    ]
+  },
+  {
     version: "18:03 - v7.0.18",
     date: "18/08/2026",
     title: "Unificação Universal de Conexões em Todos os Nós do FlowBuilder",
@@ -667,7 +676,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("18:03 - v7.0.18");
+  const [systemVersion, setSystemVersion] = useState("18:08 - v7.0.19");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -677,7 +686,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("18:03 - v7.0.18");
+        setSystemVersion("18:08 - v7.0.19");
       }
     }
     fetchVersion();

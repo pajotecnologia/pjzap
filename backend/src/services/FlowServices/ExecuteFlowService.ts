@@ -215,59 +215,69 @@ const ExecuteFlowService = async ({
         whereClause.active = true;
       }
 
-      const flows = await Flow.findAll({ where: whereClause });
+      const flows = await Flow.findAll({ where: whereClause, order: [["id", "DESC"]] });
       if (!flows || flows.length === 0) return false;
 
-      // Se o ticket já estiver aberto com atendente humano e sem estado ativo no Redis, só inicia se houver palavra-chave explícita
-      if (!activeState && (ticket.status === "open" || ticket.userId)) {
-        const hasExplicitTrigger = flows.some((f) => {
-          let fn: FlowNode[] = [];
-          try {
-            fn = typeof f.nodes === "string" ? JSON.parse(f.nodes) : f.nodes;
-          } catch (e) {}
-          return (
-            Array.isArray(fn) &&
-            fn.some(
-              (n) =>
-                n.type === "trigger" &&
-                n.keyword &&
-                n.keyword !== "*" &&
-                trimmedMsg.includes(n.keyword.toLowerCase())
-            )
-          );
-        });
-        if (!hasExplicitTrigger) return false;
-      }
+      let matchedFlow: Flow | null = null;
+      let matchedTriggerNode: FlowNode | null = null;
 
+      // 1ª Passada: Buscar fluxo com gatilho explícito correspondente à mensagem do usuário
       for (const f of flows) {
         let fNodes: FlowNode[] = [];
-        let fConns: FlowConnection[] = [];
         try {
           fNodes = typeof f.nodes === "string" ? JSON.parse(f.nodes) : f.nodes;
-          fConns = typeof f.connections === "string" ? JSON.parse(f.connections) : f.connections;
         } catch (e) {
           continue;
         }
 
         if (!Array.isArray(fNodes) || fNodes.length === 0) continue;
 
-        const triggerNode = fNodes.find(
+        const explicitTrigger = fNodes.find(
           (n) => n.type === "trigger" && n.keyword && n.keyword !== "*" && trimmedMsg.includes(n.keyword.toLowerCase())
-        ) || (!activeState ? fNodes.find((n) => n.type === "trigger" && (!n.keyword || n.keyword === "*")) : undefined);
+        );
 
-        if (triggerNode) {
-          flow = f;
-          nodes = fNodes;
-          connections = fConns;
-          let nextNodeId = triggerNode.targetNodeId;
-          if (!nextNodeId) {
-            const conn = connections.find((c) => c.sourceNodeId === triggerNode.id);
-            if (conn) nextNodeId = conn.targetNodeId;
+        if (explicitTrigger) {
+          matchedFlow = f;
+          matchedTriggerNode = explicitTrigger;
+          break;
+        }
+      }
+
+      // 2ª Passada: Se nenhum gatilho explícito correspondeu e NÃO há estado no Redis nem atendente humano ativo, buscar gatilho curinga (*)
+      if (!matchedFlow && !activeState && !(ticket.status === "open" || ticket.userId)) {
+        for (const f of flows) {
+          let fNodes: FlowNode[] = [];
+          try {
+            fNodes = typeof f.nodes === "string" ? JSON.parse(f.nodes) : f.nodes;
+          } catch (e) {
+            continue;
           }
-          if (nextNodeId) {
-            currentNode = findNodeById(nodes, nextNodeId);
+
+          if (!Array.isArray(fNodes) || fNodes.length === 0) continue;
+
+          const wildcardTrigger = fNodes.find(
+            (n) => n.type === "trigger" && (!n.keyword || n.keyword === "*")
+          );
+
+          if (wildcardTrigger) {
+            matchedFlow = f;
+            matchedTriggerNode = wildcardTrigger;
             break;
           }
+        }
+      }
+
+      if (matchedFlow && matchedTriggerNode) {
+        flow = matchedFlow;
+        nodes = typeof matchedFlow.nodes === "string" ? JSON.parse(matchedFlow.nodes) : matchedFlow.nodes;
+        connections = typeof matchedFlow.connections === "string" ? JSON.parse(matchedFlow.connections) : matchedFlow.connections;
+
+        let nextNodeId = matchedTriggerNode.targetNodeId;
+        if (!nextNodeId) {
+          nextNodeId = findTargetFromConnections(connections, matchedTriggerNode.id);
+        }
+        if (nextNodeId) {
+          currentNode = findNodeById(nodes, nextNodeId);
         }
       }
     }

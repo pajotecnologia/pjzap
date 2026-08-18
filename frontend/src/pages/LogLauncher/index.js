@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "18:08 - v7.0.19 - Prioridade de Gatilhos Explícitos em 2 Passadas & Purga Global de Cache ao Publicar",
+    changes: [
+      "⚡ <strong>Prioridade Absoluta para Gatilhos Explícitos</strong>: Seleção em 2 passadas no `ExecuteFlowService.ts` garante que gatilhos como 'suporte' tenham prioridade total sobre qualquer gatilho curinga `*`.",
+      "🧹 <strong>Invalidação de Cache ao Publicar</strong>: `UpdateFlowService.ts` purga o cache do Redis automaticamente ao salvar qualquer fluxo, forçando o servidor a rodar imediatamente o novo fluxo publicado."
+    ]
+  },
+  {
     version: "18:03 - v7.0.18 - Unificação Universal de Busca de Conectores em Todos os Nós",
     changes: [
       "🔗 <strong>Resolução Universal de Bordas</strong>: Todos os tipos de nós (Mensagem, Kanban, Delay, Webhook, Pix, Condição) agora utilizam `findTargetFromConnections` universal.",
