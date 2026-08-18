@@ -2179,7 +2179,7 @@ const handleMessage = async (
     }
 
     // ── Executar FlowBuilder automatizado se houver fluxo ativo para esta empresa ──
-    if (!msg.key.fromMe && ticket.status !== "open" && !ticket.userId) {
+    if (!msg.key.fromMe) {
       try {
         const ExecuteFlowService = require("../FlowServices/ExecuteFlowService").default;
         const flowExecuted = await ExecuteFlowService({ ticket, messageBody: bodyMessage, companyId });

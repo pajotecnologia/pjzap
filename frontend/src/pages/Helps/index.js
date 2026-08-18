@@ -500,6 +500,16 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "17:04 - v7.0.15",
+    date: "18/08/2026",
+    title: "Correção Crítica no Listener do WhatsApp & Garantia de Execução de Fluxos Ativos no Redis",
+    changes: [
+      "Remoção da trava em `wbotMessageListener.ts` que bloqueava a execução do FlowBuilder caso o status do ticket estivesse aberto ou com atendente.",
+      "Garantia de que mensagens em turnos de menu (ex: opção '2') sejam SEMPRE processadas pelo FlowBuilder se houver estado ativo em cache no Redis.",
+      "Validação com simulação de fluxo multinó em 3 turnos (Gatilho -> Mensagem -> Kanban -> Mensagem -> Menu -> Lista Interativa -> Fila)."
+    ]
+  },
+  {
     version: "16:46 - v7.0.14",
     date: "18/08/2026",
     title: "Otimização Arquitetural Completa do FlowBuilder: Sincronização Dupla de Handles e Opções",
@@ -630,7 +640,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("16:46 - v7.0.14");
+  const [systemVersion, setSystemVersion] = useState("17:04 - v7.0.15");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -640,7 +650,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("16:46 - v7.0.14");
+        setSystemVersion("17:04 - v7.0.15");
       }
     }
     fetchVersion();

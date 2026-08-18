@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "17:04 - v7.0.15 - Correção no Listener do WhatsApp & Simulação Multinó de 3 Turnos",
+    changes: [
+      "⚡ <strong>Garantia de Execução no WhatsApp</strong>: Ajustada trava em `wbotMessageListener.ts` para que respostas de menus em fluxos ativos no Redis sejam sempre processadas pelo FlowBuilder.",
+      "🤖 <strong>Simulação Multinó Validade</strong>: Execução autônoma testada e aprovada em 3 turnos (Gatilho -> Mensagem -> Kanban -> Mensagem -> Menu -> Lista Interativa -> Fila)."
+    ]
+  },
+  {
     version: "16:46 - v7.0.14 - Otimização Arquitetural de Salvamento e Resolução do FlowBuilder",
     changes: [
       "🤖 <strong>Sincronização Dupla de Opções e Conexões</strong>: Salvamento automático de `targetNodeId`, `targetNodeIdOption` e `targetNodeIdTag` diretamente no array de opções e botões dos nós no `builder.js`.",

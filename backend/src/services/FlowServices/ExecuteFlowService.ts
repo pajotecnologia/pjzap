@@ -204,6 +204,27 @@ const ExecuteFlowService = async ({
       const flows = await Flow.findAll({ where: whereClause });
       if (!flows || flows.length === 0) return false;
 
+      // Se o ticket já estiver aberto com atendente humano e sem estado ativo no Redis, só inicia se houver palavra-chave explícita
+      if (!activeState && (ticket.status === "open" || ticket.userId)) {
+        const hasExplicitTrigger = flows.some((f) => {
+          let fn: FlowNode[] = [];
+          try {
+            fn = typeof f.nodes === "string" ? JSON.parse(f.nodes) : f.nodes;
+          } catch (e) {}
+          return (
+            Array.isArray(fn) &&
+            fn.some(
+              (n) =>
+                n.type === "trigger" &&
+                n.keyword &&
+                n.keyword !== "*" &&
+                trimmedMsg.includes(n.keyword.toLowerCase())
+            )
+          );
+        });
+        if (!hasExplicitTrigger) return false;
+      }
+
       for (const f of flows) {
         let fNodes: FlowNode[] = [];
         let fConns: FlowConnection[] = [];
@@ -217,7 +238,7 @@ const ExecuteFlowService = async ({
         if (!Array.isArray(fNodes) || fNodes.length === 0) continue;
 
         const triggerNode = fNodes.find(
-          (n) => n.type === "trigger" && n.keyword && trimmedMsg.includes(n.keyword.toLowerCase())
+          (n) => n.type === "trigger" && n.keyword && n.keyword !== "*" && trimmedMsg.includes(n.keyword.toLowerCase())
         ) || fNodes.find((n) => n.type === "trigger" && (!n.keyword || n.keyword === "*"));
 
         if (triggerNode) {
