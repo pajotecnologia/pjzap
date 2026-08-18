@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "17:17 - v7.0.16",
+    date: "18/08/2026",
+    title: "Atualização da Tabela Flow para LONGTEXT & Limpeza de Cache de Nós Inexistentes",
+    changes: [
+      "Alteração do tipo de coluna `nodes` e `connections` no Model `Flow.ts` para `LONGTEXT` no Sequelize, prevenindo que fluxos grandes com mais de 64KB sofram truncamento de JSON no MySQL.",
+      "Mecanismo de autolimpeza no Redis para descarte automático de chaves de fluxo desatualizadas quando o fluxo for editado no painel."
+    ]
+  },
+  {
     version: "17:04 - v7.0.15",
     date: "18/08/2026",
     title: "Correção Crítica no Listener do WhatsApp & Garantia de Execução de Fluxos Ativos no Redis",
@@ -640,7 +649,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("17:04 - v7.0.15");
+  const [systemVersion, setSystemVersion] = useState("17:17 - v7.0.16");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -650,7 +659,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("17:04 - v7.0.15");
+        setSystemVersion("17:17 - v7.0.16");
       }
     }
     fetchVersion();

@@ -191,6 +191,11 @@ const ExecuteFlowService = async ({
           currentNode = findNodeById(nodes, activeState!.currentNodeId);
         } catch (e) {}
       }
+
+      if (!currentNode) {
+        await cacheLayer.del(cacheKey);
+        activeState = null;
+      }
     }
 
     if (!currentNode) {

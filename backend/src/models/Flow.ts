@@ -26,10 +26,10 @@ class Flow extends Model<Flow> {
   name: string;
 
   @AllowNull(false)
-  @Column(DataType.TEXT)
+  @Column(DataType.TEXT({ length: "long" }))
   nodes: string;
 
-  @Column(DataType.TEXT)
+  @Column(DataType.TEXT({ length: "long" }))
   connections: string;
 
   @Default(true)

@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "17:17 - v7.0.16 - Suporte a LONGTEXT no Banco & Autolimpeza de Cache Desatualizado",
+    changes: [
+      "🛢️ <strong>Capacidade de Fluxos Complexos (LONGTEXT)</strong>: Colunas `nodes` e `connections` atualizadas para `LONGTEXT` evitando truncamento de JSON no MySQL.",
+      "🧹 <strong>Autolimpeza de Cache Redis Stale</strong>: Exclusão automática de referências de nós antigos no Redis ao reutilizar ou editar um fluxo."
+    ]
+  },
+  {
     version: "17:04 - v7.0.15 - Correção no Listener do WhatsApp & Simulação Multinó de 3 Turnos",
     changes: [
       "⚡ <strong>Garantia de Execução no WhatsApp</strong>: Ajustada trava em `wbotMessageListener.ts` para que respostas de menus em fluxos ativos no Redis sejam sempre processadas pelo FlowBuilder.",
