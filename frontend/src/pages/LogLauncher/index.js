@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "16:46 - v7.0.14 - Otimização Arquitetural de Salvamento e Resolução do FlowBuilder",
+    changes: [
+      "🤖 <strong>Sincronização Dupla de Opções e Conexões</strong>: Salvamento automático de `targetNodeId`, `targetNodeIdOption` e `targetNodeIdTag` diretamente no array de opções e botões dos nós no `builder.js`.",
+      "🔗 <strong>Preservação de Handles do ReactFlow</strong>: Conexões gravadas e recarregadas sem perda de `sourceHandle` ou `targetHandle`."
+    ]
+  },
+  {
     version: "10:50 - v7.0.13 - Solução Definitiva para Opções do Menu Numérico no FlowBuilder",
     changes: [
       "🤖 <strong>Navegação de Nós Resiliente</strong>: Suporte completo para transição do Nó #5 (Menu Numérico) para os nós #6 (Lista Interativa), #7 (Botões), #8 e #10.",

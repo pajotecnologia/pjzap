@@ -500,6 +500,16 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "16:46 - v7.0.14",
+    date: "18/08/2026",
+    title: "Otimização Arquitetural Completa do FlowBuilder: Sincronização Dupla de Handles e Opções",
+    changes: [
+      "Preservação obrigatória de `sourceHandle` e `targetHandle` no salvamento de conexões em `builder.js`.",
+      "Sincronização automática de `targetNodeId`, `targetNodeIdOption` e `targetNodeIdTag` diretamente no array de opções e botões dos nós.",
+      "Garantia de continuidade total do fluxo independentemente da quantidade de opções encadeadas."
+    ]
+  },
+  {
     version: "10:50 - v7.0.13",
     date: "18/08/2026",
     title: "Melhoria de Roteamento de Opções no Menu Numérico & Resolução de Conexões ReactFlow",
@@ -620,7 +630,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("10:50 - v7.0.13");
+  const [systemVersion, setSystemVersion] = useState("16:46 - v7.0.14");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -630,7 +640,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("10:50 - v7.0.13");
+        setSystemVersion("16:46 - v7.0.14");
       }
     }
     fetchVersion();

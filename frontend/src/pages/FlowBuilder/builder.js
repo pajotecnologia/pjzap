@@ -748,9 +748,11 @@ const FlowBuilderInner = () => {
           if (Array.isArray(parsedEdges)) {
             setEdges(
               parsedEdges.map((c, idx) => ({
-                id: `e_${c.sourceNodeId}_${c.targetNodeId}_${idx}`,
-                source: c.sourceNodeId,
-                target: c.targetNodeId,
+                id: c.id || `e_${c.sourceNodeId || c.source}_${c.targetNodeId || c.target}_${idx}`,
+                source: c.sourceNodeId || c.source,
+                target: c.targetNodeId || c.target,
+                sourceHandle: c.sourceHandle || c.handle || (c.optionId ? `option-${c.optionId}` : null),
+                targetHandle: c.targetHandle || null,
                 type: "smoothstep",
                 animated: true,
                 style: { stroke: "#128C7E", strokeWidth: 2 },
@@ -777,24 +779,98 @@ const FlowBuilderInner = () => {
     loadData();
   }, [flowId, setNodes, setEdges]);
 
-  // Salva o fluxo
+  // Salva o fluxo com preservação total de conexões e sincronização de opções
   const handleSave = async () => {
     try {
+      // 1. Formatar conexões mantendo handles e optionIds
+      const formattedConnections = edges.map((e, idx) => ({
+        id: e.id || `edge_${e.source}_${e.target}_${idx}`,
+        sourceNodeId: e.source,
+        targetNodeId: e.target,
+        sourceHandle: e.sourceHandle || e.handle || null,
+        targetHandle: e.targetHandle || null,
+        optionId: e.sourceHandle ? e.sourceHandle.replace(/^(option-|opt-|handle-)/, "") : null
+      }));
+
+      // 2. Formatar nós e sincronizar targetNodeId diretamente em cada opção/botão
       const formattedNodes = nodes.map((n) => {
         const badge = getNodeBadge(n, nodes);
         const cleanTag = badge.replace(/^#/, "");
+        const nodeData = { ...n.data };
+
+        // Sincronizar opções de menus com as conexões (edges) ativas
+        if (Array.isArray(nodeData.options)) {
+          nodeData.options = nodeData.options.map((opt, optIdx) => {
+            const optConn = edges.find(
+              (e) =>
+                e.source === n.id &&
+                (e.sourceHandle === opt.id ||
+                  e.sourceHandle === `option-${optIdx}` ||
+                  e.sourceHandle === `opt-${optIdx}` ||
+                  e.sourceHandle === `handle-${optIdx}` ||
+                  e.sourceHandle === `option-${opt.optionNumber || optIdx + 1}` ||
+                  e.sourceHandle === (opt.optionNumber || (optIdx + 1).toString()))
+            );
+
+            if (optConn) {
+              const targetNode = nodes.find((tn) => tn.id === optConn.target);
+              const targetBadge = targetNode ? getNodeBadge(targetNode, nodes).replace(/^#/, "") : undefined;
+
+              return {
+                ...opt,
+                targetNodeId: optConn.target,
+                targetNodeIdOption: optConn.target,
+                targetNodeIdTag: targetBadge
+              };
+            }
+
+            return opt;
+          });
+        }
+
+        // Sincronizar botões interativos
+        if (Array.isArray(nodeData.buttons)) {
+          nodeData.buttons = nodeData.buttons.map((btn, btnIdx) => {
+            const btnConn = edges.find(
+              (e) =>
+                e.source === n.id &&
+                (e.sourceHandle === btn.id ||
+                  e.sourceHandle === `btn-${btnIdx}` ||
+                  e.sourceHandle === `option-${btnIdx}` ||
+                  e.sourceHandle === `handle-${btnIdx}`)
+            );
+
+            if (btnConn) {
+              const targetNode = nodes.find((tn) => tn.id === btnConn.target);
+              const targetBadge = targetNode ? getNodeBadge(targetNode, nodes).replace(/^#/, "") : undefined;
+
+              return {
+                ...btn,
+                targetNodeId: btnConn.target,
+                targetNodeIdOption: btnConn.target,
+                targetNodeIdTag: targetBadge
+              };
+            }
+
+            return btn;
+          });
+        }
+
+        // Sincronizar targetNodeId para nós com saída única
+        if (!nodeData.targetNodeId) {
+          const singleConn = edges.find((e) => e.source === n.id);
+          if (singleConn) {
+            nodeData.targetNodeId = singleConn.target;
+          }
+        }
+
         return {
-          ...n.data,
+          ...nodeData,
           id: n.id,
           position: n.position,
-          nodeIdTag: n.data?.isCustomTag ? n.data.nodeIdTag : cleanTag,
+          nodeIdTag: n.data?.isCustomTag ? n.data.nodeIdTag : cleanTag
         };
       });
-
-      const formattedConnections = edges.map((e) => ({
-        sourceNodeId: e.source,
-        targetNodeId: e.target,
-      }));
 
       const payload = {
         name: flowName,
@@ -812,6 +888,7 @@ const FlowBuilderInner = () => {
         history.push(`/flowbuilder/${data.id}`);
       }
     } catch (err) {
+      console.error("Erro ao salvar fluxo:", err);
       toast.error("Erro ao salvar fluxo.");
     }
   };
