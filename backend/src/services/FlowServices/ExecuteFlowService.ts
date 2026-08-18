@@ -399,10 +399,31 @@ const ExecuteFlowService = async ({
             whatsapp: ticket.whatsapp
           });
         } else {
-          await SendWhatsAppMessage({
-            body: textToSend,
-            ticket
-          });
+          try {
+            const GetTicketWbot = require("../../helpers/GetTicketWbot").default;
+            const { resolveWbotJid } = require("../../utils/global");
+            const wbot = await GetTicketWbot(ticket);
+            const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
+
+            const buttons = (buttonsList || []).slice(0, 3).map((btn: any, idx: number) => ({
+              buttonId: (idx + 1).toString(),
+              buttonText: { displayText: (btn.text || `Opção ${idx + 1}`).substring(0, 20) },
+              type: 1
+            }));
+
+            const buttonMessage = {
+              text: textToSend,
+              buttons,
+              headerType: 1
+            };
+
+            await wbot.sendMessage(jid, buttonMessage);
+          } catch (e) {
+            await SendWhatsAppMessage({
+              body: textToSend,
+              ticket
+            });
+          }
         }
 
         await cacheLayer.set(cacheKey, JSON.stringify({ flowId: flow.id, currentNodeId: currentNode.id }), "EX", 3600);
@@ -570,10 +591,41 @@ const ExecuteFlowService = async ({
             whatsapp: ticket.whatsapp
           });
         } else {
-          await SendWhatsAppMessage({
-            body: menuText,
-            ticket
-          });
+          if (currentNode.type === "list_menu") {
+            try {
+              const GetTicketWbot = require("../../helpers/GetTicketWbot").default;
+              const { resolveWbotJid } = require("../../utils/global");
+              const wbot = await GetTicketWbot(ticket);
+              const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
+
+              const sectionsRows: any[] = [];
+              (options || []).forEach((opt: any, idx: number) => {
+                const title = (opt.text || `Opção ${idx + 1}`).substring(0, 24);
+                const desc = (opt as any).url ? `🔗 ${(opt as any).url}` : "";
+                const rowId = (opt.optionNumber || idx + 1).toString();
+                sectionsRows.push({ title, description: desc, rowId });
+              });
+
+              const listMessage = {
+                text: currentNode.content || "Escolha uma das opções abaixo:",
+                title: currentNode.title || "Menu de Opções",
+                buttonText: "Abrir Lista de Opções",
+                sections: [{ title: "Opções", rows: sectionsRows }]
+              };
+
+              await wbot.sendMessage(jid, listMessage);
+            } catch (e) {
+              await SendWhatsAppMessage({
+                body: menuText,
+                ticket
+              });
+            }
+          } else {
+            await SendWhatsAppMessage({
+              body: menuText,
+              ticket
+            });
+          }
         }
 
         await cacheLayer.set(cacheKey, JSON.stringify({ flowId: flow.id, currentNodeId: currentNode.id }), "EX", 3600);

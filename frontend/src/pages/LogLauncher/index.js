@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:57 - v7.0.27 - Suporte a Mensagens Nativas de Lista e Botões Interativos no WhatsApp",
+    changes: [
+      "📱 <strong>Listas Nativas Clicáveis (List Messages)</strong>: Nós do tipo `list_menu` são enviados no formato nativo de lista do WhatsApp com o botão 'Abrir Lista de Opções' e itens clicáveis.",
+      "🔘 <strong>Botões Nativos de Clique (Buttons)</strong>: Nós do tipo `buttons` são enviados como botões nativos do WhatsApp de clique direto com fallback seguro."
+    ]
+  },
+  {
     version: "20:48 - v7.0.26 - Links / URLs Clicáveis em Botões, Menus e Listas do FlowBuilder",
     changes: [
       "🔗 <strong>Campo de URL no Editor</strong>: Adicionados campos dedicados `Link / URL (Opcional)` para cada item nos nós de Botões, Menu Numérico, Listas Interativas e Carrossel em `builder.js`.",

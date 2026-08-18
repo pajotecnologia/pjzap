@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:57 - v7.0.27",
+    date: "18/08/2026",
+    title: "Mensagens Nativas Interativas de Lista e Botões do WhatsApp no FlowBuilder",
+    changes: [
+      "Suporte a envio nativo de Mensagens de Lista Interativa (List Messages) e Botões de Clique (Buttons) do WhatsApp em `ExecuteFlowService.ts`.",
+      "Fallback automático para formato de texto com marcadores clicáveis garantindo compatibilidade com 100% dos clientes de WhatsApp."
+    ]
+  },
+  {
     version: "20:48 - v7.0.26",
     date: "18/08/2026",
     title: "Campos de Link/URL Clicáveis em Botões e Listas Interativas do FlowBuilder",
@@ -739,7 +748,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:48 - v7.0.26");
+  const [systemVersion, setSystemVersion] = useState("20:57 - v7.0.27");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -749,7 +758,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("20:48 - v7.0.26");
+        setSystemVersion("20:57 - v7.0.27");
       }
     }
     fetchVersion();
