@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "20:42 - v7.0.25 - Desvinculação Automática ao Excluir Integrações de Filas",
+    changes: [
+      "🗑️ <strong>Exclusão Direta de Integrações</strong>: `DeleteQueueIntegrationService.ts` desvincula automaticamente Filas e Tickets antes de deletar, eliminando travamentos de Foreign Key Constraint.",
+      "⚡ <strong>Remoção Instantânea</strong>: O botão 'Excluir' na lista de Integrações agora remove a integração de primeira sem erro."
+    ]
+  },
+  {
     version: "20:13 - v7.0.24 - Tratamento de Iterabilidade em Respostas do Typebot em Filas",
     changes: [
       "🛡️ <strong>Prevenção de Exceção em `typebotListener.ts`</strong>: Verificação `!Array.isArray(messages)` na linha 147 impedindo a exceção `TypeError: messages is not iterable`.",

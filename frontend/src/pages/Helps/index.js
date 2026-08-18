@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "20:42 - v7.0.25",
+    date: "18/08/2026",
+    title: "Desvinculação Automática de Filas/Tickets ao Excluir Integrações (`DeleteQueueIntegrationService.ts`)",
+    changes: [
+      "Inclusão de desvinculação em `Queue.update` e `Ticket.update` em `DeleteQueueIntegrationService.ts` prevenindo erro de restrição de chave estrangeira (Foreign Key Constraint) ao excluir integrações.",
+      "Garantia de exclusão instantânea de integrações ao clicar no botão 'Excluir'."
+    ]
+  },
+  {
     version: "20:13 - v7.0.24",
     date: "18/08/2026",
     title: "Tratamento de Iterabilidade em Respostas do Typebot (`typebotListener.ts`)",
@@ -721,7 +730,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:13 - v7.0.24");
+  const [systemVersion, setSystemVersion] = useState("20:42 - v7.0.25");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -731,7 +740,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("20:13 - v7.0.24");
+        setSystemVersion("20:42 - v7.0.25");
       }
     }
     fetchVersion();
