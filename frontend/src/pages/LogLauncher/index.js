@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "18:03 - v7.0.18 - Unificação Universal de Busca de Conectores em Todos os Nós",
+    changes: [
+      "🔗 <strong>Resolução Universal de Bordas</strong>: Todos os tipos de nós (Mensagem, Kanban, Delay, Webhook, Pix, Condição) agora utilizam `findTargetFromConnections` universal.",
+      "🛡️ <strong>Fim das Interrupções Prematuras</strong>: Transições de nós mantêm a sessão do Redis intacta até a entrega da mensagem sequencial."
+    ]
+  },
+  {
     version: "17:36 - v7.0.17 - Bloqueio de Loop Infinito do Gatilho Curinga (*) & Mapeamento por Número de Opção",
     changes: [
       "🛡️ <strong>Bloqueio de Reinício Indevido</strong>: O gatilho curinga `*` foi blindado para NUNCA reiniciar o fluxo do zero quando o usuário digita uma opção no menu.",

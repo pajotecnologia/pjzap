@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "18:03 - v7.0.18",
+    date: "18/08/2026",
+    title: "Unificação Universal de Conexões em Todos os Nós do FlowBuilder",
+    changes: [
+      "Substituição de todas as buscas manuais de conexões (`conn.sourceNodeId`) por `findTargetFromConnections` em todos os nós (`message`, `set_kanban`, `anti_ban`, `pix_payment`, `condition`, `webhook`, `delay`).",
+      "Eliminação definitiva de interrupções de fluxo por imcompatibilidade de formato de bordas ReactFlow."
+    ]
+  },
+  {
     version: "17:36 - v7.0.17",
     date: "18/08/2026",
     title: "Proteção Contra Loop Infinito de Gatilho Curinga (*) & Mapeamento por Número de Opção",
@@ -658,7 +667,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("17:36 - v7.0.17");
+  const [systemVersion, setSystemVersion] = useState("18:03 - v7.0.18");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -668,7 +677,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("17:36 - v7.0.17");
+        setSystemVersion("18:03 - v7.0.18");
       }
     }
     fetchVersion();

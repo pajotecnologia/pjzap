@@ -321,8 +321,7 @@ const ExecuteFlowService = async ({
 
         let targetId = currentNode.targetNodeId;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
@@ -457,8 +456,7 @@ const ExecuteFlowService = async ({
 
         let targetId = currentNode.targetNodeId;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
@@ -554,8 +552,7 @@ const ExecuteFlowService = async ({
         }
         let targetId = currentNode.targetNodeId;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
@@ -583,8 +580,7 @@ const ExecuteFlowService = async ({
 
         let targetId = currentNode.targetNodeId;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
@@ -597,8 +593,7 @@ const ExecuteFlowService = async ({
         const match = Boolean(keyword && trimmedMsg.includes(keyword));
         let targetId = match ? currentNode.targetNodeIdTrue : currentNode.targetNodeIdFalse;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
@@ -630,8 +625,7 @@ const ExecuteFlowService = async ({
         }
         let targetId = currentNode.targetNodeId;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
@@ -645,8 +639,7 @@ const ExecuteFlowService = async ({
 
         let targetId = currentNode.targetNodeId;
         if (!targetId) {
-          const c = connections.find((conn) => conn.sourceNodeId === currentNode?.id);
-          targetId = c?.targetNodeId;
+          targetId = findTargetFromConnections(connections, currentNode.id);
         }
         currentNode = findNodeById(nodes, targetId);
 
