@@ -591,13 +591,27 @@ const ExecuteFlowService = async ({
             whatsapp: ticket.whatsapp
           });
         } else {
-          if (currentNode.type === "list_menu") {
-            try {
-              const GetTicketWbot = require("../../helpers/GetTicketWbot").default;
-              const { resolveWbotJid } = require("../../utils/global");
-              const wbot = await GetTicketWbot(ticket);
-              const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
+          try {
+            const GetTicketWbot = require("../../helpers/GetTicketWbot").default;
+            const { resolveWbotJid } = require("../../utils/global");
+            const wbot = await GetTicketWbot(ticket);
+            const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
 
+            if (options && options.length <= 3 && currentNode.type !== "list_menu") {
+              const buttons = (options || []).slice(0, 3).map((opt: any, idx: number) => ({
+                buttonId: (opt.optionNumber || idx + 1).toString(),
+                buttonText: { displayText: (opt.text || `Opção ${idx + 1}`).substring(0, 20) },
+                type: 4
+              }));
+
+              const buttonMessage = {
+                text: currentNode.content || "Escolha uma opção:",
+                buttons,
+                headerType: 4
+              };
+
+              await wbot.sendMessage(jid, buttonMessage);
+            } else {
               const sectionsRows: any[] = [];
               (options || []).forEach((opt: any, idx: number) => {
                 const title = (opt.text || `Opção ${idx + 1}`).substring(0, 24);
@@ -614,13 +628,8 @@ const ExecuteFlowService = async ({
               };
 
               await wbot.sendMessage(jid, listMessage);
-            } catch (e) {
-              await SendWhatsAppMessage({
-                body: menuText,
-                ticket
-              });
             }
-          } else {
+          } catch (e) {
             await SendWhatsAppMessage({
               body: menuText,
               ticket

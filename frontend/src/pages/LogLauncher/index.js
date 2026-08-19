@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "21:07 - v7.0.28 - Botões Nativos Sem Digitação para Todos os Menus",
+    changes: [
+      "🔘 <strong>Botões Nativos de Clique Direto</strong>: `ExecuteFlowService.ts` converte automaticamente Menus e Botões com até 3 opções em botões nativos do WhatsApp, eliminando a necessidade de digitar números.",
+      "⚡ <strong>Resposta por Toque na Tela</strong>: O cliente clica diretamente no botão na tela do celular e avança para os nós internos sem digitar."
+    ]
+  },
+  {
     version: "20:57 - v7.0.27 - Suporte a Mensagens Nativas de Lista e Botões Interativos no WhatsApp",
     changes: [
       "📱 <strong>Listas Nativas Clicáveis (List Messages)</strong>: Nós do tipo `list_menu` são enviados no formato nativo de lista do WhatsApp com o botão 'Abrir Lista de Opções' e itens clicáveis.",

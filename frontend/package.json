@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "versionSystem": "20:57 - v7.0.27",
+  "versionSystem": "21:07 - v7.0.28",
   "nomeEmpresa": "Whaticket",
   "private": true,
   "dependencies": {

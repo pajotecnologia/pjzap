@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "21:07 - v7.0.28",
+    date: "18/08/2026",
+    title: "Conversão Automática de Menus para Botões Interativos de Clique Direto sem Digitação",
+    changes: [
+      "Envio de botões nativos de toque direto (`type: 4, headerType: 4`) em `ExecuteFlowService.ts` para todos os nós de Menu/Botões com até 3 opções.",
+      "Eliminação total da necessidade de digitar números no teclado do WhatsApp, permitindo apenas tocar no botão desejado."
+    ]
+  },
+  {
     version: "20:57 - v7.0.27",
     date: "18/08/2026",
     title: "Mensagens Nativas Interativas de Lista e Botões do WhatsApp no FlowBuilder",
@@ -748,7 +757,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("20:57 - v7.0.27");
+  const [systemVersion, setSystemVersion] = useState("21:07 - v7.0.28");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -758,7 +767,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("20:57 - v7.0.27");
+        setSystemVersion("21:07 - v7.0.28");
       }
     }
     fetchVersion();
