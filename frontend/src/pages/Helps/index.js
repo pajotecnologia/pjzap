@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "21:52 - v7.0.30",
+    date: "18/08/2026",
+    title: "Correção Definitiva de Menus e Botões do FlowBuilder com Menu Numerado Confiável",
+    changes: [
+      "Remoção do envio nativo `templateButtons`/`sections` que o Baileys 7.x descartava silenciosamente, fazendo o cliente receber apenas texto cru sem roteamento.",
+      "Envio de menu numerado formatado (`*1.* Opção`) para nós de Menu, Lista e Botões, com matching de resposta reforçado que aceita número, número com pontuação e texto."
+    ]
+  },
+  {
     version: "21:20 - v7.0.29",
     date: "18/08/2026",
     title: "Payload Nativo Baileys `templateButtons` (`urlButton` + `quickReplyButton`) no FlowBuilder",
@@ -766,7 +775,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("21:20 - v7.0.29");
+  const [systemVersion, setSystemVersion] = useState("21:52 - v7.0.30");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -776,7 +785,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("21:20 - v7.0.29");
+        setSystemVersion("21:52 - v7.0.30");
       }
     }
     fetchVersion();

@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "21:52 - v7.0.30 - Correção Definitiva de Menus e Botões do FlowBuilder",
+    changes: [
+      "🔧 <strong>Causa Raiz Corrigida</strong>: O Baileys 7.x descartava silenciosamente `templateButtons`/`sections`, fazendo o cliente receber apenas texto cru sem roteamento das opções.",
+      "✅ <strong>Menu Numerado Confiável</strong>: Nós de Menu, Lista e Botões agora enviam menu numerado formatado (`*1.* Opção`) com matching de resposta que aceita número, número com pontuação e texto."
+    ]
+  },
+  {
     version: "21:20 - v7.0.29 - Payload Baileys Native TemplateButtons (urlButton & quickReplyButton)",
     changes: [
       "🔘 <strong>Baileys Native templateButtons</strong>: Implementados botões nativos `urlButton` (para links web) e `quickReplyButton` (para cliques diretos em menus e opções).",
