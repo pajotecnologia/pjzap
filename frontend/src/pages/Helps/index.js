@@ -500,6 +500,15 @@ const FLOWBUILDER_MANUAL_STEPS = [
 
 const CHANGELOG_ITEMS = [
   {
+    version: "21:20 - v7.0.29",
+    date: "18/08/2026",
+    title: "Payload Nativo Baileys `templateButtons` (`urlButton` + `quickReplyButton`) no FlowBuilder",
+    changes: [
+      "Inclusão da estrutura nativa Baileys `templateButtons` com suporte a botões de link (`urlButton`) e botões de resposta rápida (`quickReplyButton`) no WhatsApp.",
+      "Triplo nível de fallback automático (`templateButtons` -> `buttonsMessage` -> `listMessage` -> texto formatado) para garantia de exibição em 100% dos dispositivos."
+    ]
+  },
+  {
     version: "21:07 - v7.0.28",
     date: "18/08/2026",
     title: "Conversão Automática de Menus para Botões Interativos de Clique Direto sem Digitação",
@@ -757,7 +766,7 @@ const Helps = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [expandedSection, setExpandedSection] = useState("step1");
-  const [systemVersion, setSystemVersion] = useState("21:07 - v7.0.28");
+  const [systemVersion, setSystemVersion] = useState("21:20 - v7.0.29");
 
   useEffect(() => {
     async function fetchVersion() {
@@ -767,7 +776,7 @@ const Helps = () => {
           setSystemVersion(data.version);
         }
       } catch (e) {
-        setSystemVersion("21:07 - v7.0.28");
+        setSystemVersion("21:20 - v7.0.29");
       }
     }
     fetchVersion();

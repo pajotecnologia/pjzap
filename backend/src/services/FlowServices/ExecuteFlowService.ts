@@ -405,24 +405,55 @@ const ExecuteFlowService = async ({
             const wbot = await GetTicketWbot(ticket);
             const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
 
-            const buttons = (buttonsList || []).slice(0, 3).map((btn: any, idx: number) => ({
-              buttonId: (idx + 1).toString(),
-              buttonText: { displayText: (btn.text || `Opção ${idx + 1}`).substring(0, 20) },
-              type: 1
-            }));
-
-            const buttonMessage = {
-              text: textToSend,
-              buttons,
-              headerType: 1
-            };
-
-            await wbot.sendMessage(jid, buttonMessage);
-          } catch (e) {
-            await SendWhatsAppMessage({
-              body: textToSend,
-              ticket
+            const templateButtons = (buttonsList || []).slice(0, 3).map((btn: any, idx: number) => {
+              const url = btn.url || btn.link;
+              if (url) {
+                return {
+                  index: idx + 1,
+                  urlButton: {
+                    displayText: (btn.text || `Opção ${idx + 1}`).substring(0, 20),
+                    url: url
+                  }
+                };
+              }
+              return {
+                index: idx + 1,
+                quickReplyButton: {
+                  displayText: (btn.text || `Opção ${idx + 1}`).substring(0, 20),
+                  id: (idx + 1).toString()
+                }
+              };
             });
+
+            await wbot.sendMessage(jid, {
+              text: textToSend,
+              footer: currentNode.footer || "",
+              templateButtons
+            });
+          } catch (errTemplate) {
+            try {
+              const GetTicketWbot = require("../../helpers/GetTicketWbot").default;
+              const { resolveWbotJid } = require("../../utils/global");
+              const wbot = await GetTicketWbot(ticket);
+              const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
+
+              const buttons = (buttonsList || []).slice(0, 3).map((btn: any, idx: number) => ({
+                buttonId: (idx + 1).toString(),
+                buttonText: { displayText: (btn.text || `Opção ${idx + 1}`).substring(0, 20) },
+                type: 4
+              }));
+
+              await wbot.sendMessage(jid, {
+                text: textToSend,
+                buttons,
+                headerType: 4
+              });
+            } catch (e) {
+              await SendWhatsAppMessage({
+                body: textToSend,
+                ticket
+              });
+            }
           }
         }
 
@@ -598,19 +629,30 @@ const ExecuteFlowService = async ({
             const jid = await resolveWbotJid(wbot, ticket.contact, ticket.isGroup);
 
             if (options && options.length <= 3 && currentNode.type !== "list_menu") {
-              const buttons = (options || []).slice(0, 3).map((opt: any, idx: number) => ({
-                buttonId: (opt.optionNumber || idx + 1).toString(),
-                buttonText: { displayText: (opt.text || `Opção ${idx + 1}`).substring(0, 20) },
-                type: 4
-              }));
+              const templateButtons = (options || []).slice(0, 3).map((opt: any, idx: number) => {
+                const url = opt.url || opt.link;
+                if (url) {
+                  return {
+                    index: idx + 1,
+                    urlButton: {
+                      displayText: (opt.text || `Opção ${idx + 1}`).substring(0, 20),
+                      url: url
+                    }
+                  };
+                }
+                return {
+                  index: idx + 1,
+                  quickReplyButton: {
+                    displayText: (opt.text || `Opção ${idx + 1}`).substring(0, 20),
+                    id: (opt.optionNumber || idx + 1).toString()
+                  }
+                };
+              });
 
-              const buttonMessage = {
+              await wbot.sendMessage(jid, {
                 text: currentNode.content || "Escolha uma opção:",
-                buttons,
-                headerType: 4
-              };
-
-              await wbot.sendMessage(jid, buttonMessage);
+                templateButtons
+              });
             } else {
               const sectionsRows: any[] = [];
               (options || []).forEach((opt: any, idx: number) => {

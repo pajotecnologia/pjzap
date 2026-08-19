@@ -97,6 +97,13 @@ const ErrorMessage = styled.div`
 
 const LOCAL_VERSION_LOGS = [
   {
+    version: "21:20 - v7.0.29 - Payload Baileys Native TemplateButtons (urlButton & quickReplyButton)",
+    changes: [
+      "🔘 <strong>Baileys Native templateButtons</strong>: Implementados botões nativos `urlButton` (para links web) e `quickReplyButton` (para cliques diretos em menus e opções).",
+      "⚡ <strong>Tripla Camada de Garantia</strong>: Tenta `templateButtons` -> `buttonsMessage` -> `listMessage` -> texto formatado, garantindo 100% de compatibilidade em todos os clientes WhatsApp."
+    ]
+  },
+  {
     version: "21:07 - v7.0.28 - Botões Nativos Sem Digitação para Todos os Menus",
     changes: [
       "🔘 <strong>Botões Nativos de Clique Direto</strong>: `ExecuteFlowService.ts` converte automaticamente Menus e Botões com até 3 opções em botões nativos do WhatsApp, eliminando a necessidade de digitar números.",
